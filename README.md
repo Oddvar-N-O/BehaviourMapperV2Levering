@@ -1,8 +1,16 @@
 # behaviourMapperV2
 Her skal vi lage bacheloroppgaven til Behaviour Mapper versjon 2
 
+Rapport:
 https://liveuis-my.sharepoint.com/:w:/g/personal/250588_uis_no/EdtBTsY0NH9PvFkbxDdCmb4BcBSABsqtX9ZvROYIyvBL1g?e=7ZTiYK
 
-Sveinung var her 04.01.21
+Hovedegenskaper til app:
+Rask registrering av aktivitet
+Mulighet for å plotte inn ulike typer oppførsel (gående, syklende, barnevogn osv...)
 
-Tor Håkon var her 04.01
+Eksportere data til fil
+
+Ideer til app:
+Få inn værdata, enten automatisk eller manuelt
+Hver registrering burde ha mulighet for et notat for å skrive inn oppførsel som ikke er lett å plotte inn i appen (for eksempel en som gjør flere ting samtidig)
+The app can also be configured to only show the last ten people registered.
