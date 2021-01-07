@@ -3,6 +3,8 @@ import Map from 'components/map';
 import Sidebar from 'components/sidebar'
 import 'pages/BehaviourMapping.css'
 
+
+
 function BehaviourMapping() {
     return (
       <div className="behaviour-mapping">

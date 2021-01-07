@@ -1,33 +1,38 @@
-import React from 'react';
+import React, { Component } from 'react';
+// import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 
-var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+// type State = {
+//   lat: number,
+//   lng: number,
+//   zoom: Number,
+// }
 
-L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    maxZoom: 18,
-    id: 'mapbox/streets-v11',
-    tileSize: 512,
-    zoomOffset: -1,
-    accessToken: 'pk.eyJ1Ijoic2ZqZXJtZXN0YWQiLCJhIjoiY2tqbW1iYXVuMmVoZzJybG9tOWh2MHl2YiJ9.nK9mBf5CGzGfrn9CiOrDWg'
-}).addTo(mymap);
+class Map extends Component {
+//   state = {
+//     lat: 51,
+//     lng: 0,
+//     zoom: 13, 
+//   }
 
-function map() {
+  render() {
+    // const position = [this.state.lat, this.state.lng];
     return (
       <div id="map">
-          <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+        map
+          {/* <Map center={position} zoom={this.state.zoom} scrollWheelZoom={false}>
           <TileLayer
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Marker position={[51.505, -0.09]}>
+          /> */}
+          {/* <Marker position={[51.505, -0.09]}>
             <Popup>
               A pretty CSS3 popup. <br /> Easily customizable.
             </Popup>
-          </Marker>
-        </MapContainer>
+          </Marker> */}
+        {/* </Map> */}
       </div>
     );
   }
-  
-  export default map;
+}  
+export default Map;
