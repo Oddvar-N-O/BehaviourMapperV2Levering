@@ -1,13 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-function Login() {
+function Startpage() {
     return (
       <div className="login">
-        <Link to="/startpage">login</Link>
-          
+          <Link to="/mapping">Go to map</Link>
       </div>
     );
   }
   
-  export default Login;
+  export default Startpage;
