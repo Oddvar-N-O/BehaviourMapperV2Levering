@@ -1,0 +1,2 @@
+må ha kjørt denne for å koble mot db
+pip install mysql-connector-python
