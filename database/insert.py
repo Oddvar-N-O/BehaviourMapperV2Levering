@@ -1,4 +1,4 @@
-# Alt er kopiert fra https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html
+# Brukt start fra https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html
 from __future__ import print_function
 from datetime import date, datetime, timedelta
 import mysql.connector
