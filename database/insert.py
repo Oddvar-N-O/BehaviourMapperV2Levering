@@ -3,32 +3,43 @@ from __future__ import print_function
 from datetime import date, datetime, timedelta
 import mysql.connector
 
-cnx = mysql.connector.connect(user='scott', database='employees')
+cnx = mysql.connector.connect(user='root', database='behaviormapper')
 cursor = cnx.cursor()
 
 tomorrow = datetime.now().date() + timedelta(days=1)
 
-add_employee = ("INSERT INTO employees "
-               "(first_name, last_name, hire_date, gender, birth_date) "
-               "VALUES (%s, %s, %s, %s, %s)")
-add_salary = ("INSERT INTO salaries "
-              "(emp_no, salary, from_date, to_date) "
-              "VALUES (%(emp_no)s, %(salary)s, %(from_date)s, %(to_date)s)")
+add_user = ("INSERT INTO bruker "
+               "(brukerID, feideinfo) "
+               "VALUES (%s, %s)")
+add_event = ("INSERT INTO hendelse "
+              "(hendelseID, beskrivelse, retning, center_koordinat, tidspunkt, synlig, person_personID) "
+              "VALUES (%s,%s,%s,%s,%s,%s,%s)")
+add_map = ("INSERT INTO kart "
+              "(kartID, navn, startdato, kartcol, sluttdato, zoom, bruker_brukerID) "
+              "VALUES (%s,%s,%s,%s,%s,%s,%s)")
+add_person = ("INSERT INTO person "
+              "(personID, kartet, synlig, farge, deltakende_attributter) "
+              "VALUES (%(personID)s, %(kartet)s, %(synlig)s, %(farge)s, %(deltakende_attributter)s)")
+add_relation = ("INSERT INTO kart_has_person "
+              "(kart_kartID, person_personID) "
+              "VALUES (%s, %s)")
+
 
 data_employee = ('Geert', 'Vanderkelen', tomorrow, 'M', date(1977, 6, 14))
 
 # Insert new employee
-cursor.execute(add_employee, data_employee)
+cursor.execute(add_user, data_employee)
 emp_no = cursor.lastrowid
 
 # Insert salary information
-data_salary = {
-  'emp_no': emp_no,
-  'salary': 50000,
-  'from_date': tomorrow,
-  'to_date': date(9999, 1, 1),
+data_person = {
+  'personID': emp_no,
+  'kartet': 50000,
+  'synlig': tomorrow,
+  'farge': date(9999, 1, 1),
+  'deltakende_attributter': "Heisann",
 }
-cursor.execute(add_salary, data_salary)
+cursor.execute(add_person, data_person)
 
 # Make sure data is committed to the database
 cnx.commit()
