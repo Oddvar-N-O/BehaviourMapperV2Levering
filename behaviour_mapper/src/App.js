@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 
 
 function App() {
-  const [placeholder, setPlaceholder] = useState('Hi');
+  const [placeholder, setPlaceholder] = useState('Flask server not running');
 
   useEffect(() => {
     fetch('/hello').then(res => res.json()).then(data => {
