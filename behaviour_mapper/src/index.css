@@ -1,5 +1,10 @@
 *{
 padding: 0px;
 margin: 0px;
-font-family:Verdana, Geneva, Tahoma, sans-serif
+font-family: 'Karla', sans-serif;
+}
+
+body {
+    background-image: url(./bg.jpg);
+    background-size: cover;
 }

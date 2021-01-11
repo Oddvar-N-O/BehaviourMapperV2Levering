@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class Map extends Component {
-
-  render() {
-    return (
-      <div id="map">
-        Kart
-      </div>
-    );
-  }
+function Map() {
+  return (
+    <div id="map">
+      Kart
+    </div>
+  );
+  
 }  
 export default Map;

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import Map from 'components/map';
-import Sidebar from 'components/sidebar'
-import 'pages/BehaviourMapping.css'
+import Map from '../components/map';
+import Sidebar from '../components/sidebar'
+import './BehaviourMapping.css'
 
 
 
