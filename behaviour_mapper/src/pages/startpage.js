@@ -13,20 +13,40 @@ import './startpage.css';
 // }
 
 function Startpage() {
-  const [new_project, setNewProject] = useState(false)
+  // State for new_project
+  const [new_project, setNewProject] = useState(false) // set state for new_project to false
+  const changeNewVisibility = () => setNewProject(!new_project) // change state for new procject (true/false)
+  const hideNewProject = () => setNewProject(false) // set state to false
 
-  const hideSection = () => setNewProject(!new_project)
+  // State for load_project
+  const [load_project, setLoadProject] = useState(false)
+  const changeLoadVisibility = () => setLoadProject(!load_project) 
+  const hideLoadProject = () => setLoadProject(false) 
+
+  // State for User Profile
+  // const [user_profile, setUserProfile] = useState(false)
+  // const changeUserVisibility = () => setUserProfile(!user_profile) 
+  // const hideUserProfile = () => setUserProfile(false) 
 
     return (
       <div className="startpage">
+        <h1>Behaviour Mapper</h1>
         <ul id='start-menu'>
-        <li onClick={hideSection}>New Project</li>
-          <li className='start-menu-li'>Load Project</li>
-          <li>User Profile</li>
+          {/* NEW PROJECT */}
+          <li onClick={ () => { hideLoadProject(), changeNewVisibility() }}
+            className={new_project ? 'active' : 'passive'}
+            >New Project</li>
+          {/* LOAD PROJECT */}
+          <li onClick={ () => { hideNewProject(), changeLoadVisibility() }}
+            className={load_project ? 'active' : 'passive'}
+          >Load Project</li>
+          {/* USER PROFILE */}
+          <li onClick={hideNewProject}>User Profile</li>
         </ul>
         <ul id={new_project ? 'load-map' : 'invisible'}>
-          <li>Load map from file</li>
-          <li>Use web-map</li>
+          <Link to="/mapping"><li>Use Web-map</li></Link>
+          {/* <li>Use Template??</li> */}
+          <li>Load Map From File</li>
         </ul>
       </div>
     );
