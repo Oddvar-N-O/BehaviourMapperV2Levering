@@ -6,6 +6,14 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
     DATABASE_USER = 'root'
     DATABASE = 'behaviormapper'
+    DATABASE_CONFIG = {
+                        'user': 'behavior',
+                        'password': 'thisCanBe12Mappings',
+                        'host': '127.0.0.1',
+                        'port': '3306',
+                        'database': 'behaviormapper',
+                        'raise_on_warnings': True,
+                        }
     UPLOAD_PATH = 'app/static/uploads'
     ALLOWED_EXTENSIONS = {"jpg"}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
