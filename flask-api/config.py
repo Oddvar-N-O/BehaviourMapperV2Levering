@@ -12,7 +12,6 @@ class Config(object):
                         'host': '127.0.0.1',
                         'port': '3306',
                         'database': 'behaviormapper',
-                        'raise_on_warnings': True,
                         }
     UPLOAD_PATH = 'app/static/uploads'
     ALLOWED_EXTENSIONS = {"jpg"}
