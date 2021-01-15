@@ -44,7 +44,7 @@ function Startpage() {
           <li onClick={hideNewProject}>User Profile</li>
         </ul>
         <ul id={new_project ? 'load-map' : 'invisible'}>
-          <Link to="/mapping"><li>Use Web-map</li></Link>
+          <Link to="/newproject"><li>Use Web-map</li></Link>
           {/* <li>Use Template??</li> */}
           <li>Load Map From File</li>
         </ul>
