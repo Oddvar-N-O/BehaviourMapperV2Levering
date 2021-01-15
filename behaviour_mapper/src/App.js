@@ -1,5 +1,6 @@
 import './App.css';
 import BehaviourMapping from './pages/BehaviourMapping'
+import NewProject from './pages/newProject'
 import Login from './pages/login'
 import Startpage from './pages/startpage'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
@@ -24,7 +25,8 @@ function App() {
       <Router>
         <Switch>
           <Route path='/' exact component={Login} />
-          <Route path='/startpage' exact component={Startpage} />
+          <Route path='/startpage' component={Startpage} />
+          <Route path='/newproject' component={NewProject} />
           <Route path='/mapping' component={BehaviourMapping} />
         </Switch>
       </Router>
