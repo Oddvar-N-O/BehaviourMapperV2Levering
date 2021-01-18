@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import * as AiIcons from "react-icons/ai";
 
 class NewProject extends React.Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
             projectName: "",
+            projectNameText: "Project Name",
             description: "",
-            redirect: false
+            redirect: false,
         }
         this.handleChange = this.handleChange.bind(this)
         // this.setRedirect = this.setRedirect.bind(this)
@@ -29,25 +30,13 @@ class NewProject extends React.Component {
             }
         
         else {
-            this.projectNameRequired()
+            this.setState({projectNameText: "Project Name Required"})
         }
     }
 
-    projectNameRequired() {
-        return (
-            <div className="validate-false">recuired</div>
-        )
-    }
-
-  
-
     render() {
         return (
-            
             <div id="new-project">
-                {/* <Fragment>
-                {this.setRedirect}
-                </Fragment> */}
                 <div id="new-project-box">
                     <Link to="/startpage" className="close-icon">
                         <AiIcons.AiOutlineClose />
@@ -55,7 +44,7 @@ class NewProject extends React.Component {
                     <div id="heading-and-form">
                         <h2>New Project</h2>
                         <form>
-                            <legend>Project Name</legend> 
+                            <legend>{this.state.projectNameText}</legend> 
                             <input 
                                 id="project-name"
                                 type="text" 
@@ -72,7 +61,6 @@ class NewProject extends React.Component {
                                 placeholder="E.g. time of day, wheather conditions, special events etc." 
                                 onChange={this.handleChange}
                             />
-                            {/* <h1>{this.state.projectName} {this.state.description}</h1> */}
                         </form>
                     </div>
                     <ul>
