@@ -48,7 +48,7 @@ function Startpage() {
         <ul id={new_project ? 'load-map' : 'invisible'}>
           <Link to="/newproject"><li>Use Web-map</li></Link>
           {/* <li>Use Template??</li> */}
-          <li>Load Map From File</li>
+          <Link to="/upload"><li>Load Map From File</li></Link>
         </ul>
       </div>
     );
