@@ -7,7 +7,7 @@
     directories:
     - node_modules
     before_script:
-      -cd behaviour_mapper/
+      -cd frontend/
     script:
       - npm run build
       - npm test
