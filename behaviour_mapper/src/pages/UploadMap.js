@@ -3,7 +3,7 @@ import "./UploadMap.css"
 import * as AiIcons from "react-icons/ai";
 import { Link } from 'react-router-dom';
 
-class UploadMap extends React.Component() {
+class UploadMap extends React.Component {
     constructor() {
         super()
         this.state = {
@@ -29,4 +29,4 @@ class UploadMap extends React.Component() {
 }
 
 
-// export default UploadMap
+export default UploadMap
