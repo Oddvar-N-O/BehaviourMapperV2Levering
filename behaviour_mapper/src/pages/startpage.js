@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-sequences */
 import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 import './startpage.css';
