@@ -1,0 +1,47 @@
+.startpage {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    /* align-items: center; */
+    justify-content: center;
+    }
+
+.startpage h1 {
+    margin-top: 22vh;
+    position: absolute;
+    font-size: 10vh;
+    color: #F3F7F0;
+    opacity: 0.9;
+}
+
+.startpage ul {
+    margin-top: 37vh;  
+}
+
+#start-menu li, #load-map li {
+    background-color: #F3F7F0;
+    list-style: none;
+    padding: 6px 14px;
+    margin: 7.5px;
+    border: 1.2px solid #19323C;
+    color: #19323C;
+    border-radius: 18px;
+    opacity: 0.85; 
+    font-size: 4.5vh;
+    text-align: center; 
+    user-select: none;
+}
+
+#load-map li {
+    font-size: 3vh;
+}
+
+#start-menu li:hover, #load-map li:hover, #start-menu .active {
+    opacity: 1;
+    background-color: white;
+    cursor: pointer;
+}
+
+#invisible {
+    display: none;
+}
