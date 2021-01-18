@@ -4,8 +4,8 @@ node_js:
 cache:
   directories:
     - node_modules
-before_script:
-  -cd frontend
-script:
-  - npm run build
-  - npm test
+    before_script:
+      -cd frontend/
+    script:
+      - npm run build
+      - npm test
