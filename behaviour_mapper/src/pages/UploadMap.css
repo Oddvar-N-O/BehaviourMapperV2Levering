@@ -1,0 +1,18 @@
+.upload-map  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    /* width: 100%; */
+}
+
+#upload-box {
+    background-color: black;
+    color: white;
+    width: 35vw;
+    height: 65vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}

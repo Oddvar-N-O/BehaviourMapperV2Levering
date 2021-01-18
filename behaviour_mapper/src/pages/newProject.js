@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import * as AiIcons from "react-icons/ai";
 
 class NewProject extends React.Component {
-    constructor(props) {
-        super(props)
+    constructor() {
+        super()
         this.state = {
             projectName: "",
             projectNameText: "Project Name",
