@@ -14,12 +14,12 @@ jobs:
       before_script:
         - cd frontend
       script:
+        - npm install
         - npm run build
         - npm test
 
     - language: python
       python:
-        - "2.7"
         - "3.8"
       before_install:
         - cd backend
