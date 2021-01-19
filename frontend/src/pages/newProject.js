@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React from 'react';
 import "./newProject.css"
 import { Link } from 'react-router-dom';
 import * as AiIcons from "react-icons/ai";
@@ -23,7 +23,7 @@ class NewProject extends React.Component {
     }
 
     setRedirect() {
-        if (this.state.projectName != ""){
+        if (this.state.projectName !== ""){
             this.props.history.push('/mapping')
             }
         
