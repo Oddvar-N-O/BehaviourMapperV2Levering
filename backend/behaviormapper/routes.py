@@ -16,22 +16,25 @@ def initdb():
 
 @app.route('/testdb')
 def testdb():
-    brid = query_db(add_user, user_values, True)
-    prid = query_db(add_person, person_values, True)
-    event_values = ("kartet", 45,"12991.29291,2929.21", "12:12:12", 0, prid)
-    map_values = ("kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", brid)
-    kaid = query_db(add_map, map_values, True)
-    query_db(add_relation, (kaid, prid), True)
-    query_db(add_event, event_values, True)
+    brid = query_db(add_user, user_values)
+    prid = query_db(add_person, person_values)
+    event_values = ("kartet", 45,"12991.29291,2929.21", "12:12:12", 0, prid[-1])
+    map_values = ("kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", brid[-1])
+    kaid = query_db(add_map, map_values)
+    query_db(add_relation, (kaid[-1], prid[-1]))
+    query_db(add_event, event_values)
     return redirect(url_for("selectdb"))    
 
 @app.route('/selectdb')
 def selectdb():
-    result = {}
-    table_names = ("person", "bruker", "kart", "kart_has_person", "hendelse")
+    result = {"Person": "", "Users": "", "Map": "", "Map_has_Person": "", "Event": ""}
+    table_names = ("Person", "Users", "Map", "Map_has_Person", "Event")
     for x in table_names:
-        query_result = select_db(("SELECT * FROM {}".format(x)))
-        result[x] = query_result
+        query_result = select_db(("SELECT * FROM {}".format(x)), True)
+        temp_result = []
+        for query in query_result:
+            temp_result.append(query)
+        result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
 # Eksempler på bruk av alle felter til hver tabell i databasen.
@@ -41,15 +44,15 @@ event_values = ("kartet", 45,"12991.29291 2929.21", datetime.now().time(), 0, "m
 map_values = ("kartet", datetime.now(),datetime(1998,1,30,12,23,43), "zoom", "må hentes frå forrige eller noe")
 
 # sql for å bruke alle felt.
-add_user = ("INSERT INTO bruker (feideinfo)"
+add_user = ("INSERT INTO Users (feideinfo)"
                "VALUES (?)")
-add_event = ("INSERT INTO hendelse "
-              "(beskrivelse, retning, center_koordinat, tidspunkt, synlig, person_personID) "
+add_event = ("INSERT INTO Event "
+              "(description, direction, center_coordinate, created, visible, p_id) "
               "VALUES (?,?,?,?,?,?)")
-add_map = ("INSERT INTO kart "
-              "(navn, startdato, sluttdato, zoom, bruker_brukerID) "
+add_map = ("INSERT INTO Map "
+              "(name, startdate, enddate, zoom, u_id) "
               "VALUES (?,?,?,?,?)")
-add_person = ('INSERT INTO person (kartID, synlig, farge, deltakende_attributter) VALUES (?,?,?,?)')
-add_relation = ("INSERT INTO kart_has_person "
-              "(kart_kartID, person_personID) "
+add_person = ('INSERT INTO Person (m_id, visible, color, other_attributes) VALUES (?,?,?,?)')
+add_relation = ("INSERT INTO Map_has_Person "
+              "(k_id, p_id) "
               "VALUES (?,?)")
