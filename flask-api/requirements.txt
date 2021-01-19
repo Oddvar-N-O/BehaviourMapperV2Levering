@@ -1,6 +1,0 @@
-Flask==1.1.2
-flask-cors==3.0.10
-mysql-connector-python==8.0.22
-protobuf==3.14.0
-python_dotenv==0.15.0
-Werkzeug==1.0.1
