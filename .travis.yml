@@ -1,7 +1,4 @@
 ---
-branches:
-  only:
-    - main
 
 jobs:
   include:
