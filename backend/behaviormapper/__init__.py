@@ -3,7 +3,7 @@ from config import Config
 from flask_cors import CORS
 import mysql.connector
 from mysql.connector import errorcode
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 
 # Create and configure app
 app = Flask(__name__)
@@ -58,4 +58,4 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-from app import routes
+from behaviormapper import routes
