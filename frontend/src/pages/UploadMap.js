@@ -1,4 +1,4 @@
-import React, {Component} from "react"
+import React from "react"
 import "./UploadMap.css"
 import * as AiIcons from "react-icons/ai";
 import { Link } from 'react-router-dom';
