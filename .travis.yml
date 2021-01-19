@@ -1,5 +1,9 @@
 ---
-
+branches:
+  only:
+  - gh-pages
+  - /.*/
+  
 jobs:
   include:
     - language: node_js
