@@ -1,8 +1,22 @@
 from behaviormapper import app, query_db, init_db, select_db
 from datetime import datetime, date
-from flask import redirect, url_for
+from flask import redirect, url_for, flash, request, session
 from time import time
 import json
+import logging
+from config import Config
+import os
+from werkzeug.utils import secure_filename
+from flask_cors import CORS, cross_origin
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger('HELLO WORLD')
+
+UPLOAD_FOLDER = Config.UPLOAD_PATH
+ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
+
+
 
 @app.route('/hello')
 def say_hello_world():
@@ -36,6 +50,22 @@ def selectdb():
             temp_result.append(query)
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
+
+@app.route('/upload', methods=['POST'])
+def fileUpload():
+    target=os.path.join(UPLOAD_FOLDER,'test_docs')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+    logger.info("welcome to upload`")
+    file = request.files['file'] 
+    filename = secure_filename(file.filename)
+    destination="/".join([target, filename])
+    file.save(destination)
+    session['uploadFilePath']=destination
+    response="Whatever you wish too return"
+    return response
+
+# flask_cors.CORS(app, expose_headers='Authorization')
 
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 person_values = ("kartet", 0,"blue", "attributter")
