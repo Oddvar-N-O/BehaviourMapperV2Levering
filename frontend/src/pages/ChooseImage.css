@@ -1,9 +1,7 @@
-.behaviour-mapping{
+#mapbox {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     font-size: xx-large;
-    height: 100%;
-
 }
 
 .sidebar {
@@ -34,19 +32,19 @@
 
 /*OSM*/
 
-.ol-zoom {
+/* .ol-zoom {
     left: 500px;
     width: 50px;
     object-position: 15px;
-    /* background-color: aliceblue;*/
+    background-color: aliceblue;
 }
 
 .zin {
     size: 10px;
     height: 25px;
     width: 20px;
-    /* color: red;
-    object-position: 15px;*/
+    color: red;
+    object-position: 15px;
 }
 
 .zout {
@@ -54,3 +52,22 @@
     height: 25px;
     width: 20px;
 }
+
+.download {
+    width: 510px;
+    background-color: #F3F7F0;
+    list-style: none;
+    padding: 6px 14px;
+    margin: 7.5px;
+    border: 1.2px solid #19323C;
+    color: #19323C;
+    border-radius: 18px;
+    opacity: 0.85;
+    font-size: 4.5vh;
+    text-align: center;
+    user-select: none;
+}
+
+.download:hover {
+    background-color: royalblue;
+}*/

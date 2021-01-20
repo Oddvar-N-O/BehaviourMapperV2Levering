@@ -24,7 +24,7 @@ class NewProject extends React.Component {
 
     setRedirect() {
         if (this.state.projectName !== ""){
-            this.props.history.push('/mapping')
+            this.props.history.push('/chooseImage')
             }
         
         else {
