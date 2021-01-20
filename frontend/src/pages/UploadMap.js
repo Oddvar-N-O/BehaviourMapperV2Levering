@@ -31,17 +31,20 @@ class UploadMap extends React.Component {
         // vi sender til upload
         // bør det ikke være en egen addresse for
         // faktiske uploading?
-
+        console.log(imageDBEntry)
         // Du kan skrive det under som:
         // axios.post('http://localhost:3000/upload', imageDBEntry);
         // Da det eneste som trends
+        //   doError();});
         axios.post('http://localhost:3000/upload', imageDBEntry, {
             onUploadProgress: ProgressEvent => {
                 console.log('Progress: '+ Math.round(ProgressEvent.loaded / ProgressEvent.total * 100 ) + '%')
             }
         })
-            .then(result => {
+            .then((result) => {
                 console.log(result)
+            }, (error) => {
+                console.log(error)
             });
     }
 

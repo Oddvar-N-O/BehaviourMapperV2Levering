@@ -1,10 +1,10 @@
 from flask import Flask, g
 from config import Config
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import sqlite3
 import mysql.connector
 from mysql.connector import errorcode
-from werkzeug.utils import secure_filename
+import os
 
 # Create and configure app
 app = Flask(__name__)
