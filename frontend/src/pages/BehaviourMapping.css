@@ -1,0 +1,44 @@
+.behaviour-mapping{
+    display: flex;
+    flex-direction: row;
+    font-size: xx-large;
+    height: 100%;
+
+}
+
+.sidebar {
+    display: flex;
+    width: 200px;
+    order: 1;
+    background-color: rgb(34, 34, 34);
+    color: rgb(201, 185, 156);
+    height: 100%;
+}
+.sidebar ul {
+    list-style-type: none;
+    width: 100%;
+    
+}
+
+.sidebar li{
+    padding: 5px;
+    width: 100%;
+    border-bottom: 2px rgb(65, 65, 65) solid;
+    transition: 200ms;
+}
+.sidebar li:hover{
+    background-color: rgb(52, 52, 66);
+    /* padding-left: 10px;
+    transition: 200ms; */
+}
+
+#map{   
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    order: 2;
+}
+
+#map{
+    width: 100%;
+}
