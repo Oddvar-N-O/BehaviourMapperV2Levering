@@ -5,10 +5,11 @@ import './BehaviourMapping.css'
 
 
 
-function BehaviourMapping() {
+function RedactImage() {
     return (
       <div className="behaviour-mapping">
         <Sidebar />
+        <h1>REDACTIMAGE</h1>
         <Kart />
         <form>
         </form>
@@ -16,4 +17,4 @@ function BehaviourMapping() {
     );
   }
   
-  export default BehaviourMapping;
+  export default RedactImage;
