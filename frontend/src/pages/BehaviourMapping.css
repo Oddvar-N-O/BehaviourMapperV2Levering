@@ -6,6 +6,39 @@
 
 }
 
+.ol-zoom {
+    left: 500px;
+    width: 50px;
+    object-position: 15px;
+    /* background-color: aliceblue;*/
+}
+
+.zin {
+    size: 10px;
+    height: 25px;
+    width: 20px;
+    /* color: red;
+    object-position: 15px;*/
+}
+
+.zout {
+    size: 10px;
+    height: 25px;
+    width: 20px;
+}
+
+.ol-attribution {
+    size: 2px;
+    right: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+}
+
+.ol-attribution > text {
+    font-size: 10px;
+}
+
 .sidebar {
     display: flex;
     width: 200px;
