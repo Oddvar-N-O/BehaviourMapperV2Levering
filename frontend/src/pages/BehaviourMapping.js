@@ -1,5 +1,5 @@
 import React from 'react';
-import Map from '../components/map';
+import Kart from '../components/Kart';
 import Sidebar from '../components/sidebar'
 import './BehaviourMapping.css'
 
@@ -9,7 +9,7 @@ function BehaviourMapping() {
     return (
       <div className="behaviour-mapping">
         <h1>TEST</h1>
-        <Map />
+        <Kart />
         <Sidebar />
         <form>
         </form>
