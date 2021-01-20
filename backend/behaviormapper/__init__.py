@@ -1,13 +1,15 @@
 from flask import Flask, g
 from config import Config
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import sqlite3
 import mysql.connector
 from mysql.connector import errorcode
-from werkzeug.utils import secure_filename
+import os
+
 
 # Create and configure app
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 CORS(app)
 app.config.from_object(Config)
 app.config["UPLOAD_FOLDER"] = Config.UPLOAD_PATH
@@ -52,5 +54,7 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+# flask_cors.CORS(app, expose_headers='Authorization')
 
 from behaviormapper import routes
