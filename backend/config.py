@@ -5,6 +5,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     DATABASE = 'database.db'
-    UPLOAD_PATH = 'app/static/uploads'
-    ALLOWED_EXTENSIONS = {"jpg"}
+    UPLOAD_PATH = 'behaviormapper/static/uploads'
+    ALLOWED_EXTENSIONS = {"jpg", "png", "jpeg", "pdf", "gif"}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
