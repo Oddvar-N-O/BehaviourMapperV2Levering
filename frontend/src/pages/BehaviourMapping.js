@@ -7,6 +7,14 @@ import './BehaviourMapping.css'
 
 function BehaviourMapping() {
 
+  function appendData() {
+    this.displayData.push(<div  id="display-data"><pre>{this.state.postVal}</pre></div>);
+    this.setState({
+      showdata : this.displayData,
+      postVal : ""
+    });
+  }
+
   function showMarker(event) {
     console.log (event);
     /*var container = document.getElementById('divImgContainer')
