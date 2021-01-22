@@ -24,7 +24,7 @@ class NewProject extends React.Component {
 
     setRedirect() {
         if (this.state.projectName !== ""){
-            this.props.history.push('/mapping')
+            this.props.history.push('/chooseImage')
             }
         
         else {
@@ -62,6 +62,7 @@ class NewProject extends React.Component {
                         </form>
                     </div>
                     <ul>
+                        {/*Det er her vi sendes til Mapping*/}
                     <li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>
                         {/* <li id="cancel">Cancel</li> */}
                     </ul>

@@ -6,7 +6,6 @@ import mysql.connector
 from mysql.connector import errorcode
 import os
 
-
 # Create and configure app
 app = Flask(__name__)
 app.secret_key = os.urandom(24)

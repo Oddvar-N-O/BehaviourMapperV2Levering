@@ -51,6 +51,7 @@ def selectdb():
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
+
 @app.route('/upload', methods=['POST'])
 @cross_origin()
 def fileUpload():
