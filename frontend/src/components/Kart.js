@@ -4,13 +4,24 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import Zoom from 'ol/control/Zoom';
-import './Kart.css'
+import { none } from "ol/centerconstraint";
+
+/*var map = new Map({
+  view: new View({
+    center: [0, 0],
+    zoom: 1
+  }),
+  layers: [
+    new TileLayer({
+      source: new OSM()
+    })
+  ],
+  target: 'map'
+});*/
 
 class Kart extends React.Component {
     constructor(props) {
       super(props);
-
-      // this.handleChange = this.handleChange.bind(this)
 
       this.map = new Map({
         target: null,
@@ -33,6 +44,12 @@ class Kart extends React.Component {
         ]
       });
     }
+
+    /*checkSize() {
+      var small = this.map.getSize()[0] < 600;
+      attribution.setCollapsible(small);
+      attribution.setCollapsed(small);
+    }*/
 
     componentDidMount() {
       this.map.setTarget("map");
@@ -65,7 +82,7 @@ class Kart extends React.Component {
               var transform = canvas.style.transform;
               // Get the transform parameters from the style's transform matrix
               var matrix = transform
-                .match(/^matrix\(([^]*)\)$/)[1]
+                .match(/^matrix([^]*)$/)[1]
                 .split(',')
                 .map(Number);
               // Apply the transform to the export map context
@@ -81,6 +98,7 @@ class Kart extends React.Component {
         );
         if (navigator.msSaveBlob) {
           console.log("SaveBlob");
+          // link download attribuute does not work on MS browsers
           navigator.msSaveBlob(mapCanvas.msToBlob(), 'map.png');
         } else {
           var link = document.getElementById('image-download');
@@ -91,15 +109,13 @@ class Kart extends React.Component {
       map.renderSync();
     }
   
-  // <a href="javascript:void(0)" id="image-download" download="map.png">Img</a>
-  // <button id="image-download" download="test">Button</button>
-  // <button onClick={this.setRedirect.bind(this)}>Redact</button>
   render() {
     return (
-      <div id="box">
-        <div id="map" style={{ width: "610px", height: "410px" }} />
-        <button className="download" onClick={e => this.exportImg()}>Download Image</button>
-        <a href="javascript:void(0)" id="image-download" download="map.png"></a>
+      <div>
+        <div id="map" style={{ width: "610px", height: "410px" }}>
+          <button onClick={e => this.exportImg()}>Choose Image</button>
+        </div>
+        <a id="image-download" style={{display: 'none'}} href="www.google.com">HiddenText</a>
       </div>
     );
   }

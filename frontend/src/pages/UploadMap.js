@@ -2,50 +2,33 @@ import React from "react"
 import "./UploadMap.css"
 import * as AiIcons from "react-icons/ai";
 import { Link } from 'react-router-dom';
-import axios from 'axios'
+
+// methods from https://medium.com/excited-developers/file-upload-with-react-flask-e115e6f2bf99
 
 class UploadMap extends React.Component {
     constructor() {
         super()
         this.state = {
-            name: "",
-            selectedFile: null,
+            iamgeURL: '',
         }
+        this.handleUploadImage = this.handleUploadImage.bind(this);
     }
 
-    changeFile = event => {
-        // the first element of target.files
-        // is the file itself
-        console.log(event.target.files[0]);
-        // we set the file on change in input
-        this.setState({
-            selectedFile: event.target.files[0]
-        })
-    }
-
-    uploadFile  = () => {
-        // Vi lager en informasjonskapsel som vi vil sende
-        const imageDBEntry = new FormData();
-        // vi gir den tittel, innhold og navn(det siste)
-        imageDBEntry.append('image', this.state.selectedFile, this.state.selectedFile.name)
-        // vi sender til upload
-        // bør det ikke være en egen addresse for
-        // faktiske uploading?
-        console.log(imageDBEntry)
-        // Du kan skrive det under som:
-        // axios.post('http://localhost:3000/upload', imageDBEntry);
-        // Da det eneste som trends
-        //   doError();});
-        axios.post('http://localhost:3000/upload', imageDBEntry, {
-            onUploadProgress: ProgressEvent => {
-                console.log('Progress: '+ Math.round(ProgressEvent.loaded / ProgressEvent.total * 100 ) + '%')
-            }
-        })
-            .then((result) => {
-                console.log(result)
-            }, (error) => {
-                console.log(error)
-            });
+    handleUploadImage(ev) {
+        ev.preventDefault();
+    
+        const data = new FormData();
+        data.append('file', this.uploadInput.files[0]);
+        data.append('filename', this.fileName.value);
+    
+        fetch('http://localhost:5000/upload', {
+          method: 'POST',
+          body: data,
+        }).then((response) => {
+          response.json().then((body) => {
+            this.setState({ imageURL: `http://localhost:5000/${body.file}` });
+          });
+        });
     }
 
     render() {
@@ -55,10 +38,19 @@ class UploadMap extends React.Component {
                     <Link to="/startpage" className="close-icon">
                         <AiIcons.AiOutlineClose />
                     </Link>
-                    <form>
-                        <input type="file" onChange={this.changeFile} /> <br></br>
+                    <form onSubmit={this.handleUploadImage}>
+                        <div>
+                            <input ref={(ref) => { this.uploadInput = ref; }} type="file" />
+                        </div>
+                        <div>
+                            <input ref={(ref) => { this.fileName = ref; }} type="text" placeholder="Enter filename" />
+                        </div>
+                        <br />
+                        <div>
+                            <button>Upload</button>
+                        </div>
+                        <img src={this.state.imageURL} alt="img" />
                     </form>
-                    <button id="upload-button" onClick={this.uploadFile}>Upload</button>
                 </div>
             </div>
         )
@@ -66,4 +58,4 @@ class UploadMap extends React.Component {
 }
 
 
-export default UploadMap
+export default UploadMap     

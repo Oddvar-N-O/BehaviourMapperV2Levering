@@ -55,7 +55,13 @@ def selectdb():
 @app.route('/upload', methods=['POST'])
 @cross_origin()
 def fileUpload():
-    print("YEEEEEEEEEEEEEEEEEEEEEEEEEEET")
+    if request.method == 'POST':
+        """modify/update the information for <user_id>"""
+        # you can use <user_id>, which is a str but could
+        # changed to be int or whatever you want, along
+        # with your lxml knowledge to make the required
+        # changes
+        data = request.form 
     target=os.path.join(UPLOAD_FOLDER,'test_docs')
     if not os.path.isdir(target):
         os.mkdir(target)

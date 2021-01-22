@@ -31,7 +31,7 @@ function App() {
           <Route path='/newproject' component={NewProject} />
           <Route path='/chooseImage' component={ChooseImage} />
           <Route path='/mapping' component={BehaviourMapping} />
-          <Route path='/uploadImage' component={UploadMap} />
+          <Route path='/upload' component={UploadMap} />
         </Switch>
       </Router>
     </div>
