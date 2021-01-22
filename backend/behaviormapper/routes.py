@@ -89,6 +89,27 @@ def selectdb():
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
+<<<<<<< HEAD
+=======
+
+@app.route('/upload', methods=['POST'])
+@cross_origin()
+def fileUpload():
+    target=os.path.join(UPLOAD_FOLDER,'test_docs')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+    logger.info("welcome to upload`")
+    file = request.files['file'] 
+    filename = secure_filename(file.filename)
+    destination="/".join([target, filename])
+    file.save(destination)
+    session['uploadFilePath']=destination
+    response="Whatever you wish too return"
+    return response
+
+# flask_cors.CORS(app, expose_headers='Authorization')
+
+>>>>>>> c9df1f310f990181467c150e90ae6577dcc59f70
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "attributter")
 user_values = ("kartet",)

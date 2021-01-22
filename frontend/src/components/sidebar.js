@@ -1,13 +1,22 @@
 import React from 'react';
+import Symbol from './Symbol';
 
-function sidebar() {
+function sidebar(props) {
     return (
       <div className="sidebar">
           <ul>
-              <li>1</li>
-              <li>2</li>
-              <li>3</li>
-              <li>4</li>
+            <li><Symbol 
+            inf={{img: "No", desc: "Mann"}}
+            /></li>
+            <li><Symbol 
+            inf={{img: "No", desc: "Dame"}}
+            /></li>
+            <li><Symbol 
+            inf={{img: "No", desc: "Med hund"}}
+            /></li>
+            <li><Symbol 
+            inf={{img: "No", desc: "Sketboard"}}
+            /></li>
           </ul>
       </div>
     );
