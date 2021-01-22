@@ -8,6 +8,7 @@ import os
 
 # Create and configure app
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 CORS(app)
 app.config.from_object(Config)
 app.config["UPLOAD_FOLDER"] = Config.UPLOAD_PATH
@@ -52,5 +53,7 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+# flask_cors.CORS(app, expose_headers='Authorization')
 
 from behaviormapper import routes
