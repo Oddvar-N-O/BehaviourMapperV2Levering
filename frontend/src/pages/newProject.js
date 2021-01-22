@@ -22,8 +22,23 @@ class NewProject extends React.Component {
         })
     }
 
-    setRedirect() {
+    setRedirect(event) {
         if (this.state.projectName !== ""){
+            event.preventDefault();
+    
+            const data = new FormData();
+            data.append('name', this.uploadInput.files[0]);
+            data.append('description', this.fileName.value);
+            data.append('startdate', new Date());
+        
+            fetch('http://localhost:5000/addproject', {
+            method: 'POST',
+            body: data,
+            }).then((response) => {
+            response.json().then((body) => {
+                this.props.history.push('/mapping');
+            });
+            });
             this.props.history.push('/mapping')
             }
         
