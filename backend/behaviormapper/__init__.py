@@ -10,6 +10,7 @@ import os
 # Create and configure app
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+# CORS implemented so that we don't get errors when trying to access the server from a different server location
 CORS(app)
 app.config.from_object(Config)
 app.config["UPLOAD_FOLDER"] = Config.UPLOAD_PATH

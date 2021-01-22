@@ -1,16 +1,18 @@
-DROP TABLE IF EXISTS [Users];
+DROP TABLE IF EXISTS "Users" ;
 
-CREATE TABLE "Users" (
+CREATE TABLE IF NOT EXISTS "Users" (
 	"id"	INTEGER NOT NULL UNIQUE,
-	"feideinfo"	TEXT,
+	"feideinfo"	VARCHAR NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
-DROP TABLE IF EXISTS [Map];
+DROP TABLE IF EXISTS [Project];
 
-CREATE TABLE IF NOT EXISTS [Map] (
+CREATE TABLE IF NOT EXISTS [Project] (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR NOT NULL,
+    description VARCHAR NULL,
+    map VARCHAR NULL,
     startdate DATETIME NULL,
     enddate DATETIME NULL,
     zoom VARCHAR NULL,
@@ -18,37 +20,34 @@ CREATE TABLE IF NOT EXISTS [Map] (
     FOREIGN KEY (u_id) REFERENCES "Users"(id)
 );
 
+DROP TABLE IF EXISTS "Figures";
 
-DROP TABLE IF EXISTS [Person];
-
-CREATE TABLE IF NOT EXISTS [Person] (
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-    m_id INTEGER NOT NULL, 
-    visible BOOLEAN NOT NULL, 
-    color VARCHAR NULL, 
-    other_attributes VARCHAR NULL,
-    FOREIGN KEY (m_id) REFERENCES [Map](id)
+CREATE TABLE IF NOT EXISTS "Figures" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"description"	VARCHAR NOT NULL UNIQUE,
+	"color"	VARCHAR NULL,
+	"other_attributes"	INTEGER NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
 DROP TABLE IF EXISTS [Event];
 
 CREATE TABLE IF NOT EXISTS [Event] (
-     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-     description VARCHAR NULL, 
-     direction DECIMAL NULL, 
-     center_coordinate VARCHAR NULL, 
-     created TIME NULL, 
-     visible BOOLEAN NULL, 
-     p_id INTEGER NOT NULL,
-     FOREIGN KEY (p_id) REFERENCES [Person](id)
+     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+     "direction" DECIMAL NULL, 
+     "center_coordinate" VARCHAR NULL, 
+     "created" TIME NULL, 
+     "visible" BOOLEAN NULL, 
+     "f_id" INTEGER NOT NULL,
+     FOREIGN KEY (f_id) REFERENCES [Figures](id)
 );
 
-DROP TABLE IF EXISTS [Map_has_Person];
+DROP TABLE IF EXISTS "Project_has_Event";
 
-CREATE TABLE IF NOT EXISTS [Map_has_Person] (
-    k_id INTEGER NOT NULL, 
-    p_id INTEGER NOT NULL, 
-    PRIMARY KEY (k_id, p_id),
-    FOREIGN KEY (k_id) REFERENCES [Map](id)
-    FOREIGN KEY (p_id) REFERENCES [Person](id)
+CREATE TABLE IF NOT EXISTS "Project_has_Event" (
+	"p_id"	INTEGER NOT NULL,
+	"e_id"	INTEGER NOT NULL,
+	PRIMARY KEY ("p_id", "e_id"),
+	FOREIGN KEY("p_id") REFERENCES [Project](id),
+	FOREIGN KEY("e_id") REFERENCES [Event](id)
 );
