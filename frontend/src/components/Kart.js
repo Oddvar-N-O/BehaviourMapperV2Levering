@@ -4,7 +4,6 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import Zoom from 'ol/control/Zoom';
-import { none } from "ol/centerconstraint";
 
 /*var map = new Map({
   view: new View({

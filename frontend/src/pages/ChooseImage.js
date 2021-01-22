@@ -1,5 +1,4 @@
 import React from 'react';
-import * as AiIcons from "react-icons/ai";
 import Kart from '../components/Kart';
 import './ChooseImage.css'
 
