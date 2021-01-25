@@ -1,6 +1,6 @@
 from behaviormapper import app, query_db, init_db, select_db
 from datetime import datetime, date
-from flask import redirect, url_for, flash, request, session
+from flask import redirect, url_for, flash, request, session, send_from_directory
 from time import time
 import json
 import logging
@@ -22,15 +22,29 @@ def addProject():
     add_small_project = ("INSERT INTO Project "
               "(name, description, startdate) "
               "VALUES (?,?,?)")
-    project_values = (request.form.get('name'), request.form.get('description'), 
+    small_project_values = (request.form.get('name'), request.form.get('description'), 
                         request.form.get('startdate'))
-    query_db(add_small_project, project_values)
+    query_db(add_small_project, small_project_values)
     return {}
     # Add a new project and link a map
 
 # @app.route('getproject', methods=['GET'])
 # def getProject():
 
+# Usage /getFigure?description=<desc>&color=<color>
+@app.route('/getFigure')
+def getFigure():
+    get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
+    description = request.args.get('description', None)
+    color = request.args.get('color', None)
+    result = query_db(get_figure_image_sql, (description, color), True)
+    image = {"image": ""}
+    for res in result:
+        image["image"] = res
+    try:
+        return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+    except FileNotFoundError:
+        abort(404)
 
 @app.route('/addevent', methods=['POST'])
 def addEvent():
@@ -89,29 +103,8 @@ def selectdb():
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
-<<<<<<< HEAD
-=======
-
-@app.route('/upload', methods=['POST'])
-@cross_origin()
-def fileUpload():
-    target=os.path.join(UPLOAD_FOLDER,'test_docs')
-    if not os.path.isdir(target):
-        os.mkdir(target)
-    logger.info("welcome to upload`")
-    file = request.files['file'] 
-    filename = secure_filename(file.filename)
-    destination="/".join([target, filename])
-    file.save(destination)
-    session['uploadFilePath']=destination
-    response="Whatever you wish too return"
-    return response
-
-# flask_cors.CORS(app, expose_headers='Authorization')
-
->>>>>>> c9df1f310f990181467c150e90ae6577dcc59f70
 # Eksempler på bruk av alle felter til hver tabell i databasen.
-figure_values = ("beskrivelse","blue", "attributter")
+figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("kartet",)
 event_values = [45,"12991.29291 2929.21", "12:12:12", 0]
 project_values = ["prosjektnamn", "beskrivelse", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom"]
@@ -126,8 +119,8 @@ add_project = ("INSERT INTO Project "
               "(name, description, map, startdate, enddate, zoom, u_id) "
               "VALUES (?,?,?,?,?,?,?)")
 add_figure = ("INSERT INTO Figures "
-                "(description, color, other_attributes) "
-                "VALUES (?,?,?)")
+                "(description, color, image, other_attributes) "
+                "VALUES (?,?,?,?)")
 add_relation = ("INSERT INTO Project_has_Event "
               "(p_id, e_id) "
               "VALUES (?,?)")

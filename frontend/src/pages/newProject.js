@@ -27,8 +27,8 @@ class NewProject extends React.Component {
             event.preventDefault();
     
             const data = new FormData();
-            data.append('name', this.uploadInput.files[0]);
-            data.append('description', this.fileName.value);
+            data.append('name', this.state.projectName);
+            data.append('description', this.state.description);
             data.append('startdate', new Date());
         
             fetch('http://localhost:5000/addproject', {
