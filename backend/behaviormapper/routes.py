@@ -1,4 +1,5 @@
 from behaviormapper import app, query_db, init_db, select_db
+from behaviormapper.errorhandlers import InvalidUsage
 from datetime import datetime, date
 from flask import redirect, url_for, flash, request, session, send_from_directory
 from time import time
@@ -14,7 +15,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('HELLO WORLD')
 
 UPLOAD_FOLDER = Config.UPLOAD_PATH
-ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
+
+# Set allowed filenames
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 # Not all done, must add link to map
 @app.route('/addproject', methods=['POST'])
@@ -100,11 +104,14 @@ def fileUpload():
         os.mkdir(target)
     logger.info("welcome to upload`")
     file = request.files['file'] 
-    filename = secure_filename(file.filename)
-    destination="/".join([target, filename])
-    file.save(destination)
-    session['uploadFilePath']=destination
-    response="Whatever you wish too return"
+    if allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        destination="/".join([target, filename])
+        file.save(destination)
+        session['uploadFilePath']=destination
+        response="Whatever you wish too return"
+    else:
+        raise InvalidUsage("Not allowed file ending", status_code=400) 
     return {"resp": response}
 
 @app.route('/hello')

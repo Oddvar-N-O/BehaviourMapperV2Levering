@@ -27,7 +27,7 @@ def test_faviconico(client):
     rv = client.get(('/favicon.ico'))
     assert rv.status_code != 404
 
-def test_upload(client):
-    rv = client.get(('/upload'))
-    dbtest = {"resp": "Whatever you wish too return"}
-    assert json.loads(rv.data) == dbtest
+# def test_upload(client):
+#     rv = client.get(('/upload'))
+#     dbtest = {"resp": "Whatever you wish too return"}
+#     assert json.loads(rv.data) == dbtest
