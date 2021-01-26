@@ -81,7 +81,7 @@ class Kart extends React.Component {
               var transform = canvas.style.transform;
               // Get the transform parameters from the style's transform matrix
               var matrix = transform
-                .match(/^matrix\(([^\(]*)\)$/)[1]
+                .match(/^matrix([^]*)$/)[1]
                 .split(',')
                 .map(Number);
               // Apply the transform to the export map context
@@ -114,7 +114,7 @@ class Kart extends React.Component {
         <div id="map" style={{ width: "610px", height: "410px" }}>
           <button onClick={e => this.exportImg()}>Choose Image</button>
         </div>
-        <a id="image-download" download="map.png"></a>
+        <a id="image-download" style={{display: 'none'}} href="www.google.com">HiddenText</a>
       </div>
     );
   }

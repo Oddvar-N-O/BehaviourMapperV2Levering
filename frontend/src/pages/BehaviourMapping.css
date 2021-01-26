@@ -78,6 +78,10 @@
 
 /*ModImg*/
 
+#maincont {
+    display: flex;
+}
+
 div.divImgContainer {
     position:absolute;
     top:10px; left:10px;
@@ -89,6 +93,24 @@ div.divImgContainer {
     height: 500px;
 }
 
+.textIcon {
+    background-color:blue;
+    color: white;
+    position:absolute;
+    top:-100px; 
+    left:-100px;
+}
+
+.icon {
+    background-color:blue;
+    color: white;
+    position:absolute;
+    width: 100px;
+    height: 100px;
+    top:-100px; 
+    left:-100px;
+}
+
 div#icon {
     position:absolute;
     top:-100px; 
@@ -97,6 +119,8 @@ div#icon {
     width:5px; height:4px;
 }
 
+
+
 div.dar {
     position:absolute;
     top:-100px; 
@@ -104,3 +128,15 @@ div.dar {
     background-color:red;
     width:5px; height:4px;
 }
+
+/*Rotate: */
+/* img {
+    border-radius: 50%;
+    -webkit-transition: -webkit-transform .8s ease-in-out;
+            transition:         transform .8s ease-in-out;
+}
+
+img:hover {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+}*/
