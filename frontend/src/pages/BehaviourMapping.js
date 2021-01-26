@@ -44,11 +44,19 @@ class BehaviourMapping extends React.Component {
 
   // her forandrer vi bildet
   changeIcon(icNum) {
-    console.log("Test")
-    console.log(icNum)
+    console.log("Test");
+    console.log(icNum);
     this.setState({
       imgIcon: icNum
-    })
+    });
+    this.hideIcon();
+  }
+
+  hideIcon() {
+    var icon = document.getElementById(this.state.ourIconID.toString())
+    if (icon != null) {
+      icon.style.display = 'none';
+    }
     this.state.actionID = 0;
   }
 
@@ -81,23 +89,8 @@ class BehaviourMapping extends React.Component {
     img.style.transform = string_degree;
   }
 
-  /* getRotateDegree(side_x, side_y) {
-    // console.log("SX: " + side_x + " SY: " + side_y);
-    var tan_x = side_y / side_x;
-    // console.log("TAN_X: " + tan_x);
-    var radians = Math.atan(tan_x);
-    var degrees = radians*180/Math.PI;
-    var round_degree = Math.round(degrees);
-    var string_degree = 'rotate(' + round_degree.toString() +'deg)';
-    return string_degree;
-  }*/
-
   showIcon(event) {
     // make element invisible:
-    var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon != null) {
-      icon.style.display = 'none';
-    }
 
     var img = document.createElement('img');
     // set attributes
@@ -112,7 +105,7 @@ class BehaviourMapping extends React.Component {
     img.addEventListener('click', function() {
       console.log(img.getAttribute('id'));
     });
-    document.getElementById("iconContainer").appendChild(img);
+    document.getElementById('iconContainer').appendChild(img);
     
     // place icon on larger image
     // and set current icon coordinates
@@ -122,7 +115,7 @@ class BehaviourMapping extends React.Component {
     // find and save positon image was placed on
     var x = event.clientX; // - 200;
     var y = event.clientY;
-    console.log("Placement: Left? : " + x + " ; Top? : " + y + ".");
+    // console.log("Placement: Left? : " + x + " ; Top? : " + y + ".");
     
     this.state.ourIconCoord.x = x + 25;
     this.state.ourIconCoord.y = y + 25;
