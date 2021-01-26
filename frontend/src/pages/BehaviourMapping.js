@@ -202,7 +202,7 @@ class BehaviourMapping extends React.Component {
         <img alt="" onMouseMove={e => this.updateCoord(e)} onClick={e => this.takeAction(e)} id='backgroundImage' height="500px" width="500px" src={this.state.background} />
         <div id="iconContainer">
         </div>
-        <button onClick={() => this.showAll()}>Show</button>
+        <button onClick={() => this.print()}>Show</button>
       </div>
     );
   }
