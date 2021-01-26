@@ -37,8 +37,7 @@ CREATE TABLE IF NOT EXISTS [Event] (
      "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
      "direction" DECIMAL NULL, 
      "center_coordinate" VARCHAR NULL, 
-     "created" TIME NULL, 
-     "visible" BOOLEAN NULL, 
+     "created" TIME NULL,  
      "f_id" INTEGER NOT NULL,
      FOREIGN KEY (f_id) REFERENCES [Figures](id)
 );
@@ -54,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 );
 
 INSERT INTO 'Figures' ("description", "color", "image") VALUES 
-    ('bike','blue', 'icons\\man\\bike.png'),
+    ('bike','blue', './icons/man/bike.png'),
     ('feedingBirds','blue', './icons/man/feedingBirds.png'),
     ('goodsDelivery','blue', './icons/man/goodsDelivery.png'),
     ('scooter','blue', './icons/man/scooter.png'),

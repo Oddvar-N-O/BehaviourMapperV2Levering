@@ -30,6 +30,7 @@ def addProject():
     # Add a new project and link a map
 
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
+# Need to add that you first get all projects, then get all info on a project.
 @app.route('/getproject', methods=['GET'])
 def getProject():
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
@@ -71,14 +72,25 @@ def favicon():
     except FileNotFoundError:
         abort(404)
 
+# Not done yet, must be checked with
 @app.route('/addevent', methods=['POST'])
 def addEvent():
-    print(request)
+    project_id = 1 # find clever way to get this dynamically
+    d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
+                        request.form.get('created'), request.form.get('f_id'))
+    e_id = query_db(add_event, d_event_values) # Adds to Event table in db
+    query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
+    return {}
 # add both to event and Project_has_Event
 
-@app.route('/adduser', methods=['POST'])
+@app.route('/adduser', methods=['POST', 'GET'])
 def addUser():
-    print(request)
+    return {"ERROR": "Not Created yet."}
+# add a new user
+
+@app.route('/getuser', methods=['GET'])
+def getUser():
+    return {"ERROR": "Not Created yet."}
 # add a new user
 
 @app.route('/upload', methods=['POST'])
@@ -93,7 +105,7 @@ def fileUpload():
     file.save(destination)
     session['uploadFilePath']=destination
     response="Whatever you wish too return"
-    return response
+    return {"resp": response}
 
 @app.route('/hello')
 def say_hello_world():
@@ -131,15 +143,15 @@ def selectdb():
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("kartet",)
-event_values = [45,"12991.29291 2929.21", "12:12:12", 0]
+event_values = [45,"12991.29291 2929.21", "12:12:12"]
 project_values = ["prosjektnamn", "beskrivelse", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom"]
 
 # sql for å bruke alle felt.
 add_user = ("INSERT INTO Users (feideinfo)"
                "VALUES (?)")
 add_event = ("INSERT INTO Event "
-              "(direction, center_coordinate, created, visible, f_id) "
-              "VALUES (?,?,?,?,?)")
+              "(direction, center_coordinate, created, f_id) "
+              "VALUES (?,?,?,?)")
 add_project = ("INSERT INTO Project "
               "(name, description, map, startdate, enddate, zoom, u_id) "
               "VALUES (?,?,?,?,?,?,?)")

@@ -5,7 +5,7 @@ function Login() {
   const [placeholder, setPlaceholder] = useState('Prosjektet finnes ikke.')
 
   useEffect(() => {
-    fetch('getfigure?description=stand&color=red').then(res => res.blob()).then(images => {
+    fetch('getfigure?description=bike&color=blue').then(res => res.blob()).then(images => {
       var image = URL.createObjectURL(images)
       document.getElementById("figur").src = image
     }); 
