@@ -87,6 +87,4 @@ class NewProject extends React.Component {
         )
     }
 }
-
-
 export default NewProject
