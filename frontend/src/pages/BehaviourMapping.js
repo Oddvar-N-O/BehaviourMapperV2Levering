@@ -1,10 +1,5 @@
 import React from 'react';
-// import Kart from '../components/Kart';
-// import Sidebar from '../components/sidebar'
 import './BehaviourMapping.css'
-
-// rettningen, xogykoordinat, tid, icon
-// event tilknyttet til figur 
 
 class BehaviourMapping extends React.Component {
   constructor() { //props
@@ -209,4 +204,3 @@ class BehaviourMapping extends React.Component {
 }
 
 export default BehaviourMapping;
-
