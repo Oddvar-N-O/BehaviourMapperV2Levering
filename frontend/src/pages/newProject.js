@@ -22,8 +22,23 @@ class NewProject extends React.Component {
         })
     }
 
-    setRedirect() {
+    setRedirect(event) {
         if (this.state.projectName !== ""){
+            event.preventDefault();
+    
+            const data = new FormData();
+            data.append('name', this.state.projectName);
+            data.append('description', this.state.description);
+            data.append('startdate', new Date());
+        
+            fetch('http://localhost:5000/addproject', {
+            method: 'POST',
+            body: data,
+            }).then((response) => {
+            response.json().then((body) => {
+                this.props.history.push('/mapping');
+            });
+            });
             this.props.history.push('/mapping')
             }
         
@@ -62,6 +77,7 @@ class NewProject extends React.Component {
                         </form>
                     </div>
                     <ul>
+                        {/*Det er her vi sendes til Mapping*/}
                     <li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>
                         {/* <li id="cancel">Cancel</li> */}
                     </ul>
