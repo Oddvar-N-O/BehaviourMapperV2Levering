@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 );
 
 INSERT INTO 'Figures' ("description", "color", "image") VALUES 
-    ('bike','blue', './icons/man/bike.png'),
+    ('bike','blue', 'icons\\man\\bike.png'),
     ('feedingBirds','blue', './icons/man/feedingBirds.png'),
     ('goodsDelivery','blue', './icons/man/goodsDelivery.png'),
     ('scooter','blue', './icons/man/scooter.png'),

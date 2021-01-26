@@ -16,6 +16,7 @@ logger = logging.getLogger('HELLO WORLD')
 UPLOAD_FOLDER = Config.UPLOAD_PATH
 ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
 
+# Not all done, must add link to map
 @app.route('/addproject', methods=['POST'])
 @cross_origin()
 def addProject():
@@ -28,11 +29,28 @@ def addProject():
     return {}
     # Add a new project and link a map
 
-# @app.route('getproject', methods=['GET'])
-# def getProject():
+# Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
+@app.route('/getproject', methods=['GET'])
+def getProject():
+    get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
+    proj_values = (request.args.get('u_id'), request.args.get('name'))
+    if proj_values[1] == None:
+        get_proj_sql = ("SELECT * FROM Project WHERE u_id=?")
+        projects = query_db(get_proj_sql, proj_values[0])
+        projects = projects[:-1]
+    else:
+        projects = query_db(get_proj_sql, proj_values, True)
+    result = []
+    for project in projects:
+        if proj_values[1] == None:
+            for data in project:
+                result.append(data)
+        else:
+            result.append(project)
+    return json.dumps(result)
 
-# Usage /getFigure?description=<desc>&color=<color>
-@app.route('/getFigure')
+# Usage /getfigure?description=<desc>&color=<color>
+@app.route('/getfigure')
 def getFigure():
     get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
     description = request.args.get('description', None)
@@ -43,6 +61,13 @@ def getFigure():
         image["image"] = res
     try:
         return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+    except FileNotFoundError:
+        abort(404)
+
+@app.route('/favicon.ico')
+def favicon():
+    try:
+        return send_from_directory(app.config['STATIC_URL_PATH'], "favicon.ico")
     except FileNotFoundError:
         abort(404)
 
