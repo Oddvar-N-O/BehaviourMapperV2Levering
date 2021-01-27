@@ -14,8 +14,6 @@ logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger('HELLO WORLD')
 
-UPLOAD_FOLDER = Config.UPLOAD_PATH
-
 # Set allowed filenames
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
@@ -99,20 +97,26 @@ def getUser():
 
 @app.route('/upload', methods=['POST'])
 def fileUpload():
-    target=os.path.join(UPLOAD_FOLDER)
+    target=os.path.join(Config.UPLOAD_PATH)
     if not os.path.isdir(target):
         os.mkdir(target)
     logger.info("welcome to upload`")
-    file = request.files['file'] 
+    file = request.files['file']
+    unique = 1
     if allowed_file(file.filename):
         filename = secure_filename(file.filename)
         destination="/".join([target, filename])
-        file.save(destination)
-        session['uploadFilePath']=destination
-        response="Whatever you wish too return"
+        while os.path.exists(destination):
+            destination="/".join([target, str(unique) + filename])
+            unique += 1
     else:
-        raise InvalidUsage("Not allowed file ending", status_code=400) 
-    return {"resp": response}
+        raise InvalidUsage("Not allowed file ending", status_code=400)
+    try:
+        file.save(destination)
+        return {"file": filename}, 201
+    except:
+        raise InvalidUsage("Failed to upload image", status_code=500)
+    
 
 @app.route('/hello')
 def say_hello_world():
