@@ -1,6 +1,5 @@
 import React from 'react';
 import "./newProject.css"
-import { withRouter } from "react-router";
 import { Link } from 'react-router-dom';
 import * as AiIcons from "react-icons/ai";
 // import Upload from "../components/UploadMap"
