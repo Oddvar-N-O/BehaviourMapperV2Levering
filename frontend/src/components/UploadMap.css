@@ -1,10 +1,10 @@
-.upload-map  {
+/* .upload-map  {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    /* width: 100%; */
-}
+    /* width: 100%; 
+ }
 
 #upload-box {
     background-color: black;
@@ -23,4 +23,23 @@
     padding: 5px;
     padding-left: 20px;
     padding-right: 20px;
+} */
+
+input[type="file"] {
+    display: none;
+}
+
+.file-button {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.file-button-uploaded {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: azure;
 }

@@ -46,9 +46,19 @@ function Startpage() {
           <li onClick={hideNewProject}>User Profile</li>
         </ul>
         <ul id={new_project ? 'load-map' : 'invisible'}>
-          <Link to="/newproject"><li>Use Web-map</li></Link>
-          {/* <li>Use Template??</li> */}
-          <Link to="/upload"><li>Load Map From File</li></Link>
+          <Link to={{
+              pathname: "/newproject",
+              state: {
+                fromLoadMap: false
+            }
+            }}><li>Use Web-map</li></Link>
+            {/* <li>Use Template??</li> */}
+            <Link to={{
+              pathname: "/newproject",
+              state: {
+                fromLoadMap: true
+            }
+            }}><li>Load Map From File</li></Link>
         </ul>
       </div>
     );

@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom';
 // methods from https://medium.com/excited-developers/file-upload-with-react-flask-e115e6f2bf99
 
 class UploadMap extends React.Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
             iamgeURL: '',
+            buttonText: 'Choose image'
         }
         this.handleUploadImage = this.handleUploadImage.bind(this);
     }
@@ -19,7 +20,7 @@ class UploadMap extends React.Component {
     
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
-        data.append('filename', this.fileName.value);
+        // data.append('filename', this.fileName.value);
     
         fetch('http://localhost:5000/upload', {
           method: 'POST',
@@ -40,16 +41,16 @@ class UploadMap extends React.Component {
                     </Link>
                     <form onSubmit={this.handleUploadImage}>
                         <div>
-                            <input ref={(ref) => { this.uploadInput = ref; }} type="file" />
+                            <label className='file-button'><input ref={(ref) => { this.uploadInput = ref; }} type="file"  ></input>Choose file</label>
                         </div>
-                        <div>
+                        {/* <div>
                             <input ref={(ref) => { this.fileName = ref; }} type="text" placeholder="Enter filename" />
-                        </div>
+                        </div>  */}
                         <br />
                         <div>
                             <button>Upload</button>
                         </div>
-                        <img src={this.state.imageURL} alt="img" />
+                        {/* <img src={this.state.imageURL} alt="img" /> */}
                     </form>
                 </div>
             </div>
