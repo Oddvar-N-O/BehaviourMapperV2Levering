@@ -39,7 +39,10 @@ class NewProject extends React.Component {
           method: 'POST',
           body: data,
         }).then((response) => {
-          response.json().then((body) => {
+            if (response.status > 199 && response.status < 300) {
+                console.log(response.status)
+            }
+            response.json().then((body) => {
             this.setState({ imageURL: `http://localhost:5000/${body.file}` });
           });
         });
@@ -87,13 +90,9 @@ class NewProject extends React.Component {
                     </div>
 
                     <form onSubmit={this.handleUploadImage} className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
-                        <div>
-                            <label className='file-button'><input ref={(ref) => { this.uploadInput = ref; }} type="file"  ></input>Choose file</label>
-                        </div>
-                        <div>
-                        <label className='upload-button'><button className="hidden-button" />Upload</label>
-                        </div>
-                        </form>
+                        <input ref={(ref) => { this.uploadInput = ref; }} type="file"  className='file-button'></input>
+                        <button className='upload-button'>Upload</button>
+                    </form>
 
                     <ul>
                         {/*Det er her vi sendes til Mapping*/}
