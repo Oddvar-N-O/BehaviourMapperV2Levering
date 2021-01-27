@@ -47,9 +47,24 @@ class NewProject extends React.Component {
         });
     }
 
-    setRedirect() {
+    setRedirect(event) {
         if (this.state.projectName !== ""){
-            this.props.history.push('/chooseImage')
+            event.preventDefault();
+    
+            const data = new FormData();
+            data.append('name', this.state.projectName);
+            data.append('description', this.state.description);
+            data.append('startdate', new Date());
+        
+            fetch('http://localhost:5000/addproject', {
+            method: 'POST',
+            body: data,
+            }).then((response) => {
+            response.json().then((body) => {
+                this.props.history.push('/mapping');
+            });
+            });
+            this.props.history.push('/mapping')
             }
         
         else {
@@ -104,6 +119,4 @@ class NewProject extends React.Component {
         )
     }
 }
-
-
 export default NewProject

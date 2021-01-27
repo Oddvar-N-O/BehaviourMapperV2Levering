@@ -21,5 +21,5 @@ function sidebar(props) {
       </div>
     );
   }
-  
+
   export default sidebar;

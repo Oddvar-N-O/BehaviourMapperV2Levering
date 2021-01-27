@@ -1,0 +1,123 @@
+1a: 	method overriding: f.eks at en tar en standard metode for forelderobjekt og endrer på funksjonaliteten til den.
+	method overloading: I ein klasse er det flere metoder med samme navn, bare ulike innparamatre. (Polymorfisme)
+
+1b: 	3, 5 because Player is a class, and classes cannot inherit multiple classes. 
+1c: 	3, Because line 9 does not end with ; otherwise 2.
+1d:	1,5
+
+2a:
+Shape.java:
+package ...
+
+import Point;
+
+public abstract class Shape {
+	private Point position = (10,10);
+
+	public abstract double area();
+
+	public abstract void draw();
+
+	public void set_position(Point position){
+		this.position = position;
+	}
+
+	public Point get_position(){
+		return this.position;
+	}
+
+Squircle.java
+package ..
+
+public class Squircle extends Shape{
+	private Circle circle;
+	private Rectangle rectangle:
+
+	Public Squircle(Circle circle, Rectangle rectangle){
+		this.circle = circle;
+		this.rectangle = rectangle;
+	}
+
+	public void set_a(){
+		// change value of a
+	}
+
+	public void resize(double factor){
+		// use factor to resize
+		// remember constraint
+	}
+
+	public double area(){
+		
+	}
+
+}
+
+Circle.java
+
+public class Circle extends Shape{
+	private Double radius = 1; // must be > 0.
+
+	public double area(){
+		// find area
+	}
+
+	public void draw(){
+		// Draw circle
+	}
+
+	public void set_radius(double radius){
+		// set radius
+		// remember constraints
+	}
+
+	public double get_radius(){
+		//return radius
+	}
+
+Rectangle.java
+
+public class Rectangle{
+	private double a = 10;
+	private double b = 10;
+
+	public double area(){
+		// find area
+	}
+
+	public void draw(){
+		// Draw circle
+	}
+	// getters and setters for a and b.
+
+3a: 	Adapter, fordi det er en ekstra klasse som må hentes inn for å få bruke et interface
+3b:	Strategy pattern: It is a behavoiural pattern. Deler opp ulike funksjoner i underklasser under et
+	interface som har en handling. Underklassene behandler hva som gjøres konkret i handlingen.
+	Så må en bare velge strategi, hvilken metode en ønsker å bruke for den gitte handlingen.
+	I tillegg må det være en contekst klasse som bruker strategi metodene ut ifra konteksten.
+	konteksten kan endre til alle typer strategier, og den har en utfør metode. Deretter må conteksten
+	brukes i en kontekst der den valgte strategien er i bruk. Operasjoner på en kalkulator (gange, minus, pluss)
+	Der vil det være et stragegi pattern som har en kalkuler() og de ulike underklassene er de spesifikke
+	operasjonene. Så tar kontekst klassen og styrer hvilken strategi som skal brukes. 
+3c:	Bryter med SRP, fordi den gjør to ting i klassen. Og OCP fordi den 
+4a: 	Fordi det kan være vanskelig å få innført en ny metode for å gjøre ting når det allerede er veletablerte
+	prosesser i en bedrift. 
+4b:	LSP: Er at det kan gi meining å bytte klasse frå subklassen til forelder, og det skal gå an. F.eks: Shape
+	er forelder Circle subklasse og da skal en kunne ta et circle objekt og kunne si at det er et shape objekt
+	uten å måtte endre noe på programmet.	
+4c: 	testCatWHiteSpace(){
+		Paragraph test = new Paragraph("Test   String");
+		test.catWhiteSpace();
+		AssertEqual(test, "Test String");
+		AssertNotEqual(test, "Test       String");
+		AssertNotEqual(test, "TestString");
+	}
+5a:	No, because the variable i which could have ben the issue is local, and a different variable for the two
+	for loops.
+5b:	
+ThreadSafeHashMap.java
+
+public class ThreadSafeHashMap{
+	public ArrayList<integer, E> hashmap;
+
+	public void put(
