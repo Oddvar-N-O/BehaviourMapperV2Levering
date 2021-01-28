@@ -1,6 +1,6 @@
 from behaviormapper import app, query_db, init_db, select_db
 from datetime import datetime, date
-from flask import redirect, url_for, flash, request, session
+from flask import Flask, redirect, url_for, flash, request, session
 from time import time
 import json
 import logging
@@ -15,6 +15,8 @@ logger = logging.getLogger('HELLO WORLD')
 
 UPLOAD_FOLDER = Config.UPLOAD_PATH
 ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
+app = Flask(__name__)
+CORS(app)
 
 
 

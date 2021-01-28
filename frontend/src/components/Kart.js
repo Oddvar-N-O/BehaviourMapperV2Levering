@@ -5,19 +5,6 @@ import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import Zoom from 'ol/control/Zoom';
 
-/*var map = new Map({
-  view: new View({
-    center: [0, 0],
-    zoom: 1
-  }),
-  layers: [
-    new TileLayer({
-      source: new OSM()
-    })
-  ],
-  target: 'map'
-});*/
-
 class Kart extends React.Component {
     constructor(props) {
       super(props);
@@ -29,8 +16,6 @@ class Kart extends React.Component {
             source: new OSM()
           })
         ],
-        // controls: defaultControls({attribution: false}).extend([attribution]),
-        // controls : defaultControls({attribution: false}).extend([this.attribution]),
         view: new View({
           center: [0, 0],
           zoom: 2
@@ -44,16 +29,9 @@ class Kart extends React.Component {
       });
     }
 
-    /*checkSize() {
-      var small = this.map.getSize()[0] < 600;
-      attribution.setCollapsible(small);
-      attribution.setCollapsed(small);
-    }*/
-
     componentDidMount() {
       this.map.setTarget("map");
   
-      // Listen to map changes
       this.map.on("moveend", () => {
         let center = this.map.getView().getCenter();
         let zoom = this.map.getView().getZoom();
@@ -61,13 +39,13 @@ class Kart extends React.Component {
       });
     }
 
-    exportImg() {
+    exportImg(todb) {
       var map = this.map;
       map.once('rendercomplete', function () {
         var mapCanvas = document.createElement('canvas');
         var size = map.getSize();
-        console.log("size x " + size[0])
-        console.log("size y " + size[1])
+        /* console.log("size x " + size[0])
+        console.log("size y " + size[1])*/
         mapCanvas.width = size[0];
         mapCanvas.height = size[1];
         var mapContext = mapCanvas.getContext('2d');
@@ -75,7 +53,7 @@ class Kart extends React.Component {
           document.querySelectorAll('.ol-layer canvas'),
           function (canvas) {
             if (canvas.width > 0) {
-              console.log("Width > 0");
+              // console.log("Width > 0");
               var opacity = canvas.parentNode.style.opacity;
               mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
               var transform = canvas.style.transform;
@@ -85,24 +63,51 @@ class Kart extends React.Component {
                 .split(',')
                 .map(Number);
               // Apply the transform to the export map context
-              console.log("has transformed.");
+              // console.log("has transformed.");
               CanvasRenderingContext2D.prototype.setTransform.apply(
                 mapContext,
                 matrix
               );
-              console.log("Set MapContext");
+              // console.log("Set MapContext");
               mapContext.drawImage(canvas, 0, 0);
             }
           }
         );
         if (navigator.msSaveBlob) {
-          console.log("SaveBlob");
+          // console.log("SaveBlob");
           // link download attribuute does not work on MS browsers
           navigator.msSaveBlob(mapCanvas.msToBlob(), 'map.png');
         } else {
-          var link = document.getElementById('image-download');
-          link.href = mapCanvas.toDataURL();
-          link.click();
+          var link;
+          if (!todb) {
+            link = document.getElementById('image-download');
+            link.href = mapCanvas.toDataURL();
+            link.click();
+          } else {
+
+            fetch(mapCanvas.toDataURL())
+              .then(res => res.blob()) // Gets the response and returns it as a blob
+              .then(blob => {
+                // Here's where you get access to the blob
+                // And you can use it for whatever you want
+                // Like calling ref().put(blob)
+
+                // Here, I use it to make an image appear on the page
+                let objectURL = URL.createObjectURL(blob);
+            
+                const data = new FormData();
+                data.append('file', objectURL);
+                data.append('filename', 'yeet');
+    
+                fetch('http://localhost:5000/upload', { 
+                  method: 'POST',
+                  body: data,
+                }).then((response) => { // fetch
+                  console.log(response);
+                }); // -then
+            
+            }); // fetch1
+          }
         }
       });
       map.renderSync();
@@ -111,13 +116,15 @@ class Kart extends React.Component {
   render() {
     return (
       <div>
-        <div id="map" style={{ width: "610px", height: "410px" }}>
-          <button onClick={e => this.exportImg()}>Choose Image</button>
-        </div>
-        <a id="image-download" style={{display: 'none'}} href="www.google.com">HiddenText</a>
+        <div id="map" style={{ width: "610px", height: "410px" }}></div>
+        <div id="myImg"></div>
+        <button onClick={e => this.exportImg(false)}>Download Image</button>
+        <button onClick={e => this.exportImg(true)}>Export to DB</button>
+        <a id="image-store" style={{display: 'none'}} href="www.google.com">HiddenText</a>
+        <a id="image-download" style={{display: 'none'}} href="www.google.com" download>HiddenText</a>
       </div>
     );
   }
 }
-  
+
 export default Kart;
