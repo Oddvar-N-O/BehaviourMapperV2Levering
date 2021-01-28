@@ -1,4 +1,5 @@
 import React from 'react';
+<<<<<<< HEAD
 // import Kart from '../components/Kart';
 // import Sidebar from '../components/sidebar'
 import './BehaviourMapping.css'
@@ -46,6 +47,50 @@ class BehaviourMapping extends React.Component {
       data.append('center_coordinate', coordinates);
       data.append('created', new Date());
 
+=======
+import './BehaviourMapping.css'
+
+class BehaviourMapping extends React.Component {
+  constructor() { //props
+      super() //props
+
+      this.state = {
+        imgIcon: 0,
+        background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
+        icons: [
+          'https://miro.medium.com/max/1200/1*mk1-6aYaf_Bes1E3Imhc0A.jpeg',
+          'https://i.redd.it/695k3qokjvt51.png',
+          'https://i.ibb.co/z4VBh7G/download-10.jpg',
+          'https://i.pinimg.com/originals/31/af/a5/31afa5e7acd31a8b8d0ea0afb64ff5b1.jpg'
+        ],
+        newIconID: 0,
+        actionID: 0,
+        ourIconID: 0,
+        ourIconCoord: {
+          x: 0,
+          y: 0,
+          degree: 0,
+        },
+        ourMouseCoord: {
+          x: 0,
+          y: 0,
+        }
+      };
+      this.background = {
+          imageURL: '',
+      };
+  }
+
+  // set state to change the uri
+  sendDatabaseEvent() {
+      // rettningen, xogykoordinat, tid, icon
+      const data = new FormData();
+      const coordinates = [this.state.ourIconCoord.x-25, this.state.ourIconCoord.y-25];
+      data.append('direction', this.state.ourIconCoord.degree);
+      data.append('center_coordinate', coordinates);
+      data.append('created', new Date());
+
+>>>>>>> 65d7032ac623ebec439d76ce1625a2a4fbf2bf69
       console.log(data);
 
       fetch('http://localhost:5000/addevent', {
@@ -208,5 +253,9 @@ class BehaviourMapping extends React.Component {
   }
 }
 
+<<<<<<< HEAD
 export default BehaviourMapping;
 
+=======
+export default BehaviourMapping;
+>>>>>>> 65d7032ac623ebec439d76ce1625a2a4fbf2bf69
