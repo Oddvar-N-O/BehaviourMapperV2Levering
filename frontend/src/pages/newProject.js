@@ -55,7 +55,7 @@ class NewProject extends React.Component {
         
     }
 
-    setRedirect() {
+    setRedirect(event) {
         if (this.state.projectName !== ""){
             console.log('redirect')
             event.preventDefault();
