@@ -9,6 +9,10 @@ class Kart extends React.Component {
     constructor(props) {
       super(props);
 
+      this.state = {
+        name: this.props.name
+      }
+      
       this.map = new Map({
         target: null,
         layers: [
@@ -84,42 +88,55 @@ class Kart extends React.Component {
             link.href = mapCanvas.toDataURL();
             link.click();
           } else {
-
             fetch(mapCanvas.toDataURL())
-              .then(res => res.blob()) // Gets the response and returns it as a blob
-              .then(blob => {
-                // Here's where you get access to the blob
-                // And you can use it for whatever you want
-                // Like calling ref().put(blob)
-
-                // Here, I use it to make an image appear on the page
-                let objectURL = URL.createObjectURL(blob);
-            
-                const data = new FormData();
-                data.append('file', objectURL);
-                data.append('filename', 'yeet');
+            .then(res => res.blob()) // Gets the response and returns it as a blob
+            .then(blob => {
+                    // Here's where you get access to the blob
+                    // And you can use it for whatever you want
+                    // Like calling ref().put(blob)
     
-                fetch('http://localhost:5000/upload', { 
-                  method: 'POST',
-                  body: data,
-                }).then((response) => { // fetch
-                  console.log(response);
-                }); // -then
-            
-            }); // fetch1
+                    // Here, I use it to make an image appear on the page
+                    // let objectURL = URL.createObjectURL(blob);
+                    // This is the problem. objectURL does not work
+              blob.lastModifiedDate = new Date();
+              blob.name = "fileName";
+                
+              var file = new File([blob], "name.png", { lastModified: new Date().getTime(), type: blob.type })
+              
+              console.log(blob);
+              console.log(file);
+              const data = new FormData();
+
+              data.append('file', file);
+  
+              fetch('http://localhost:5000/upload', {
+                method: 'POST',
+                body: data,
+              }).then((response) => {
+                response.json().then((body) => {
+                 console.log(response);
+                });
+              });    
+          }); // fetch1
+
           }
         }
       });
       map.renderSync();
     }
+
+  showname() {
+    console.log(this.state.name);
+  }
   
   render() {
-    return (
+    return (  
       <div>
         <div id="map" style={{ width: "610px", height: "410px" }}></div>
         <div id="myImg"></div>
-        <button onClick={e => this.exportImg(false)}>Download Image</button>
-        <button onClick={e => this.exportImg(true)}>Export to DB</button>
+        <button className="download" onClick={e => this.exportImg(false)}>Download Image</button>
+        <button className="download" onClick={e => this.exportImg(true)}>Export to DB</button>
+        <button className="download" onClick={() => this.showname()}>{this.state.name}</button>
         <a id="image-store" style={{display: 'none'}} href="www.google.com">HiddenText</a>
         <a id="image-download" style={{display: 'none'}} href="www.google.com" download>HiddenText</a>
       </div>

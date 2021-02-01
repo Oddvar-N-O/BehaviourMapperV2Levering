@@ -121,6 +121,16 @@
     user-select: none;
     cursor: pointer;
     /* margin-top: 3vh; */
+    display: none;
+}
+
+#new-project #choose-name {
+    display: block;
+}
+
+
+#start_startButton {
+    display: block;
 }
 
 /* FILE BUTTONS */

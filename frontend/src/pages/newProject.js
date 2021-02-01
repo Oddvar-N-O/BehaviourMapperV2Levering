@@ -21,10 +21,11 @@ class NewProject extends React.Component {
     }
 
     handleChange(event) { 
-        const {name, value} = event.target  
+        const {name, value} = event.target;
         this.setState({
             [name]: value
         })
+        
     }
 
     handleUploadImage(ev) {
@@ -50,25 +51,53 @@ class NewProject extends React.Component {
     setRedirect(event) {
         if (this.state.projectName !== ""){
             event.preventDefault();
-    
-            const data = new FormData();
-            data.append('name', this.state.projectName);
-            data.append('description', this.state.description);
-            data.append('startdate', new Date());
+            console.log(this.state.fromLoadMap)
+            if (this.state.fromLoadMap === true) {
         
-            fetch('http://localhost:5000/addproject', {
-            method: 'POST',
-            body: data,
-            }).then((response) => {
-            response.json().then((body) => {
-                this.props.history.push('/mapping');
-            });
-            });
-            this.props.history.push('/mapping')
-            }
-        
-        else {
+                const data = new FormData();
+                data.append('name', this.state.projectName);
+                data.append('description', this.state.description);
+                data.append('startdate', new Date());
+            
+                fetch('http://localhost:5000/addproject', {
+                method: 'POST',
+                body: data,
+                }).then((response) => {
+                response.json().then((body) => {
+                    this.props.history.push('/mapping');
+                });
+                });
+                this.props.history.push('/mapping')
+            } else {
+                // this.props.history.push('/chooseImage')
+            } 
+        } else {
             this.setState({projectNameText: "Project Name Required"})
+        }
+    }
+
+    changeButton(event) {
+        const {name, value} = event.target;
+        this.state.projectName = value;
+        this.setState({})
+
+        var relevantButton;
+        var textButton = document.getElementById('choose-name');
+        if (this.state.fromLoadMap === true) { 
+            relevantButton = document.getElementById('start-UP');
+        } else {
+            relevantButton = document.getElementById('start-OSM');
+        }
+        
+        if (this.state.projectName !== ""){
+            relevantButton.style.display = 'block';
+            textButton.style.display = 'none';
+        } else {
+            relevantButton.style.display = 'none';
+            textButton.style.display = 'block';
+            /* relevantButton.style.display = 'none';
+            uselessButton = document.getElementById('start_startButton');
+            uselessButton.style.display = 'block';*/
         }
     }
 
@@ -88,7 +117,7 @@ class NewProject extends React.Component {
                                 type="text" 
                                 name="projectName" 
                                 value={this.state.projectName} 
-                                onChange={this.handleChange}
+                                onChange={(e) => this.changeButton(e)}
                                 
                             /> 
                             <br/>
@@ -110,7 +139,16 @@ class NewProject extends React.Component {
 
                     <ul>
                         {/*Det er her vi sendes til Mapping*/}
-                    <li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>
+                        <li id="start-UP" onClick={this.setRedirect.bind(this)}>Go to Behaviour Mapping</li>
+                        <Link to={{
+                        pathname: "/chooseImage",
+                        state: {
+                            kartnavn: this.state.projectName
+                        }
+                        }}><li id="start-OSM">World Map</li></Link>
+                        <li id="choose-name">Choose a name to proceed</li>
+                        <li>Choose a file</li>
+                        {/*<li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>*/}
                         {/* <li id="cancel">Cancel</li> */}
                     </ul>
                 </div>
