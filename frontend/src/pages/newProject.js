@@ -81,9 +81,9 @@ class NewProject extends React.Component {
     }
 
     changeButton(event) {
-        const {name, value} = event.target;
-        this.state.projectName = value;
-        this.setState({})
+        this.setState({projectName: event.target.value}, function () {
+            console.log(this.state.value);
+        });
 
         var relevantButton;
         var textButton = document.getElementById('choose-name');
