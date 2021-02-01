@@ -128,6 +128,11 @@
     display: block;
 }
 
+#new-project #start {
+    display: block;
+}
+
+
 
 #start_startButton {
     display: block;

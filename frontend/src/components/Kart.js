@@ -4,6 +4,7 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import Zoom from 'ol/control/Zoom';
+import './Kart.css'
 
 class Kart extends React.Component {
     constructor(props) {
@@ -12,7 +13,7 @@ class Kart extends React.Component {
       this.state = {
         name: this.props.name
       }
-      
+
       this.map = new Map({
         target: null,
         layers: [
@@ -128,6 +129,8 @@ class Kart extends React.Component {
   showname() {
     console.log(this.state.name);
   }
+
+  //        <button className="download" onClick={() => this.showname()}>{this.state.name}</button>
   
   render() {
     return (  
@@ -136,7 +139,6 @@ class Kart extends React.Component {
         <div id="myImg"></div>
         <button className="download" onClick={e => this.exportImg(false)}>Download Image</button>
         <button className="download" onClick={e => this.exportImg(true)}>Export to DB</button>
-        <button className="download" onClick={() => this.showname()}>{this.state.name}</button>
         <a id="image-store" style={{display: 'none'}} href="www.google.com">HiddenText</a>
         <a id="image-download" style={{display: 'none'}} href="www.google.com" download>HiddenText</a>
       </div>

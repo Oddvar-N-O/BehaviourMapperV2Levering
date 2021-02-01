@@ -1,11 +1,7 @@
 from behaviormapper import app, query_db, init_db, select_db
 from behaviormapper.errorhandlers import InvalidUsage
 from datetime import datetime, date
-<<<<<<< HEAD
 from flask import Flask, redirect, url_for, flash, request, session
-=======
-from flask import redirect, url_for, flash, request, session, send_from_directory
->>>>>>> 65d7032ac623ebec439d76ce1625a2a4fbf2bf69
 from time import time
 import json
 import logging
@@ -18,16 +14,9 @@ logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger('HELLO WORLD')
 
-<<<<<<< HEAD
-UPLOAD_FOLDER = Config.UPLOAD_PATH
-ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
-app = Flask(__name__)
-CORS(app)
-=======
 # Set allowed filenames
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
->>>>>>> 65d7032ac623ebec439d76ce1625a2a4fbf2bf69
 
 # Not all done, must add link to map
 @app.route('/addproject', methods=['POST'])

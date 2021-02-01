@@ -60,25 +60,21 @@ class NewProject extends React.Component {
         if (this.state.projectName !== ""){
             event.preventDefault();
             console.log(this.state.fromLoadMap)
-            if (this.state.fromLoadMap === true) {
-        
-                const data = new FormData();
-                data.append('name', this.state.projectName);
-                data.append('description', this.state.description);
-                data.append('startdate', new Date());
+      
+            const data = new FormData();
+            data.append('name', this.state.projectName);
+            data.append('description', this.state.description);
+            data.append('startdate', new Date());
             
-                fetch('http://localhost:5000/addproject', {
-                method: 'POST',
-                body: data,
-                }).then((response) => {
-                response.json().then((body) => {
-                    this.props.history.push('/mapping');
-                });
-                });
-                this.props.history.push('/mapping')
-            } else {
-                // this.props.history.push('/chooseImage')
-            } 
+            fetch('http://localhost:5000/addproject', {
+            method: 'POST',
+            body: data,
+            }).then((response) => {
+            response.json().then((body) => {
+                this.props.history.push('/mapping');
+            });
+            });
+            this.props.history.push('/mapping')
         } else {
             this.setState({projectNameText: "Project Name Required"})
         }
@@ -103,9 +99,6 @@ class NewProject extends React.Component {
         } else {
             relevantButton.style.display = 'none';
             textButton.style.display = 'block';
-            /* relevantButton.style.display = 'none';
-            uselessButton = document.getElementById('start_startButton');
-            uselessButton.style.display = 'block';*/
         }
     }
 
@@ -124,7 +117,8 @@ class NewProject extends React.Component {
                                 id="project-name"
                                 type="text" 
                                 name="projectName" 
-                                value={this.state.projectName} 
+                                value={this.state.projectName}
+                                // onChange={this.handleChange}
                                 onChange={(e) => this.changeButton(e)}
                                 
                             /> 
@@ -146,12 +140,21 @@ class NewProject extends React.Component {
 
                     <ul>
                         {/*Det er her vi sendes til Mapping*/}
+                        <Link to={{
+                        pathname: "/chooseImage",
+                        state: {
+                            kartnavn: this.state.projectName
+                        }
+                        }}><li id="start-OSM">World Map</li></Link>
 
-                    <li id="start" 
-                    onClick={ (e) => {
-                        this.handleUploadImage(e); 
-                        this.setRedirect(e);
+                        {/*<li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>*/}
+                       <li id="start-UP" 
+                        onClick={ (e) => {
+                            this.handleUploadImage(e); 
+                            this.setRedirect(e);
                         }}>Let's go!</li>
+                        <li id="choose-name">Choose a name to proceed</li>
+                        <li>Choose a file</li>
                         {/* <li id="cancel">Cancel</li> */}
                     </ul>
                 </div>
