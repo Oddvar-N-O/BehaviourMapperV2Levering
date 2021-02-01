@@ -16,8 +16,9 @@ class NewProject extends React.Component {
             fromLoadMap: props.location.state.fromLoadMap
         }
         
-        this.handleChange = this.handleChange.bind(this)
+        this.handleChange = this.handleChange.bind(this);
         this.handleUploadImage = this.handleUploadImage.bind(this);
+        this.setRedirect = this.setRedirect.bind(this)
     }
 
     handleChange(event) { 
@@ -29,8 +30,12 @@ class NewProject extends React.Component {
     }
 
     handleUploadImage(ev) {
+        if (!this.state.fromLoadMap) {
+            return
+        }
+        console.log('upload')
         ev.preventDefault();
-
+        
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
         // data.append('filename', this.fileName.value);
@@ -41,11 +46,14 @@ class NewProject extends React.Component {
         }).then((response) => {
             if (response.status > 199 && response.status < 300) {
                 console.log(response.status)
+                
             }
             response.json().then((body) => {
             this.setState({ imageURL: `http://localhost:5000/${body.file}` });
+            // this.setRedirect(ev)
           });
         });
+        
     }
 
     setRedirect(event) {
@@ -134,21 +142,16 @@ class NewProject extends React.Component {
 
                     <form onSubmit={this.handleUploadImage} className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
                         <input ref={(ref) => { this.uploadInput = ref; }} type="file"  className='file-button'></input>
-                        <button className='upload-button'>Upload</button>
                     </form>
 
                     <ul>
                         {/*Det er her vi sendes til Mapping*/}
-                        <li id="start-UP" onClick={this.setRedirect.bind(this)}>Go to Behaviour Mapping</li>
-                        <Link to={{
-                        pathname: "/chooseImage",
-                        state: {
-                            kartnavn: this.state.projectName
-                        }
-                        }}><li id="start-OSM">World Map</li></Link>
-                        <li id="choose-name">Choose a name to proceed</li>
-                        <li>Choose a file</li>
-                        {/*<li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>*/}
+
+                    <li id="start" 
+                    onClick={ (e) => {
+                        this.handleUploadImage(e); 
+                        this.setRedirect(e);
+                        }}>Let's go!</li>
                         {/* <li id="cancel">Cancel</li> */}
                     </ul>
                 </div>
