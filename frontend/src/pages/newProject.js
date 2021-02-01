@@ -57,7 +57,6 @@ class NewProject extends React.Component {
 
     setRedirect(event) {
         if (this.state.projectName !== ""){
-            console.log('redirect')
             event.preventDefault();
     
             const data = new FormData();
