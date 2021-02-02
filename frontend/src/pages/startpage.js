@@ -41,7 +41,7 @@ function Startpage() {
           {/* LOAD PROJECT */}
           <li onClick={ () => { hideNewProject(), changeLoadVisibility() }}
             className={load_project ? 'active' : 'passive'}
-          >Load Project</li>
+          ><Link to={"/loadproject"}>Load Project</Link></li>
           {/* USER PROFILE */}
           <li onClick={hideNewProject}>User Profile</li>
         </ul>

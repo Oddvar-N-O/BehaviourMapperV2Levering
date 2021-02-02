@@ -45,11 +45,14 @@ def getProject():
         projects = query_db(get_proj_sql, proj_values, True)
     result = []
     for project in projects:
+        new_project = []
         if proj_values[1] == None:
             for data in project:
-                result.append(data)
+                new_project.append(data)
+            result.append(new_project)
         else:
             result.append(project)
+    print(result)
     return json.dumps(result)
 
 # Usage /getfigure?description=<desc>&color=<color>
