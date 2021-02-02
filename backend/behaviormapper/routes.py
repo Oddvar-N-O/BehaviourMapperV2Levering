@@ -1,7 +1,7 @@
 from behaviormapper import app, query_db, init_db, select_db
 from behaviormapper.errorhandlers import InvalidUsage
 from datetime import datetime, date
-from flask import redirect, url_for, flash, request, session, send_from_directory
+from flask import Flask, redirect, url_for, flash, request, session
 from time import time
 import json
 import logging
