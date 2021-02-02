@@ -22,10 +22,11 @@ class NewProject extends React.Component {
     }
 
     handleChange(event) { 
-        const {name, value} = event.target  
+        const {name, value} = event.target;
         this.setState({
             [name]: value
         })
+        
     }
 
     handleUploadImage(ev) {
@@ -58,12 +59,13 @@ class NewProject extends React.Component {
     setRedirect(event) {
         if (this.state.projectName !== ""){
             event.preventDefault();
-    
+            console.log(this.state.fromLoadMap)
+      
             const data = new FormData();
             data.append('name', this.state.projectName);
             data.append('description', this.state.description);
             data.append('startdate', new Date());
-        
+            
             fetch('http://localhost:5000/addproject', {
             method: 'POST',
             body: data,
@@ -73,10 +75,30 @@ class NewProject extends React.Component {
             });
             });
             this.props.history.push('/mapping')
-            }
-        
-        else {
+        } else {
             this.setState({projectNameText: "Project Name Required"})
+        }
+    }
+
+    changeButton(event) {
+        this.setState({projectName: event.target.value}, function () {
+            console.log(this.state.value);
+        });
+
+        var relevantButton;
+        var textButton = document.getElementById('choose-name');
+        if (this.state.fromLoadMap === true) { 
+            relevantButton = document.getElementById('start-UP');
+        } else {
+            relevantButton = document.getElementById('start-OSM');
+        }
+        
+        if (this.state.projectName !== ""){
+            relevantButton.style.display = 'block';
+            textButton.style.display = 'none';
+        } else {
+            relevantButton.style.display = 'none';
+            textButton.style.display = 'block';
         }
     }
 
@@ -95,8 +117,9 @@ class NewProject extends React.Component {
                                 id="project-name"
                                 type="text" 
                                 name="projectName" 
-                                value={this.state.projectName} 
-                                onChange={this.handleChange}
+                                value={this.state.projectName}
+                                // onChange={this.handleChange}
+                                onChange={(e) => this.changeButton(e)}
                                 
                             /> 
                             <br/>
@@ -117,11 +140,21 @@ class NewProject extends React.Component {
 
                     <ul>
                         {/*Det er her vi sendes til Mapping*/}
-                    <li id="start" 
-                    onClick={ (e) => {
-                        this.handleUploadImage(e); 
-                        this.setRedirect(e);
+                        <Link to={{
+                        pathname: "/chooseImage",
+                        state: {
+                            kartnavn: this.state.projectName
+                        }
+                        }}><li id="start-OSM">World Map</li></Link>
+
+                        {/*<li id="start" onClick={this.setRedirect.bind(this)}>Let's go!</li>*/}
+                       <li id="start-UP" 
+                        onClick={ (e) => {
+                            this.handleUploadImage(e); 
+                            this.setRedirect(e);
                         }}>Let's go!</li>
+                        <li id="choose-name">Choose a name to proceed</li>
+                        <li>Choose a file</li>
                         {/* <li id="cancel">Cancel</li> */}
                     </ul>
                 </div>
