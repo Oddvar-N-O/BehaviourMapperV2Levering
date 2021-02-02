@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import SidebarLoad from '../components/sidebarLP';
+import SidebarLP from '../components/sidebarLP';
 import './loadProject.css'
 
 function LoadProject() {
   const [allProjects, setAllProjects] = useState('No projects found');
-  // const projectName = "";
-  // const projectID = "";
+  const [currProj, setCurrProj] = React.useState(null);
+  // const currentProjectID = "";
+  // const currentProjectDesc = "";
+  // const currentProjectMap = "";
 
   useEffect(() => {
     // get userID from loggedonuser
@@ -16,11 +18,17 @@ function LoadProject() {
     });
   }, []);
 
+  const getCurrProj = (index) => {
+    console.log(index);
+    setCurrProj(index);
+  }
+
   return (
         <div id="loadproject">
-          <SidebarLoad projects={allProjects}/>
+          <SidebarLP  getCurrProj={getCurrProj} projects="test" />
           <div className="projectList">
             {allProjects}
+            <h1>{currProj}</h1>
           </div>
         </div>
   )
