@@ -1,4 +1,5 @@
 import React from 'react';
+import AllIcons from '../components/AllIcons';
 import './BehaviourMapping.css'
 
 class BehaviourMapping extends React.Component {
@@ -188,6 +189,7 @@ class BehaviourMapping extends React.Component {
           <div className="sidebar">
             <ul id="iconList">
                 <li onClick={() => this.changeIcon(0)}>babYod</li>
+                <li><AllIcons /></li>
                 <li onClick={() => this.changeIcon(1)}>lego Yoda</li>
                 <li onClick={() => this.changeIcon(2)}>brick lego Yoda</li>
                 <li onClick={() => this.changeIcon(3)}>yodThanos</li>
