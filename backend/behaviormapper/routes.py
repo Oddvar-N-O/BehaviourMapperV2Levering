@@ -91,6 +91,10 @@ def getEvents():
     get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")
     get_event_sql = ("SELECT * FROM Event WHERE id=?")
     p_id = request.args.get("p_id")
+    try:
+        int(p_id)
+    except:
+        raise InvalidUsage("Bad arg", status_code=400)
 
     query_e_ids = query_db(get_eventIds_sql, (p_id,))
     query_e_ids = query_e_ids[:-1]
