@@ -39,7 +39,7 @@ def getProject():
     proj_values = (request.args.get('u_id'), request.args.get('name'))
     if proj_values[1] == None:
         get_proj_sql = ("SELECT id, name, description, map FROM Project WHERE u_id=?")
-        projects = query_db(get_proj_sql, proj_values[0])
+        projects = query_db(get_proj_sql, (proj_values[0],))
         projects = projects[:-1]
     else:
         projects = query_db(get_proj_sql, proj_values, True)
@@ -47,12 +47,9 @@ def getProject():
     for project in projects:
         new_project = []
         if proj_values[1] == None:
-            for data in project:
-                new_project.append(data)
-            result.append(new_project)
+            result.append((project[0], project[1], project[2], project[3]))
         else:
             result.append(project)
-    print(result)
     return json.dumps(result)
 
 # Usage /getfigure?description=<desc>&color=<color>
@@ -77,7 +74,7 @@ def favicon():
     except FileNotFoundError:
         abort(404)
 
-# Not done yet, must be checked with
+# Not done yet, must be checked with actual data
 @app.route('/addevent', methods=['POST'])
 def addEvent():
     project_id = 1 # find clever way to get this dynamically
@@ -87,6 +84,26 @@ def addEvent():
     query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
     return {}
 # add both to event and Project_has_Event
+
+# Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
+@app.route('/getevents')
+def getEvents():
+    get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")
+    get_event_sql = ("SELECT * FROM Event WHERE id=?")
+    p_id = request.args.get("p_id")
+
+    query_e_ids = query_db(get_eventIds_sql, (p_id,))
+    query_e_ids = query_e_ids[:-1]
+
+    e_ids = []
+    for e_id in query_e_ids:
+        e_ids.append(e_id[0])
+    events = []
+
+    for e_id in e_ids:
+        query_event = query_db(get_event_sql, (str(e_id),), True)
+        events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
+    return json.dumps(events)
 
 @app.route('/adduser', methods=['POST', 'GET'])
 def addUser():
@@ -158,7 +175,7 @@ def selectdb():
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("kartet",)
 event_values = [45,"12991.29291 2929.21", "12:12:12"]
-project_values = ["prosjektnamn", "beskrivelse", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom"]
+project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom"]
 
 # sql for å bruke alle felt.
 add_user = ("INSERT INTO Users (feideinfo)"
@@ -167,8 +184,8 @@ add_event = ("INSERT INTO Event "
               "(direction, center_coordinate, created, f_id) "
               "VALUES (?,?,?,?)")
 add_project = ("INSERT INTO Project "
-              "(name, description, map, startdate, enddate, zoom, u_id) "
-              "VALUES (?,?,?,?,?,?,?)")
+              "(name, description, screenshot, map, startdate, enddate, zoom, u_id) "
+              "VALUES (?,?,?,?,?,?,?,?)")
 add_figure = ("INSERT INTO Figures "
                 "(description, color, image, other_attributes) "
                 "VALUES (?,?,?,?)")
