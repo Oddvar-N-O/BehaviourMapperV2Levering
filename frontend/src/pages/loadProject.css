@@ -14,14 +14,14 @@
     color: #ece8e8;
     box-shadow: 2px 2px 4px #161616;;
 }
-h1, p, img{
+#load-project h1, #load-project p, #load-project img{
     color: #ffffff;
     padding: 1vh;
 }
 .projectName {
     font-size: 3vh;
 }
-button {
+#load-project button {
     background-color: #F3F7F0;
     padding: 1vh 2vh;
     margin: 7.5px;
