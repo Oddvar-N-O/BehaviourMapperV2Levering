@@ -51,13 +51,16 @@ function LoadProject() {
               <h1>Description: {currProj["description"]}</h1>
               <p>Project id: {currProj["id"]} Name: {currProj["name"]} Screenshot: {currProj["screenshot"]} Events: {allEvents}</p>
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} id='opplastetKart' />
-              <button><Link to={{
+              <button>
+                <Link to={{
                         pathname: "/mapping",
                         data: {
                             project: currProj,
                             events: {allEvents},
-                        }
-                        }}>Choose this project</Link></button>
+                          }
+                        }}>Choose this project
+                </Link>
+              </button>
             </div>
           </div>
         </div>
