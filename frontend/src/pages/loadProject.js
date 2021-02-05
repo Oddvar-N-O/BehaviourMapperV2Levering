@@ -6,12 +6,13 @@ import './loadProject.css'
 function LoadProject() {
   const [allProjects, setAllProjects] = useState('No projects found');
   const [allEvents, setallEvents] = useState('No event for this project')
-  const [currProj, setCurrProj] = useState({});
+  const [currProj, setCurrProj] = useState({"id": 99999999999999999n});
   const [showProjInfo, setshowProjInfo] = useState(false);
+
 
   useEffect(() => {
     // get userID from loggedonuser
-    var userID = 1;
+    const userID = 1;
     var fetchstring = `getproject?u_id=${userID}`
     fetch(fetchstring).then(res => res.json()).then(data => {
       setAllProjects(data);
@@ -21,7 +22,9 @@ function LoadProject() {
   useEffect(() => {
     var fetchstring = `getevents?p_id=${currProj['id']}`
     fetch(fetchstring).then(res => res.json()).then(data => {
-      setallEvents(data);
+      if (data["message"] !== "Bad arg") {
+        setallEvents(data);
+      }
     });
   }, [currProj]);
 
