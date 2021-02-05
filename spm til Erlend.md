@@ -1,3 +1,1 @@
-Legend: Hva betyr det i denne sammenhengen? Er det et ord som er naturlig å bruke?
-Språk?
-Databasespråk, Mysql eller sqlLite 
+Legend: Skal shapefilen sendes til e-post eller lastes ned til enheten en mapper fra, eller begge deler?
