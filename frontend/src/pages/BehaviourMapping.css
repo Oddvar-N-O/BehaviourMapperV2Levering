@@ -13,20 +13,6 @@
     /* background-color: aliceblue;*/
 }
 
-.zin {
-    size: 10px;
-    height: 25px;
-    width: 20px;
-    /* color: red;
-    object-position: 15px;*/
-}
-
-.zout {
-    size: 10px;
-    height: 25px;
-    width: 20px;
-}
-
 .ol-attribution {
     size: 2px;
     right: 30px;
@@ -50,6 +36,7 @@
 .sidebar ul {
     list-style-type: none;
     width: 100%;
+    order: 2;
     
 }
 
@@ -65,40 +52,17 @@
     transition: 200ms; */
 }
 
-#map{   
+.map{   
     display: flex;
     width: 100%;
     height: 100vh;
     order: 2;
 }
 
-#map{
-    width: 100%;
-}
-
 /*ModImg*/
 
 #maincont {
     display: flex;
-}
-
-div.divImgContainer {
-    position:absolute;
-    top:10px; left:10px;
-    bottom:10px;
-    right:10px;
-    border: 1px solid black;
-    width: 500px;
-    background-color: black;
-    height: 500px;
-}
-
-.textIcon {
-    background-color:blue;
-    color: white;
-    position:absolute;
-    top:-100px; 
-    left:-100px;
 }
 
 .icon {
@@ -109,24 +73,6 @@ div.divImgContainer {
     height: 100px;
     top:-100px; 
     left:-100px;
-}
-
-div#icon {
-    position:absolute;
-    top:-100px; 
-    left:-100px;
-    background-color:red;
-    width:5px; height:4px;
-}
-
-
-
-div.dar {
-    position:absolute;
-    top:-100px; 
-    left:-100px;
-    background-color:red;
-    width:5px; height:4px;
 }
 
 .single-icon {

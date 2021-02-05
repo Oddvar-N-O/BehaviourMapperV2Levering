@@ -7,6 +7,7 @@ class BehaviourMapping extends React.Component {
       super() //props
 
       this.state = {
+        addIcon: false,
         imgIcon: 0,
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         icons: [
@@ -31,7 +32,14 @@ class BehaviourMapping extends React.Component {
       this.background = {
           imageURL: '',
       };
+      this.closeIconSelect = this.closeIconSelect.bind(this)
   }
+
+  closeIconSelect() {
+    this.setState({ 
+      addIcon: false 
+    })
+  }  
 
   // set state to change the uri
   sendDatabaseEvent() {
@@ -68,6 +76,8 @@ class BehaviourMapping extends React.Component {
     // send old icon to db
     this.sendDatabaseEvent()
   }
+
+  
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
@@ -185,20 +195,26 @@ class BehaviourMapping extends React.Component {
   render() {
     return (
       <div id='maincont'>
-        <div id="testAppendTextIcon">
           <div className="sidebar">
+          <div className={this.state.addIcon ? "visible" : "invisible"}
+           ><AllIcons closeIconSelect = {this.closeIconSelect} /></div>
             <ul id="iconList">
+                <li onClick={() => this.setState({ addIcon: true })}>Add Event</li>
                 <li onClick={() => this.changeIcon(0)}>babYod</li>
-                <li><AllIcons /></li>
                 <li onClick={() => this.changeIcon(1)}>lego Yoda</li>
                 <li onClick={() => this.changeIcon(2)}>brick lego Yoda</li>
                 <li onClick={() => this.changeIcon(3)}>yodThanos</li>
             </ul>
           </div>
-        </div>
-        <img alt="" onMouseMove={e => this.updateCoord(e)} onClick={e => this.takeAction(e)} id='backgroundImage' height="500px" width="500px" src={this.state.background} />
-        <div id="iconContainer">
-        </div>
+         
+        <img alt="" onMouseMove={e => this.updateCoord(e)} 
+        onClick={e => this.takeAction(e)} 
+        className='backgroundImage' 
+        height="500px" 
+        width="500px" 
+        order="3"
+        src={this.state.background} />
+        <div id="iconContainer" />
         <button onClick={() => this.print()}>Show</button>
       </div>
     );

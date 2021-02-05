@@ -1,43 +1,87 @@
 import React, { Component } from 'react'
 import Icon from './Icon'
-// import { colors, description } from "./IconData"
-
-// Velger farge som settes i state
-// 
+import './AllIcons.css'
 
 class AllIcons extends React.Component {
     constructor() {
         super()
         this.state = {
-            color: "red",
-            descriptions: [],
-            icon: ""
+            color: "blue",
+            icon: "",
+            allIconData: [],
+            redData: [],
+            blueData: [],
+            greenData: [],
+
         };
     };
 
     componentDidMount() {
-        fetch(`getallfiguredescriptions?color=${this.state.color}`)
+        fetch(`getfiguredata`)
         .then(response => response.json()) 
         .then(data => {
-            console.log("data: " + data)
             this.setState({
-                descriptions: data
+                allIconData: data
             })
-            console.log("state inside: " + this.state.descriptions)
+            console.log(this.state.allIconData)
+            for (let i=0; i<this.state.allIconData.length; i++){
+                if (this.state.allIconData[i].color === "red"){
+                    this.state.redData.push(this.state.allIconData[i])
+                } else if (this.state.allIconData[i].color === "blue") {
+                    this.state.blueData.push(this.state.allIconData[i])
+                } else {
+                    this.state.greenData.push(this.state.allIconData[i])
+                }
+            }
+            console.log(this.state.redData[5].id)
+            
         })
-        console.log("state outside: " + this.state.descriptions)
+        this.handleChange = this.handleChange.bind(this)
     };
 
-    
+    handleChange(event) {
+        this.setState({
+            color: event.target.value
+        })
+        console.log("event value: " + event.target.value)
+        
+    }
 
     render () {
+        const redIcons = this.state.redData.map(data => 
+            <li onClick={this.props.closeIconSelect}><Icon key={data.id} description={data.description} color={data.color}/></li>)
+            
+        const blueIcons = this.state.blueData.map(data => 
+            <li onClick={this.props.closeIconSelect}><Icon key={data.id} description={data.description} color={data.color}/></li>)
 
-        const allIcons = this.state.descriptions.map(icon => <Icon key={icon.description} description={icon} color={this.state.color}/>)
+        const greenIcons = this.state.greenData.map(data => 
+            <li onClick={this.props.closeIconSelect}><Icon key={data.id} description={data.description} color={data.color}/></li>)
 
         return (
-            <div>
-                {allIcons}
-                {/* <Icon description={this.state.descriptions[0]} color={this.state.color}/> */}
+            <div className="icon-select">
+                <ul className="gender-select">
+                    <li onClick={() => {
+                        this.setState({color: "blue"})}}
+                        >Man</li>
+                    <li onClick={() => {
+                        this.setState({color: "red"})}}
+                        >Woman</li>
+                    <li onClick={() => {
+                        this.setState({color: "green"})}}
+                        >Child</li>
+                </ul>
+                
+                <div className={this.state.color==="red" ? "visible" : "invisible"}>
+                    {redIcons}
+                </div>
+                    
+                <div className={this.state.color==="blue" ? "visible" : "invisible"}>
+                    {blueIcons}
+                </div>
+
+                <div className={this.state.color==="green" ? "visible" : "invisible"}>
+                    {greenIcons}
+                </div>
             </div>
         )
     }
