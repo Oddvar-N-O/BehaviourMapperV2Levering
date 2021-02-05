@@ -36,6 +36,9 @@
     width: 100%;
     height: 80%;
 }
+#load-project .close-icon { 
+    right: 11vw;
+}
 .sidebarLP {
     display: flex;
     width: 25%;

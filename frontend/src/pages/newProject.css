@@ -1,8 +1,8 @@
 @media only screen and (max-width: 600px) {
-    #new-project-box h2 {
+    .new-project-box h2 {
         font-size: 4.5vh;
     }
-    #new-project-box {
+    .new-project-box {
         width: 70vw;
     }
     .close-icon {
@@ -16,12 +16,12 @@
     justify-content: center;
 }
 
-.new-project-box {
+.new-project-box, .new-project-box-upload {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 520px;
+    width: 50vw;
     height: 68vh;
     margin-top: 12vh;
     background-color: #292828;
@@ -29,17 +29,8 @@
     box-shadow: 2px 2px 4px #161616;;
 }
 
-.new-project-box-big {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 520px;
+.new-project-box-upload {
     height: 73vh;
-    margin-top: 12vh;
-    background-color: #292828;
-    color: #ece8e8;
-    box-shadow: 2px 2px 4px #161616;
 }
 
  #heading-and-form {
@@ -49,18 +40,10 @@
 .close-icon {
      font-size: 4vh;
      position: absolute;
-     left: calc(50vw - 253px);
+     right: 26vw;
      top: 13vh;
      color: #ece8e8;
  }
-
-/* #close-startpage {
-    position: absolute;
-    font-size: 4vh;
-    color: #ecaf44;
-    top: 11vh;
-    left: 10.8vw;
-} */
 
 #new-project h2 {
     text-align: center;
@@ -100,11 +83,6 @@
     resize: none;
 }
 
-/* legend {
-    width: 100%;
-    text-align: left;
-} */
-
 /* BUTTON */
 
 #new-project li {
@@ -118,10 +96,7 @@
     opacity: 0.85; 
     font-size: 4.5vh;
     text-align: center; 
-    user-select: none;
     cursor: pointer;
-    /* margin-top: 3vh; */
-    display: none;
 }
 
 #new-project #choose-name {
@@ -145,23 +120,18 @@
 }
 
 .file-button {
-    /* border: 1px solid #ccc; */
     display: inline-block;
     cursor: pointer;
     font-size: 14px;
-    /* border-radius: 30px; */
-    /* box-shadow: 5px 5px 10px black; */
     outline: none;
     padding: 4px, 9px;
     margin-bottom: 12px;
-    /* background-color: #A39594; */
 }
 ::-webkit-file-upload-button{
     padding: 6px, 12px;
 }
 
 .upload-button {
-    /* border: 1px solid #ccc; */
     display: inline-block;
     padding: 4px 8px;
     border-radius: 7px;
