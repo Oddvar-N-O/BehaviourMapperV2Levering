@@ -84,16 +84,20 @@ class NewProject extends React.Component {
         method: 'POST',
         body: data,
         }).then((response) => {
-            response.json().then(() => {
+            response.json().then((data) => {
                 if (this.fromLoadMap) {
                     this.props.history.push({
                         pathname: '/mapping',
+                        state: {
+                            p_id: data.p_id[0]
+                        },
                     });
                 } else {
                     this.props.history.push({
                         pathname: '/chooseImage',
                         state: {
-                            kartnavn: this.state.projectName
+                            kartnavn: this.state.projectName,
+                            p_id: data.p_id[0]
                         },
                     });
                 }
