@@ -1,3 +1,4 @@
+
 import React from 'react';
 import './newProject.css'
 import { Link } from 'react-router-dom';
@@ -11,7 +12,7 @@ class NewProject extends React.Component {
             projectNameLegend: "Project Name",
             projectImageLegend: "Image",
             description: "",
-            iamgeURL: '',
+            imageURL: '',
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#F3F7F0",
@@ -20,6 +21,7 @@ class NewProject extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleUploadImage = this.handleUploadImage.bind(this);
         this.setRedirect = this.setRedirect.bind(this)
+        this.imageChosen = this.imageChosen.bind(this)
     }
 
     handleChange(event) { 
@@ -27,11 +29,24 @@ class NewProject extends React.Component {
         this.setState({
             [name]: value
         })
-        
+        if (this.state.projectNameLegend === "Project Name Required" && event.target.id === "project-name") {
+            this.setState({projectNameLegend: "Project Name"}, () => {
+                this.changeColor();
+            });   
+        }
+    }
+    imageChosen() {
+        this.setState({projectImageLegend: "Image"}, () => {
+            this.changeColor();
+        }); 
     }
 
     changeColor() {
-        this.setState({ liColor: "#FF0000" })
+        if (this.state.liColor === "#F3F7F0") {
+            this.setState({ liColor: "#FF0000" })
+        } else if (this.state.projectNameLegend === "Project Name"){
+            this.setState({ liColor: "#F3F7F0" })
+        }   
     }
 
     handleUploadImage(ev) {
@@ -50,8 +65,7 @@ class NewProject extends React.Component {
             response.json().then((body) => {
             this.setState({ imageURL: `http://localhost:5000/${body.file}` });
           });
-        });
-        
+        }); 
     }
 
     setRedirect(event) {
@@ -60,8 +74,12 @@ class NewProject extends React.Component {
             if (this.state.projectName !== "" && this.uploadInput.files.length !== 0){
                 this.handleRedirect();
             } else  {
-                this.setState({projectNameLegend: "Project Name Required"});
-                this.setState({projectImageLegend: "Image Required"});
+                if (this.state.projectName === "") {
+                    this.setState({projectNameLegend: "Project Name Required"});
+                }
+                if (this.uploadInput.files.length === 0) {
+                    this.setState({projectImageLegend: "Image Required"});
+                }
                 this.changeColor();
             }
         } else {
@@ -138,7 +156,12 @@ class NewProject extends React.Component {
 
                     <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
                         <legend>{this.state.projectImageLegend}</legend>
-                        <input ref={(ref) => { this.uploadInput = ref; }} type="file"  className='file-button'></input>
+                        <input 
+                            ref={(ref) => { this.uploadInput = ref; }} 
+                            type="file"  
+                            className='file-button' 
+                            onChange={this.imageChosen}
+                        />
                     </form>
 
                     <ul>
