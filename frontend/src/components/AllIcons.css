@@ -1,12 +1,14 @@
 .icon-select {
     position: absolute;
-    left: 25vw;
-    top: 15vh;
-    width: 50vw;
-    height: 70vh;
+    left: 27.5vw;
+    top: 11.5vh;
+    width: 45vw;
+    height: 77vh;
     background-color: black;
     z-index: 100;
     font-size: 5vh;
+    min-width: 500px;
+
 }
 
 .icon-select ul{
@@ -38,7 +40,6 @@
 .single-icon {
     flex: 1 0 21%;
     height: 40px;
-    padding: 0 2vh;
 }
 
 .selected {
@@ -46,5 +47,9 @@
 }
 
 .single-icon:hover {
-    background-color: rgb(24, 24, 24);
+    opacity: 85%;
+}
+
+.gender-select {
+    margin-bottom: 2vh;
 }

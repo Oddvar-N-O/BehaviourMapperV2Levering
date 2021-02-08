@@ -46,11 +46,6 @@
     border-bottom: 2px rgb(65, 65, 65) solid;
     transition: 200ms;
 }
-.sidebar li:hover{
-    background-color: rgb(52, 52, 66);
-    /* padding-left: 10px;
-    transition: 200ms; */
-}
 
 .map{   
     display: flex;
