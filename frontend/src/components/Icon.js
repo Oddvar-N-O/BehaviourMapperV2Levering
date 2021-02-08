@@ -12,11 +12,11 @@ function Icon(props) {
             setIcon(image)
         })
     },
-    []); 
+    [props.description, props.color]); 
     
     return (
         <>
-            <img className="single-icon" src={icon}></img>
+            <img className="single-icon" alt="icon" src={icon}></img>
         </>
     );    
 }
