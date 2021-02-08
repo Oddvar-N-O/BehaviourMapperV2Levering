@@ -50,7 +50,6 @@ class BehaviourMapping extends React.Component {
       data.append('direction', this.state.ourIconCoord.degree);
       data.append('center_coordinate', coordinates);
       data.append('created', new Date());
-
       console.log(data);
 
       fetch('http://localhost:5000/addevent', {

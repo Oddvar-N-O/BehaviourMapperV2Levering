@@ -1,5 +1,4 @@
 import React from 'react';
-import Symbol from './Symbol';
 
 function sidebar(props) {
     return (

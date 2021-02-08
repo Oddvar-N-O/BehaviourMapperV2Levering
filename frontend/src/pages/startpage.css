@@ -18,6 +18,10 @@
     margin-top: 37vh;  
 }
 
+.proceedButton {
+    color: blue;
+}
+
 #start-menu li, #load-map li {
     background-color: #F3F7F0;
     list-style: none;

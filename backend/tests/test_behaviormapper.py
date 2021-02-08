@@ -7,7 +7,6 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-
 @pytest.fixture
 def client():
     testing_client = app.test_client()
@@ -22,7 +21,7 @@ def test_db(client):
     rv = client.get(('/initdb'),follow_redirects=True)
     dbtest = {"Users": [1,"kartet"],
         "Event": [1,45,"12991.29291 2929.21","12:12:12",52],
-        "Project": [1,"prosjektnamn", "beskrivelse", "kartet","1998-01-30 12:23:43","1998-01-30 12:23:43","zoom",1],
+        "Project": [1,"prosjektnamn", "beskrivelse", "kartet", "screenshot", "1998-01-30 12:23:43","1998-01-30 12:23:43","zoom",1],
         "Project_has_Event": [1,1],
         "Figures": [1,"bike","blue","./icons/man/bike.png", None]
         }
@@ -30,7 +29,25 @@ def test_db(client):
 
 def test_faviconico(client):
     rv = client.get(('/favicon.ico'))
-    assert rv.status_code != 404
+    assert rv.status_code == 200
+
+def test_getfigure(client):
+    rv = client.get(('/getfigure?description=bike&color=red'))
+    assert rv.status_code == 200
+
+def test_getfigure_err(client):
+    rv = client.get(('/getfigure?description=bike&color=12'))
+    assert rv.status_code == 500
+
+def test_getevents(client):
+    rv = client.get(('/getevents?p_id=1'))
+    defaultEvent = b'[[1, 45, "12991.29291 2929.21", "12:12:12", 52]]'
+    assert rv.status_code == 200
+    assert rv.data == defaultEvent
+
+def test_getevents_err(client):
+    rv = client.get(('/getevents?p_id=bike'))
+    assert rv.status_code == 400  
 
 def test_upload_text(client):
     filename = "fake_textfile.txt"

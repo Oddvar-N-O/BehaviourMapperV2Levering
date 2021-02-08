@@ -6,9 +6,13 @@ function Login() {
   const color = 'green'
 
   useEffect(() => {
+<<<<<<< HEAD
     fetch(`getfigure?description=bike&color=${color}`)
     .then(res => res.blob())
     .then(images => {
+=======
+    fetch('getfigure?description=bike&color=red').then(res => res.blob()).then(images => {
+>>>>>>> a255d600c67fcfe207d07c6081eb5990ec7aaa58
       var image = URL.createObjectURL(images)
       document.getElementById("figur").src = image
       }); 

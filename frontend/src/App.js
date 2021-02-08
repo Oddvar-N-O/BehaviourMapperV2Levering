@@ -7,6 +7,7 @@ import ChooseImage from './pages/ChooseImage'
 // import UploadMap from './pages/UploadMap'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import LoadProject from './pages/loadProject';
 
 
 
@@ -31,6 +32,7 @@ function App() {
           <Route path='/newproject' component={NewProject} />
           <Route path='/chooseImage' component={ChooseImage} />
           <Route path='/mapping' component={BehaviourMapping} />
+          <Route path='/loadproject' component={LoadProject} />
           {/* <Route path='/upload' component={UploadMap} /> */}
         </Switch>
       </Router>

@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS [Project] (
     name VARCHAR NOT NULL,
     description VARCHAR NULL,
     map VARCHAR NULL,
+    screenshot VARCHAR NULL,
     startdate DATETIME NULL,
     enddate DATETIME NULL,
     zoom VARCHAR NULL,
