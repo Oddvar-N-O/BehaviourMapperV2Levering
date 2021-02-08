@@ -45,6 +45,7 @@
     width: 100%;
     border-bottom: 2px rgb(65, 65, 65) solid;
     transition: 200ms;
+    cursor: pointer;
 }
 
 .map{   
@@ -69,3 +70,12 @@
     top:-100px; 
     left:-100px;
 }
+
+.visible {
+    order: 1;
+}
+
+.background-image {
+    order: 2;
+}
+

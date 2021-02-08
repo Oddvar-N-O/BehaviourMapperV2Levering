@@ -1,15 +1,23 @@
 .icon-select {
     position: absolute;
     left: 27.5vw;
-    top: 11.5vh;
+    top: 13.5vh;
     width: 45vw;
-    height: 77vh;
+    height: 73vh;
     background-color: black;
-    z-index: 100;
-    font-size: 5vh;
+    font-size: 30px;
     min-width: 500px;
-
+    /* padding-bottom: 2vh; */
+    border-radius: 5px;
 }
+
+@media only screen and (max-width: 1111.11px) {
+    .icon-select {
+      left: calc(50vw - 250px);
+      top: 25vh;
+      height: 50vh;
+    }
+  }
 
 .icon-select ul{
     width: 100%;
@@ -18,7 +26,7 @@
 }
 
 .icon-select li{
-    width: 33.333333%;
+    /* width: 33.333333%; */
     text-align: center;
     /* display: inline; */
 }
@@ -29,7 +37,7 @@
     height: 100%;
     width: 100%;
     flex-wrap: wrap;
-    font-size: 2vh;
+    font-size: 48%;
     text-align: center;
 }
 
@@ -40,10 +48,18 @@
 .single-icon {
     flex: 1 0 21%;
     height: 40px;
+    background-color: black;
+    cursor: pointer;
+}
+
+.icon-description {
+    background-color: black;
+    padding: 1vh 0;
 }
 
 .selected {
     background-color: aliceblue;
+    border-radius: 3px;
 }
 
 .single-icon:hover {
@@ -52,4 +68,9 @@
 
 .gender-select {
     margin-bottom: 2vh;
+}
+
+.sidebar .icon-select li {
+    border-bottom: 0.5px aliceblue solid;
+    
 }

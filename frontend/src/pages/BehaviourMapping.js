@@ -195,27 +195,28 @@ class BehaviourMapping extends React.Component {
     return (
       <div id='maincont'>
           <div className="sidebar">
-            <div className={this.state.addIcon ? "visible" : "icons-invisible"}
-            ><AllIcons closeIconSelect = {this.closeIconSelect} />
-          </div>
-              <ul id="iconList">
+            <div className={this.state.addIcon ? "visible" : "icons-invisible"}>
+              <AllIcons closeIconSelect = {this.closeIconSelect} />
+            </div>
+              <ul id="icon-list">
                   <li onClick={() => this.setState({ addIcon: true })}>Add Event</li>
                   <li onClick={() => this.changeIcon(0)}>babYod</li>
                   <li onClick={() => this.changeIcon(1)}>lego Yoda</li>
                   <li onClick={() => this.changeIcon(2)}>brick lego Yoda</li>
                   <li onClick={() => this.changeIcon(3)}>yodThanos</li>
+                  <li onClick={() => this.print()}>Show</li>
               </ul>
-            </div>
+          </div>
          
-            <img alt="" onMouseMove={e => this.updateCoord(e)} 
+          <img alt="" onMouseMove={e => this.updateCoord(e)} 
             onClick={e => this.takeAction(e)} 
-            className='backgroundImage' 
+            className='background-image' 
             height="500px" 
             width="500px" 
             order="3"
             src={this.state.background} />
-            <div id="iconContainer" />
-        <button onClick={() => this.print()}>Show</button>
+          <div id="iconContainer" />
+        
       </div>
     );
   }
