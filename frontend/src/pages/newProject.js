@@ -113,8 +113,9 @@ class NewProject extends React.Component {
                     this.props.history.push({
                         pathname: '/chooseImage',
                         state: {
-                            mapname: this.state.projectName,
-                            p_id: data.p_id[0]
+                            projectName: this.state.projectName,
+                            description: this.state.description,
+                            p_id: data.p_id[0],
                         },
                     });
                 }

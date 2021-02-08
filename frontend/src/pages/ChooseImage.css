@@ -27,12 +27,19 @@
     color: #ece8e8;
 }
 
+/* HEADERS */
+
+.choose-image-box h1 {
+    margin: -1vh 0 2vh 0;
+    font-size: 4vh;
+}
+
 /* BUTTONS */
 
 .choose-image-button {
     background-color: #F3F7F0;
     padding: 1vh 2vh;
-    margin: 1vh;
+    margin: 2vh 0 0 0;
     border: 1.2px solid #19323C;
     color: #19323C;
     border-radius: 25px;

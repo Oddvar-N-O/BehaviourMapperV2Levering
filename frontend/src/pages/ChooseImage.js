@@ -13,7 +13,8 @@ class ChooseImage extends React.Component {
   constructor(props) {
       super(props)
       this.state = {
-        mapname: props.location.state.mapname,
+        projectName: props.location.state.projectName,
+        description: props.location.state.description,
         p_id: props.location.state.p_id,
       }
       this.map = new Map({
@@ -26,50 +27,46 @@ class ChooseImage extends React.Component {
   }
 
   exportImg() {
-    this.map.once('rendercomplete', function () {
-      var mapCanvas = document.createElement('canvas');
-      var size = this.map.getSize();
-      mapCanvas.width = size[0];
-      mapCanvas.height = size[1];
-      var mapContext = mapCanvas.getContext('2d');
-      Array.prototype.forEach.call(
-        document.querySelectorAll('.ol-layer canvas'),
-        function (canvas) {
-          if (canvas.width > 0) {
-            var opacity = canvas.parentNode.style.opacity;
-            mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
-            var transform = canvas.style.transform;
-            var matrix = transform
-              .match(/^matrix([^]*)$/)[1]
-              .split(',')
-              .map(Number);
-            CanvasRenderingContext2D.prototype.setTransform.apply(
-              mapContext,
-              matrix,);
-            mapContext.drawImage(canvas, 0, 0);
-          }
+    var mapCanvas = document.createElement('canvas');
+    var size = this.map.getSize();
+    mapCanvas.width = size[0];
+    mapCanvas.height = size[1];
+    var mapContext = mapCanvas.getContext('2d');
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.ol-layer canvas'),
+      function (canvas) {
+        if (canvas.width > 0) {
+          var opacity = canvas.parentNode.style.opacity;
+          mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+          var transform = canvas.style.transform;
+          var matrix = transform
+            .match(/^matrix([^]*)$/)[1]
+            .split(',')
+            .map(Number);
+          CanvasRenderingContext2D.prototype.setTransform.apply(
+            mapContext,
+            matrix,);
+          mapContext.drawImage(canvas, 0, 0);
         }
-      );
-      fetch(mapCanvas.toDataURL())
-          .then(res => res.blob())
-          .then(blob => {
-            blob.lastModifiedDate = new Date();
-            blob.name = this.state.mapname + ".png";
-            var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
-            const data = new FormData();
-            data.append('file', file);
-            fetch('http://localhost:5000/upload', {
-              method: 'POST',
-              body: data,
-            })
-        }); 
-    });
-    this.map.renderSync();
+      }
+    );
+    fetch(mapCanvas.toDataURL())
+        .then(res => res.blob())
+        .then(blob => {
+          blob.lastModifiedDate = new Date();
+          blob.name = this.state.projectName + ".png";
+          var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
+          const data = new FormData();
+          data.append('file', file);
+          fetch('http://localhost:5000/upload', {
+            method: 'POST',
+            body: data,
+          })
+      }); 
   }
 
   componentDidMount() {
     this.map.setTarget("choose-image-map");
-    
     this.map.on("moveend", () => {
       let center = this.map.getView().getCenter();
       let zoom = this.map.getView().getZoom();
@@ -81,6 +78,7 @@ class ChooseImage extends React.Component {
       return (
         <div id="choose-image">
           <div className="choose-image-box">
+            <h1>{this.state.projectName}</h1>
             <Link to="/startpage" className="close-icon">
                 <AiIcons.AiOutlineClose />
             </Link>
