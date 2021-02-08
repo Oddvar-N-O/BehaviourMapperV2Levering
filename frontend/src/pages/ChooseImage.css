@@ -25,7 +25,7 @@
     transition: 200ms;
 }
 .sidebar li:hover{
-    background-color: rgb(52, 52, 66);
+    /* background-color: rgb(52, 52, 66); */
     /* padding-left: 10px;
     transition: 200ms; */
 }
