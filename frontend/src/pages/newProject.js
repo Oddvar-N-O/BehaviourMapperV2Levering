@@ -1,4 +1,3 @@
-
 import React from 'react';
 import './newProject.css'
 import { Link } from 'react-router-dom';
@@ -20,8 +19,8 @@ class NewProject extends React.Component {
         
         this.handleChange = this.handleChange.bind(this);
         this.handleUploadImage = this.handleUploadImage.bind(this);
-        this.setRedirect = this.setRedirect.bind(this)
-        this.imageChosen = this.imageChosen.bind(this)
+        this.setRedirect = this.setRedirect.bind(this);
+        this.imageChosen = this.imageChosen.bind(this);
     }
 
     handleChange(event) { 
@@ -114,7 +113,7 @@ class NewProject extends React.Component {
                     this.props.history.push({
                         pathname: '/chooseImage',
                         state: {
-                            kartnavn: this.state.projectName,
+                            mapname: this.state.projectName,
                             p_id: data.p_id[0]
                         },
                     });
@@ -153,7 +152,6 @@ class NewProject extends React.Component {
                             />
                         </form>
                     </div>
-
                     <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
                         <legend>{this.state.projectImageLegend}</legend>
                         <input 
@@ -163,15 +161,12 @@ class NewProject extends React.Component {
                             onChange={this.imageChosen}
                         />
                     </form>
-
                     <ul>
-                       <li 
-                        onClick={ (e) => {
+                       <li onClick={ (e) => {
                             if (this.state.fromLoadMap && this.uploadInput.files.length !== 0) {
                                 this.handleUploadImage(e);
                             }
-                            this.setRedirect(e);
-                            
+                            this.setRedirect(e);     
                         }} style={{backgroundColor: this.state.liColor}}>Let's go!</li>
                     </ul>
                 </div>
