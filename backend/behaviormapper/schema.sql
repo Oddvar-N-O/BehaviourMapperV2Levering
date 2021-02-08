@@ -55,7 +55,6 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 INSERT INTO 'Figures' ("description", "color", "image") VALUES 
     ('bike','blue', './icons/man/bike.png'),
     ('feedingBirds','blue', './icons/man/feedingBirds.png'),
-    ('goodsDelivery','blue', './icons/man/goodsDelivery.png'),
     ('scooter','blue', './icons/man/scooter.png'),
     ('sit','blue', './icons/man/sit.png'),
     ('skateboard','blue', './icons/man/skateboard.png'),
@@ -72,7 +71,6 @@ INSERT INTO 'Figures' ("description", "color", "image") VALUES
     ('workers','blue', './icons/man/workers.png'),
     ('bike','red', './icons/woman/bike.png'),
     ('feedingBirds','red', './icons/woman/feedingBirds.png'),
-    ('goodsDelivery','red', './icons/woman/goodsDelivery.png'),
     ('scooter','red', './icons/woman/scooter.png'),
     ('sit','red', './icons/woman/sit.png'),
     ('skateboard','red', './icons/woman/skateboard.png'),
@@ -89,7 +87,6 @@ INSERT INTO 'Figures' ("description", "color", "image") VALUES
     ('workers','red', './icons/woman/workers.png'),
     ('bike','green', './icons/child/bike.png'),
     ('feedingBirds','green', './icons/child/feedingBirds.png'),
-    ('goodsDelivery','green', './icons/child/goodsDelivery.png'),
     ('scooter','green', './icons/child/scooter.png'),
     ('sit','green', './icons/child/sit.png'),
     ('skateboard','green', './icons/child/skateboard.png'),

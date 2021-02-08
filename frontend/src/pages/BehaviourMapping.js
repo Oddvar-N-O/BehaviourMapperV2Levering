@@ -36,6 +36,7 @@ class BehaviourMapping extends React.Component {
   }
 
   closeIconSelect() {
+    console.log('test')
     this.setState({ 
       addIcon: false 
     })
@@ -132,7 +133,6 @@ class BehaviourMapping extends React.Component {
 
   showIcon(event) {
     // make element invisible:
-
     var img = document.createElement('img');
     // set attributes
     img.src = this.state.icons[this.state.imgIcon];
@@ -196,7 +196,7 @@ class BehaviourMapping extends React.Component {
     return (
       <div id='maincont'>
           <div className="sidebar">
-          <div className={this.state.addIcon ? "visible" : "invisible"}
+          <div className={this.state.addIcon ? "visible" : "icons-invisible"}
            ><AllIcons closeIconSelect = {this.closeIconSelect} /></div>
             <ul id="iconList">
                 <li onClick={() => this.setState({ addIcon: true })}>Add Event</li>

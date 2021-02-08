@@ -1,12 +1,12 @@
 .icon-select {
     position: absolute;
-    left: 10vw;
-    top: 10vw;
-    width: 80vw;
-    height: 80vh;
+    left: 25vw;
+    top: 15vh;
+    width: 50vw;
+    height: 70vh;
     background-color: black;
     z-index: 100;
-    font-size: 50px;
+    font-size: 5vh;
 }
 
 .icon-select ul{
@@ -21,6 +21,28 @@
     /* display: inline; */
 }
 
-.invisible {
+.icons-visible {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.icons-invisible {
     display: none;
+}
+
+.single-icon {
+    flex: 1 0 21%;
+    height: 40px;
+    padding: 0 2vh;
+}
+
+.selected {
+    background-color: aliceblue;
+}
+
+.single-icon:hover {
+    background-color: rgb(24, 24, 24);
 }
