@@ -44,24 +44,37 @@ class AllIcons extends React.Component {
 
     render () {
         const redIcons = this.state.redData.map(data => 
-            <div onClick={this.props.closeIconSelect}>
-                <Icon key={data.id} 
-                description={data.description} 
-                color={data.color}/>
-                </div>)
+            <div>
+                <div onClick={this.props.closeIconSelect}>
+                    <Icon key={data.id} 
+                    description={data.description} 
+                    color={data.color}/>
+                    </div>
+                    <div>{data.description}
+                </div>
+            </div>)
             
         const blueIcons = this.state.blueData.map(data => 
-            <div onClick={this.props.closeIconSelect}>
-                <Icon key={data.id} 
-                description={data.description} 
-                color={data.color}/>
-                </div>)
+            <div>
+                <div onClick={this.props.closeIconSelect}>
+                    <Icon key={data.id} 
+                    description={data.description} 
+                    color={data.color}/>
+                    </div>
+                    <div>{data.description}
+                </div>
+            </div>)
+
         const greenIcons = this.state.greenData.map(data => 
-            <div onClick={this.props.closeIconSelect}>
-                <Icon key={data.id} 
-                description={data.description} 
-                color={data.color}/>
-                </div>)
+            <div>
+                <div onClick={this.props.closeIconSelect}>
+                    <Icon key={data.id} 
+                    description={data.description} 
+                    color={data.color}/>
+                    </div>
+                    <div>{data.description}
+                </div>
+            </div>)
 
         return (
             <div className="icon-select">
