@@ -90,10 +90,12 @@ def getFigureData():
 @app.route('/getmap')
 def getMap():
     get_map_sql =('SELECT map FROM Project WHERE id=?')
-    args = request.args.get('p_id',)
+    args = (request.args.get('p_id'),)
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",type(args), len(args))
     result = query_db(get_map_sql, args, True)
     image = {"image": ""}
     for res in result:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",res)
         image["image"] = "./uploads/" + res
     try:
         return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])

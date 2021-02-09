@@ -62,7 +62,14 @@ class ChooseImage extends React.Component {
           fetch('http://localhost:5000/upload', {
             method: 'POST',
             body: data,
-          })
+          }).then(
+            this.props.history.push({
+              pathname: '/mapping',
+              state: {
+                  p_id: this.state.p_id
+              },
+            }),
+          );
       }); 
   }
 
