@@ -52,6 +52,16 @@ def getProject():
             result.append(project)
     return json.dumps(result)
 
+@app.route('/getprojectmapping', methods=['GET'])
+def getProjectMapping():
+    get_proj_sql = ("SELECT * FROM Project WHERE id=?")
+    proj_values = (request.args.get('p_id'),)
+    project = query_db(get_proj_sql, proj_values, True)
+    result = []
+    for data in project:
+         result.append(data)
+    return json.dumps(result)
+
 # Usage /getfigure?description=<desc>&color=<color>
 @app.route('/getfigure')
 def getFigure():
@@ -83,6 +93,18 @@ def addMapName():
     values = (request.form.get('mapname'), request.form.get('id'))
     res = query_db(add_map_name_sql, values, True)
     return {"res": res}
+@app.route('/getmap')
+def getMap():
+    get_map_sql =('SELECT map FROM Project WHERE id=?')
+    args = request.args.get('p_id',)
+    result = query_db(get_map_sql, args, True)
+    image = {"image": ""}
+    for res in result:
+        image["image"] = "./uploads/" + res
+    try:
+        return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+    except FileNotFoundError:
+        abort(404)
 
 @app.route('/favicon.ico')
 def favicon():
