@@ -3,8 +3,8 @@ import AllIcons from '../components/AllIcons';
 import './BehaviourMapping.css'
 
 class BehaviourMapping extends React.Component {
-  constructor() { //props
-      super() //props
+  constructor(props) {
+      super(props)
 
       this.state = {
         addIcon: false,
@@ -19,24 +19,17 @@ class BehaviourMapping extends React.Component {
         newIconID: 0,
         actionID: 0,
         ourIconID: 0,
-        ourIconCoord: {
-          x: 0,
-          y: 0,
-          degree: 0,
-        },
-        ourMouseCoord: {
-          x: 0,
-          y: 0,
-        }
-      };
-      this.background = {
-          imageURL: '',
+        ourIconCoord: {x: 0, y: 0, degree: 0,},
+        ourMouseCoord: {x: 0, y: 0,},
+        // Perhaps collect all these into one object at a late time
+        p_id: props.location.state.p_id,
+        projdata: [],
+        mapblob: "",
       };
       this.closeIconSelect = this.closeIconSelect.bind(this)
   }
 
   closeIconSelect() {
-    console.log('test')
     this.setState({ 
       addIcon: false 
     })
@@ -191,6 +184,18 @@ class BehaviourMapping extends React.Component {
     }
   }
 
+  componentDidMount() {
+    fetch(`getprojectmapping?p_id=${this.state.p_id}`).then(res => res.json())
+    .then(data => {
+      this.setState({projdata: data});
+    });
+    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
+      .then(images => {
+        let image = URL.createObjectURL(images);
+        this.setState({mapblob: image});
+      });
+  }
+
   render() {
     return (
       <div id='maincont'>
@@ -210,11 +215,8 @@ class BehaviourMapping extends React.Component {
          
           <img alt="" onMouseMove={e => this.updateCoord(e)} 
             onClick={e => this.takeAction(e)} 
-            className='background-image' 
-            height="500px" 
-            width="500px" 
-            order="3"
-            src={this.state.background} />
+            className='map-image' 
+            src={this.state.mapblob} />
           <div id="iconContainer" />
         
       </div>
