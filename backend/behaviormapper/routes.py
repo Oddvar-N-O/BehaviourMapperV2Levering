@@ -86,13 +86,7 @@ def getFigureData():
     for res in result:
         data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
     return json.dumps(data)
-
-@app.route('/addmapname', methods=['POST'])
-def addMapName():
-    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=?")
-    values = (request.form.get('mapname'), request.form.get('id'))
-    res = query_db(add_map_name_sql, values, True)
-    return {"res": res}
+    
 @app.route('/getmap')
 def getMap():
     get_map_sql =('SELECT map FROM Project WHERE id=?')
@@ -168,6 +162,7 @@ def fileUpload():
     unique = 1
     if allowed_file(file.filename):
         filename = secure_filename(file.filename)
+        addMapName(filename, request.files['p_id'])
         destination="/".join([target, filename])
         while os.path.exists(destination):
             destination="/".join([target, str(unique) + filename])
@@ -213,6 +208,12 @@ def selectdb():
             temp_result.append(query)
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
+
+def addMapName(mapname, p_id):
+    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=?")
+    values = (mapname, p_id)
+    res = query_db(add_map_name_sql, values, True)
+    return {"res": res}
 
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
