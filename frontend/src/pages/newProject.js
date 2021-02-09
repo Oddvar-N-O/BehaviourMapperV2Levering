@@ -104,7 +104,7 @@ class NewProject extends React.Component {
         body: data,
         }).then((response) => {
             response.json().then((data) => {
-                if (this.fromLoadMap) {
+                if (this.state.fromLoadMap) {
                     this.props.history.push({
                         pathname: '/mapping',
                         state: {
