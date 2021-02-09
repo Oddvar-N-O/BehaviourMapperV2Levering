@@ -1,4 +1,5 @@
 import React from 'react';
+import AllIcons from '../components/AllIcons';
 import './BehaviourMapping.css'
 
 class BehaviourMapping extends React.Component {
@@ -6,6 +7,7 @@ class BehaviourMapping extends React.Component {
       super() //props
 
       this.state = {
+        addIcon: false,
         imgIcon: 0,
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         icons: [
@@ -30,7 +32,15 @@ class BehaviourMapping extends React.Component {
       this.background = {
           imageURL: '',
       };
+      this.closeIconSelect = this.closeIconSelect.bind(this)
   }
+
+  closeIconSelect() {
+    console.log('test')
+    this.setState({ 
+      addIcon: false 
+    })
+  }  
 
   // set state to change the uri
   sendDatabaseEvent() {
@@ -66,6 +76,8 @@ class BehaviourMapping extends React.Component {
     // send old icon to db
     this.sendDatabaseEvent()
   }
+
+  
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
@@ -120,7 +132,6 @@ class BehaviourMapping extends React.Component {
 
   showIcon(event) {
     // make element invisible:
-
     var img = document.createElement('img');
     // set attributes
     img.src = this.state.icons[this.state.imgIcon];
@@ -183,20 +194,29 @@ class BehaviourMapping extends React.Component {
   render() {
     return (
       <div id='maincont'>
-        <div id="testAppendTextIcon">
           <div className="sidebar">
-            <ul id="iconList">
-                <li onClick={() => this.changeIcon(0)}>babYod</li>
-                <li onClick={() => this.changeIcon(1)}>lego Yoda</li>
-                <li onClick={() => this.changeIcon(2)}>brick lego Yoda</li>
-                <li onClick={() => this.changeIcon(3)}>yodThanos</li>
-            </ul>
+            <div className={this.state.addIcon ? "visible" : "icons-invisible"}>
+              <AllIcons closeIconSelect = {this.closeIconSelect} />
+            </div>
+              <ul id="icon-list">
+                  <li onClick={() => this.setState({ addIcon: true })}>Add Event</li>
+                  <li onClick={() => this.changeIcon(0)}>babYod</li>
+                  <li onClick={() => this.changeIcon(1)}>lego Yoda</li>
+                  <li onClick={() => this.changeIcon(2)}>brick lego Yoda</li>
+                  <li onClick={() => this.changeIcon(3)}>yodThanos</li>
+                  <li onClick={() => this.print()}>Show</li>
+              </ul>
           </div>
-        </div>
-        <img alt="" onMouseMove={e => this.updateCoord(e)} onClick={e => this.takeAction(e)} id='backgroundImage' height="500px" width="500px" src={this.state.background} />
-        <div id="iconContainer">
-        </div>
-        <button onClick={() => this.print()}>Show</button>
+         
+          <img alt="" onMouseMove={e => this.updateCoord(e)} 
+            onClick={e => this.takeAction(e)} 
+            className='background-image' 
+            height="500px" 
+            width="500px" 
+            order="3"
+            src={this.state.background} />
+          <div id="iconContainer" />
+        
       </div>
     );
   }

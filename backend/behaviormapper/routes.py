@@ -67,6 +67,16 @@ def getFigure():
     except FileNotFoundError:
         abort(404)
 
+@app.route('/getfiguredata')
+def getFigureData():
+    get_figure_data_sql =("SELECT description, color, id FROM Figures")
+    result = select_db(get_figure_data_sql)
+    result = result[:-1]
+    data = []
+    for res in result:
+        data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
+    return json.dumps(data)
+
 @app.route('/favicon.ico')
 def favicon():
     try:

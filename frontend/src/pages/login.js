@@ -3,19 +3,24 @@ import { Link } from 'react-router-dom';
 
 function Login() {
   const [placeholder, setPlaceholder] = useState('Prosjektet finnes ikke.')
+  const color = 'green'
 
   useEffect(() => {
-    fetch('getfigure?description=bike&color=red').then(res => res.blob()).then(images => {
+    fetch(`getfigure?description=bike&color=${color}`)
+    .then(res => res.blob())
+    .then(images => {
       var image = URL.createObjectURL(images)
       document.getElementById("figur").src = image
-    }); 
-  },
+      }); 
+    },
   []);
   useEffect(() => {
-    fetch('getproject?u_id=1&name=prosjektnamn').then(res => res.json()).then(data => {
+    fetch('getproject?u_id=1&name=prosjektnamn')
+    .then(res => res.json())
+    .then(data => {
       setPlaceholder(data)
-    });
-  },
+      });
+    },
   []);
     return (
       <div className="login">
