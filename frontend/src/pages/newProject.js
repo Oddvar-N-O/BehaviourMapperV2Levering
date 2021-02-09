@@ -35,9 +35,11 @@ class NewProject extends React.Component {
         }
     }
     imageChosen() {
-        this.setState({projectImageLegend: "Image"}, () => {
-            this.changeColor();
-        }); 
+        if (this.state.projectImageLegend === "Image Required") {
+            this.setState({projectImageLegend: "Image"}, () => {
+                this.changeColor();
+            }); 
+        }  
     }
 
     changeColor() {
@@ -45,7 +47,7 @@ class NewProject extends React.Component {
             this.setState({ liColor: "#FF0000" })
         } else if (this.state.projectNameLegend === "Project Name"){
             this.setState({ liColor: "#F3F7F0" })
-        }   
+        }  
     }
 
     handleUploadImage(ev) {
@@ -106,6 +108,8 @@ class NewProject extends React.Component {
                     this.props.history.push({
                         pathname: '/mapping',
                         state: {
+                            projectName: this.state.projectName,
+                            description: this.state.description,
                             p_id: data.p_id[0]
                         },
                     });
