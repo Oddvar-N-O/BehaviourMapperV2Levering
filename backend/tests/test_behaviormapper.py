@@ -35,6 +35,13 @@ def test_getfigure(client):
     rv = client.get(('/getfigure?description=bike&color=red'))
     assert rv.status_code == 200
 
+def test_getfiguredata(client):
+    rv = client.get(('/getfiguredata'))
+    dbtest = '{"description": "bike", "color": "blue", "id": 1}'
+    decoded = rv.data.decode(encoding="utf-8", errors="strict")
+    assert rv.status_code == 200
+    assert decoded[1:50] == dbtest
+
 def test_getfigure_err(client):
     rv = client.get(('/getfigure?description=bike&color=12'))
     assert rv.status_code == 500
