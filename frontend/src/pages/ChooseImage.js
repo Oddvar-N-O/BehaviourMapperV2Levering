@@ -58,6 +58,7 @@ class ChooseImage extends React.Component {
           var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
           const data = new FormData();
           data.append('file', file);
+          data.append('p_id', this.state.p_id)
           fetch('http://localhost:5000/upload', {
             method: 'POST',
             body: data,
