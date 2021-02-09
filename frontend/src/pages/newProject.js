@@ -50,14 +50,10 @@ class NewProject extends React.Component {
         }  
     }
 
-    handleUploadImage(ev) {
-        if (!this.state.fromLoadMap) {
-            return
-        }
-        ev.preventDefault();
-        
+    handleUploadImage(p_id) {
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
+        data.append('p_id', p_id);
     
         fetch('http://localhost:5000/upload', {
           method: 'POST',
@@ -98,18 +94,22 @@ class NewProject extends React.Component {
         data.append('name', this.state.projectName);
         data.append('description', this.state.description);
         data.append('startdate', new Date());
-        
+        if (this.state.fromLoadMap){
+            data.append('map', this.uploadInput.files[0].name);
+        }
         fetch('http://localhost:5000/addproject', {
         method: 'POST',
         body: data,
         }).then((response) => {
             response.json().then((data) => {
                 if (this.state.fromLoadMap) {
-                    this.props.history.push({
-                        pathname: '/mapping',
-                        state: {
-                            p_id: data.p_id[0]
-                        },
+                    this.handleUploadImage(data.p_id[0], () => {
+                        this.props.history.push({
+                            pathname: '/mapping',
+                            state: {
+                                p_id: data.p_id[0]
+                            },
+                        });
                     });
                 } else {
                     this.props.history.push({
@@ -120,8 +120,7 @@ class NewProject extends React.Component {
                             p_id: data.p_id[0],
                         },
                     });
-                }
-                
+                }  
             });
         });
     }
@@ -166,9 +165,6 @@ class NewProject extends React.Component {
                     </form>
                     <ul>
                        <li onClick={ (e) => {
-                            if (this.state.fromLoadMap && this.uploadInput.files.length !== 0) {
-                                this.handleUploadImage(e);
-                            }
                             this.setRedirect(e);     
                         }} style={{backgroundColor: this.state.liColor}}>Let's go!</li>
                     </ul>
