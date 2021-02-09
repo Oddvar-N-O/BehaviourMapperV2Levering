@@ -77,6 +77,13 @@ def getFigureData():
         data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
     return json.dumps(data)
 
+@app.route('/addmapname', methods=['POST'])
+def addMapName():
+    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=?")
+    values = (request.form.get('mapname'), request.form.get('id'))
+    res = query_db(add_map_name_sql, values, True)
+    return {"res": res}
+
 @app.route('/favicon.ico')
 def favicon():
     try:
