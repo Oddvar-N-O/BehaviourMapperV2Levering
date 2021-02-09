@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SidebarLP from '../components/sidebarLP';
+import * as AiIcons from 'react-icons/ai';
 import './loadProject.css'
 
 function LoadProject() {
@@ -49,6 +50,9 @@ function LoadProject() {
   return (
         <div id="load-project">
           <div className="load-project-box">
+            <Link to="/startpage" className="close-icon">
+              <AiIcons.AiOutlineClose />
+            </Link>
             <SidebarLP  getCurrProj={getCurrProj} projects={allProjects} />
             <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
               <h1>Description: {currProj["description"]}</h1>

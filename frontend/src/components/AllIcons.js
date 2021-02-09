@@ -44,35 +44,36 @@ class AllIcons extends React.Component {
 
     render () {
         const redIcons = this.state.redData.map(data => 
-            <div className='single-icon'>
-                <div onClick={this.props.closeIconSelect}>
-                    <Icon key={data.id} 
+            
+            <div key={data.id} className='single-icon'>
+                <div className='single-icon' onClick={this.props.closeIconSelect}>
+                    <Icon 
                     description={data.description} 
                     color={data.color}/>
                     </div>
-                    <div>{data.description}
+                    <div className="icon-description">{data.description}
                 </div>
             </div>)
             
         const blueIcons = this.state.blueData.map(data => 
-            <div className='single-icon'>
-                <div onClick={this.props.closeIconSelect}>
-                    <Icon key={data.id} 
+            <div key={data.id} className='single-icon'>
+                <div className='single-icon' onClick={this.props.closeIconSelect}>
+                    <Icon
                     description={data.description} 
                     color={data.color}/>
                     </div>
-                    <div>{data.description}
+                    <div className="icon-description">{data.description}
                 </div>
             </div>)
 
         const greenIcons = this.state.greenData.map(data => 
-            <div className='single-icon'>
-                <div onClick={this.props.closeIconSelect}>
-                    <Icon key={data.id} 
+            <div key={data.id} className='single-icon'>
+                <div className='single-icon' onClick={this.props.closeIconSelect}>
+                    <Icon 
                     description={data.description} 
                     color={data.color}/>
                     </div>
-                    <div>{data.description}
+                    <div className="icon-description">{data.description}
                 </div>
             </div>)
 

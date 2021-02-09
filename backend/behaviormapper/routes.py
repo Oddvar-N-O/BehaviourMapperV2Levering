@@ -27,8 +27,8 @@ def addProject():
               "VALUES (?,?,?)")
     small_project_values = (request.form.get('name'), request.form.get('description'), 
                         request.form.get('startdate'))
-    query_db(add_small_project, small_project_values)
-    return {}
+    p_id = query_db(add_small_project, small_project_values)
+    return {"p_id": p_id}
     # Add a new project and link a map
 
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>

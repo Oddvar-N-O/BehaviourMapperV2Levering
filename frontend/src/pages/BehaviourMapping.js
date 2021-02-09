@@ -170,19 +170,19 @@ class BehaviourMapping extends React.Component {
               <ul id="iconList">
                   <li onClick={() => this.newIcon()}>Add Event</li>
               </ul>
-            </div>
+          </div>
          
-            <img alt="" onMouseMove={e => this.updateCoord(e)} 
+          <img alt="" onMouseMove={e => this.updateCoord(e)} 
             onClick={e => this.takeAction(e)} 
-            className='backgroundImage' 
+            className='background-image' 
             height="500px" 
             width="500px" 
             order="3"
             src={this.state.background} />
             <div id="iconContainer" />
-        <button onClick={() => this.print()}>Show</button>
-        <div id="iCont" className={this.state.addIcon ? "visible" : "icons-invisible"}
-            ><AllIcons closeIconSelect = {e => this.closeIconSelect(e)} />
+            <button onClick={() => this.print()}>Show</button>
+            <div id="iCont" className={this.state.addIcon ? "visible" : "icons-invisible"}
+                ><AllIcons closeIconSelect = {e => this.closeIconSelect(e)} />
           </div>
       </div>
     );
