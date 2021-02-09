@@ -29,7 +29,7 @@ class BehaviourMapping extends React.Component {
       this.background = {
           imageURL: '',
       };
-      this.closeIconSelect = this.closeIconSelect.bind(this)
+      this.selectIcon = this.addIconToList.bind(this)
   }
 
   sendDatabaseEvent() {
@@ -60,37 +60,58 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
+    this.hideIcon();
     this.setState({ addIcon: true })
   }
 
-  closeIconSelect(e) {
-    // lag et li object
+  setInnerHTML(str) {
+    let descr = str.split(' ');
+    descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
+    switch(descr[1]) {
+      case 'blue':
+        descr[1] = "Man";
+        break;
+      case 'red':
+        descr[1] = "Woman";
+        break;
+      default:
+        descr[1] = "Child";
+    }
+    console.log(descr);
+    let innerHTML = descr[0] + ": " + descr[1];
+    console.log(innerHTML);
+    return innerHTML;    
+  }
+
+  addIconToList(e) {
     let list = document.getElementById('iconList');
     let li = document.createElement("li");
-    console.log(e.target);
+
     let newSrc = e.target.src;
     this.setState({icons: [...this.state.icons, newSrc]}, function() {
     });
     // Onclick call changeIcon
     li.setAttribute('id', newSrc);
-    li.innerHTML = li.getAttribute('id');
+
+    let newText = this.setInnerHTML(e.target.getAttribute('id'));
+    li.innerHTML = newText;
     // vi bytter og skjuler, og sikrer oss at knappene kan gjøre det
     li.addEventListener('click', () => {
-      this.setState({ourSRC: li.getAttribute('id')});
+      this.setState({ourSRC: li.getAttribute('id')}, function() {});
       this.hideIcon()
     });
-    this.setState({ourSRC: newSrc,}, function() {});
+    this.setState({ourSRC: newSrc}, function() {});
     this.hideIcon()
 
     list.appendChild(li);
     this.setState({
       imgIcon: li.getAttribute('id')
     });
-    this.setState({ addIcon: false}); // rem iconlist
+    this.closeIconSelect() // rem iconlist
   }
 
   takeAction(event) {
-    if (this.state.ourSRC != null) {
+    if (this.state.ourSRC != null && this.state.addIcon == false) {
       if (this.state.actionID === 0) {
         this.placeIcon(event);
         this.setState({
@@ -102,16 +123,6 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-  hideIcon() {
-    var icon = document.getElementById(this.state.ourIconID.toString())
-
-    if (icon != null) {
-      icon.style.display = 'none';
-    }
-    this.setState({
-      actionID: 0,
-    });
-  }
 
 
   placeIcon(event) {
@@ -163,27 +174,71 @@ class BehaviourMapping extends React.Component {
     }
   }
 
+  hideIcon() {
+    var icon = document.getElementById(this.state.ourIconID.toString())
+    if (icon != null) {
+      icon.style.display = 'none';
+    }
+    this.stopPointing()
+  }
+
+  stopPointing() {
+    this.setState({
+      actionID: 0,
+    });
+  }
+
+
+  showAll() {
+    // console.log('Print all');
+    // console.log('currID: ' + this.state.newIconID);
+    this.stopPointing()
+    var icon;
+    for (var i=0; i<this.state.newIconID; i++) {
+      // console.log('id ' + i);
+      icon = document.getElementById(i.toString());
+      icon.style.display = 'block';
+    }
+  }
+
+  hideAll() {
+    this.stopPointing()
+    var icon;
+    for (var i=0; i<this.state.newIconID; i++) {
+      icon = document.getElementById(i.toString());
+      icon.style.display = 'none';
+    }
+  }
+
+  closeIconSelect() {
+    this.setState({ addIcon: false});
+  }
+
   render() {
     return (
       <div id='maincont'>
-          <div className="sidebar">
+        <div className="sidebar">
+          <div className={this.state.addIcon ? "visible" : "icons-invisible"}>
+              <AllIcons selectIcon = {this.selectIcon} />
+              <button id="exitIconSelect" onClick={() => this.closeIconSelect()}>Return</button>
+            </div>
               <ul id="iconList">
-                  <li onClick={() => this.newIcon()}>Add Event</li>
+                <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
+                <li className="buttonLi" onClick={() => this.showAll()}>Show icons</li>
+                <li className="buttonLi" onClick={() => this.hideAll()}>Hide icons</li>
               </ul>
-          </div>
-         
-          <img alt="" onMouseMove={e => this.updateCoord(e)} 
+        </div>
+        
+        <img alt="" onMouseMove={e => this.updateCoord(e)} 
             onClick={e => this.takeAction(e)} 
             className='background-image' 
             height="500px" 
             width="500px" 
             order="3"
             src={this.state.background} />
-            <div id="iconContainer" />
-            <button onClick={() => this.print()}>Show</button>
-            <div id="iCont" className={this.state.addIcon ? "visible" : "icons-invisible"}
-                ><AllIcons closeIconSelect = {e => this.closeIconSelect(e)} />
-          </div>
+
+          <div id="iconContainer" />
+
       </div>
     );
   }
