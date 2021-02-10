@@ -30,21 +30,23 @@
 }
 
 .sidebar li{
-    padding: 5px;
+    height: 30px;
     width: 100%;
     border-bottom: 2px rgb(65, 65, 65) solid;
     transition: 200ms;
     cursor: pointer;
+    text-align: center;
+    margin-top: 10px;
 }
 
-.sidebar .buttonLi{
-    padding: 5px;
-    width: 100%;
+.buttonLi{
     color: aliceblue;
     background-color: rgba(22, 20, 20, 0.966);
     border-bottom: 2px rgb(65, 65, 65) solid;
-    transition: 200ms;
-    cursor: pointer;
+}
+
+#iconList {
+    width: 200px;
 }
 
 .map{   

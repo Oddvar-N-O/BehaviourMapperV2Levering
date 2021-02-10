@@ -12,6 +12,7 @@ class BehaviourMapping extends React.Component {
         icons: [
         ],
         ourSRC: null,
+        sendNewIconToBD: false,
         newIconID: 0,
         actionID: 0,
         ourIconID: 0,
@@ -23,6 +24,10 @@ class BehaviourMapping extends React.Component {
         mapblob: "",
       };
       this.selectIcon = this.addIconToList.bind(this)
+  }
+
+  sendOnly() {
+    console.log("Send til Databasen");
   }
 
   sendDatabaseEvent() {
@@ -58,58 +63,84 @@ class BehaviourMapping extends React.Component {
   }
 
   setInnerHTML(str) {
-    let descr = str.split(' ');
-    descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
-    switch(descr[1]) {
-      case 'blue':
-        descr[1] = "Man";
-        break;
-      case 'red':
-        descr[1] = "Woman";
-        break;
-      default:
-        descr[1] = "Child";
+    if (str != null) {
+      let descr = str.split(' ');
+      descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
+      switch(descr[1]) {
+        case 'blue':
+          descr[1] = "Man";
+          break;
+        case 'red':
+          descr[1] = "Woman";
+          break;
+        default:
+          descr[1] = "Child";
+      }
+      // console.log(descr);
+      let innerHTML = descr[0] + ": " + descr[1];
+      // console.log(innerHTML);
+      return innerHTML; 
     }
-    console.log(descr);
-    let innerHTML = descr[0] + ": " + descr[1];
-    console.log(innerHTML);
-    return innerHTML;    
+    return console.error("Prøv på Nytt");
   }
 
   addIconToList(e) {
     let list = document.getElementById('iconList');
-    let li = document.createElement("li");
+    let li = document.createElement('li');
+
+    // let ele = list.getElementsByTagName('li')
+    // console.log(ele);
 
     let newSrc = e.target.src;
     this.setState({icons: [...this.state.icons, newSrc]}, function() {
     });
     // Onclick call changeIcon
-    li.setAttribute('id', newSrc);
 
     let newText = this.setInnerHTML(e.target.getAttribute('id'));
-    li.innerHTML = newText;
-    // vi bytter og skjuler, og sikrer oss at knappene kan gjøre det
-    li.addEventListener('click', () => {
-      this.setState({ourSRC: li.getAttribute('id')}, function() {});
-      this.hideIcon()
-    });
-    this.setState({ourSRC: newSrc}, function() {});
-    this.hideIcon()
+    li.setAttribute('id', newText);
+    let alreadyExists = this.alreadyInList(newText, list)
 
-    list.appendChild(li);
-    this.setState({
-      imgIcon: li.getAttribute('id')
-    });
-    this.closeIconSelect() // rem iconlist
+    if (alreadyExists === false) {
+      li.innerHTML = newText;
+      // vi bytter og skjuler, og sikrer oss at knappene kan gjøre det
+      
+      li.addEventListener('click', () => {
+        this.setState({ourSRC: li.getAttribute('id')}, function() {});
+        this.hideIcon()
+      });
+      this.setState({ourSRC: newSrc}, function() {});
+      this.hideIcon()
+  
+      list.appendChild(li);
+      this.setState({
+        imgIcon: li.getAttribute('id')
+      });
+      this.closeIconSelect()
+    } else {
+      alert('This icon already exists in the list!');
+      this.closeIconSelect();
+    }
+  }
+
+  alreadyInList(newText, list) {
+    let ele = list.getElementsByTagName('li')
+    // console.log(ele);
+    for (let i = 0; i < ele.length; i ++) {
+      console.log(ele[i])
+      if (ele[i].getAttribute('id') === newText) {
+        console.log("alEX")
+        return true;
+      }
+    }
+    return false;
   }
 
   takeAction(event) {
     if (this.state.ourSRC !== null && this.state.addIcon === false) {
       if (this.state.actionID === 0) {
         this.placeIcon(event);
-        this.setState({
-          actionID: 1,
-        });
+        this.setState({sendNewIconToBD: true}, function() {});
+        this.startPointing();
       } else {
         this.pointIcon();
       }
@@ -175,16 +206,24 @@ class BehaviourMapping extends React.Component {
     this.stopPointing()
   }
 
+  startPointing() {
+    this.setState({
+      actionID: 1,
+    });
+  }
+
   stopPointing() {
     this.setState({
       actionID: 0,
     });
+    if (this.state.sendNewIconToBD) {
+      this.sendOnly();
+      this.setState({sendNewIconToBD: false}, function() {});
+    }
   }
 
 
   showAll() {
-    // console.log('Print all');
-    // console.log('currID: ' + this.state.newIconID);
     this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
