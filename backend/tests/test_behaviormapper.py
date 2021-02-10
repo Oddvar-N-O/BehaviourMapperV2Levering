@@ -64,7 +64,7 @@ def test_upload_text(client):
 
 def test_upload_image(client):
     image = "bike.png"
-    data = { "file": (open("behaviormapper/static/icons/man/bike.png", 'rb'), image) }
+    data = { "file": (open("behaviormapper/static/icons/man/bike.png", 'rb'), image), "p_id": 1}
     rv = client.post(('/upload'), data=data)
     assert rv.status_code == 201
     assert rv.json['file'] == image
