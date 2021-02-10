@@ -27,7 +27,7 @@ class BehaviourMapping extends React.Component {
   }
 
   sendOnly() {
-    console.log("Send til Databasen");
+    // console.log("Send til Databasen");
   }
 
   sendDatabaseEvent() {
@@ -88,16 +88,13 @@ class BehaviourMapping extends React.Component {
     let list = document.getElementById('iconList');
     let li = document.createElement('li');
 
-    // let ele = list.getElementsByTagName('li')
-    // console.log(ele);
-
     let newSrc = e.target.src;
     this.setState({icons: [...this.state.icons, newSrc]}, function() {
     });
     // Onclick call changeIcon
 
     let newText = this.setInnerHTML(e.target.getAttribute('id'));
-    li.setAttribute('id', newText);
+    li.setAttribute('id', newSrc);
     let alreadyExists = this.alreadyInList(newText, list)
 
     if (alreadyExists === false) {
@@ -126,7 +123,7 @@ class BehaviourMapping extends React.Component {
     let ele = list.getElementsByTagName('li')
     // console.log(ele);
     for (let i = 0; i < ele.length; i ++) {
-      console.log(ele[i])
+      // console.log(ele[i])
       if (ele[i].getAttribute('id') === newText) {
         console.log("alEX")
         return true;
@@ -152,6 +149,7 @@ class BehaviourMapping extends React.Component {
   placeIcon(event) {
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
+    console.log(img.src);
     img.classList.add('icon');
     img.setAttribute('id', this.state.newIconID.toString());
     this.setState({
