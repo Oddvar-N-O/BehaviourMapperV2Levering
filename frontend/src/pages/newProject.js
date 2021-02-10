@@ -11,16 +11,17 @@ class NewProject extends React.Component {
             projectNameLegend: "Project Name",
             projectImageLegend: "Image",
             description: "",
-            imageURL: '',
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#F3F7F0",
+            p_id: "",
         }
         
         this.handleChange = this.handleChange.bind(this);
         this.handleUploadImage = this.handleUploadImage.bind(this);
         this.setRedirect = this.setRedirect.bind(this);
         this.imageChosen = this.imageChosen.bind(this);
+        this.redirectToMapping = this.redirectToMapping.bind(this);
     }
 
     handleChange(event) { 
@@ -50,23 +51,25 @@ class NewProject extends React.Component {
         }  
     }
 
-    handleUploadImage(ev) {
-        if (!this.state.fromLoadMap) {
-            return
-        }
-        ev.preventDefault();
-        
+    handleUploadImage(p_id) {
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
+        data.append('p_id', p_id);
     
         fetch('http://localhost:5000/upload', {
           method: 'POST',
           body: data,
-        }).then((response) => {
-            response.json().then((body) => {
-            this.setState({ imageURL: `http://localhost:5000/${body.file}` });
-          });
-        }); 
+        }).then(setTimeout(
+            () => this.redirectToMapping(), 500));
+    }
+
+    redirectToMapping() {
+        this.props.history.push({
+            pathname: '/mapping',
+            state: {
+                p_id: this.state.p_id
+            },
+        })
     }
 
     setRedirect(event) {
@@ -98,19 +101,17 @@ class NewProject extends React.Component {
         data.append('name', this.state.projectName);
         data.append('description', this.state.description);
         data.append('startdate', new Date());
-        
-        fetch('http://localhost:5000/addproject', {
+        if (this.state.fromLoadMap){
+            data.append('map', this.uploadInput.files[0].name);
+        }
+        fetch('addproject', {
         method: 'POST',
         body: data,
         }).then((response) => {
             response.json().then((data) => {
+                this.setState({p_id: data.p_id[0]});
                 if (this.state.fromLoadMap) {
-                    this.props.history.push({
-                        pathname: '/mapping',
-                        state: {
-                            p_id: data.p_id[0]
-                        },
-                    });
+                    this.handleUploadImage(data.p_id[0]);
                 } else {
                     this.props.history.push({
                         pathname: '/chooseImage',
@@ -120,8 +121,7 @@ class NewProject extends React.Component {
                             p_id: data.p_id[0],
                         },
                     });
-                }
-                
+                }  
             });
         });
     }
@@ -166,9 +166,6 @@ class NewProject extends React.Component {
                     </form>
                     <ul>
                        <li onClick={ (e) => {
-                            if (this.state.fromLoadMap && this.uploadInput.files.length !== 0) {
-                                this.handleUploadImage(e);
-                            }
                             this.setRedirect(e);     
                         }} style={{backgroundColor: this.state.liColor}}>Let's go!</li>
                     </ul>

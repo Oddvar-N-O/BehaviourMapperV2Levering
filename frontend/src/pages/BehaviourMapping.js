@@ -19,21 +19,20 @@ class BehaviourMapping extends React.Component {
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
         // Perhaps collect all these into one object at a late time
-        // p_id: props.location.state.p_id,
+        p_id: props.location.state.p_id,
         projdata: [],
         mapblob: "",
       };
       this.selectIcon = this.addIconToList.bind(this)
   }
 
-  sendOnly() {
-    // console.log("Send til Databasen");
-  }
-
   sendDatabaseEvent() {
     // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x-25, this.state.ourIconCoord.y-25];
+    if (this.state.ourIconCoord.degree === undefined) {
+      this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
+    }
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
@@ -214,7 +213,7 @@ class BehaviourMapping extends React.Component {
       actionID: 0,
     });
     if (this.state.sendNewIconToBD) {
-      this.sendOnly();
+      this.sendDatabaseEvent();
       this.setState({sendNewIconToBD: false}, function() {});
     }
   }

@@ -86,11 +86,11 @@ def getFigureData():
     for res in result:
         data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
     return json.dumps(data)
-
+    
 @app.route('/getmap')
 def getMap():
     get_map_sql =('SELECT map FROM Project WHERE id=?')
-    args = request.args.get('p_id',)
+    args = (request.args.get('p_id'),)
     result = query_db(get_map_sql, args, True)
     image = {"image": ""}
     for res in result:
@@ -161,11 +161,15 @@ def fileUpload():
     file = request.files['file']
     unique = 1
     if allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        filename = secure_filename(file.filename)       
         destination="/".join([target, filename])
         while os.path.exists(destination):
             destination="/".join([target, str(unique) + filename])
             unique += 1
+        if unique > 2:
+            addMapName(str(unique - 1) + filename, request.form['p_id'])
+        else:
+            addMapName(filename, request.form['p_id'])
     else:
         raise InvalidUsage("Not allowed file ending", status_code=400)
     try:
@@ -207,6 +211,12 @@ def selectdb():
             temp_result.append(query)
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
+
+def addMapName(mapname, p_id):
+    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=?")
+    values = (mapname, p_id)
+    res = query_db(add_map_name_sql, values, True)
+    return {"res": res}
 
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "bilde", "attributter")

@@ -64,7 +64,10 @@ function LoadProject() {
                         data: {
                             project: currProj,
                             events: {allEvents},
-                          }
+                          },
+                        state: {
+                          p_id: currProj['id'],
+                        },
                         }}>Choose this project
                 </Link>
               </button>
