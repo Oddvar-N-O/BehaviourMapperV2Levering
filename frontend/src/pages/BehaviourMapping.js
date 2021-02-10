@@ -18,7 +18,7 @@ class BehaviourMapping extends React.Component {
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
         // Perhaps collect all these into one object at a late time
-        p_id: props.location.state.p_id,
+        // p_id: props.location.state.p_id,
         projdata: [],
         mapblob: "",
       };
@@ -104,7 +104,7 @@ class BehaviourMapping extends React.Component {
   }
 
   takeAction(event) {
-    if (this.state.ourSRC != null && this.state.addIcon == false) {
+    if (this.state.ourSRC !== null && this.state.addIcon === false) {
       if (this.state.actionID === 0) {
         this.placeIcon(event);
         this.setState({
