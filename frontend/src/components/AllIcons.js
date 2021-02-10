@@ -46,7 +46,7 @@ class AllIcons extends React.Component {
         const redIcons = this.state.redData.map(data => 
             
             <div key={data.id} className='single-icon'>
-                <div className='single-icon' onClick={this.props.closeIconSelect}>
+                <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
                     color={data.color}/>
@@ -57,7 +57,7 @@ class AllIcons extends React.Component {
             
         const blueIcons = this.state.blueData.map(data => 
             <div key={data.id} className='single-icon'>
-                <div className='single-icon' onClick={this.props.closeIconSelect}>
+                <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon
                     description={data.description} 
                     color={data.color}/>
@@ -68,7 +68,7 @@ class AllIcons extends React.Component {
 
         const greenIcons = this.state.greenData.map(data => 
             <div key={data.id} className='single-icon'>
-                <div className='single-icon' onClick={this.props.closeIconSelect}>
+                <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
                     color={data.color}/>
