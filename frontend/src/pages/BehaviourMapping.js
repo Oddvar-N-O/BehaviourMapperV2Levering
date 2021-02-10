@@ -91,13 +91,13 @@ class BehaviourMapping extends React.Component {
     let newSrc = e.target.src;
     this.setState({icons: [...this.state.icons, newSrc]}, function() {
     });
-    // Onclick call changeIcon
-
-    let newText = this.setInnerHTML(e.target.getAttribute('id'));
     li.setAttribute('id', newSrc);
+
+    let newText = this.setInnerHTML(e.target.getAttribute('id'));    
+    let foundObject = this.objectExists(newText);
     let alreadyExists = this.alreadyInList(newText, list)
 
-    if (alreadyExists === false) {
+    if (alreadyExists === false && foundObject === true) {
       li.innerHTML = newText;
       // vi bytter og skjuler, og sikrer oss at knappene kan gjøre det
       
@@ -113,10 +113,21 @@ class BehaviourMapping extends React.Component {
         imgIcon: li.getAttribute('id')
       });
       this.closeIconSelect()
+    } else if (alreadyExists === false && foundObject === false) {
+      alert('Error Loading from DB, please try again!');
+      this.closeIconSelect();
     } else {
       alert('This icon already exists in the list!');
       this.closeIconSelect();
     }
+  }
+
+  objectExists(newText) {
+    if (newText === undefined) {
+      console.log("undefined!")
+      return false;
+    }
+    return true;
   }
 
   alreadyInList(newText, list) {
@@ -124,8 +135,7 @@ class BehaviourMapping extends React.Component {
     // console.log(ele);
     for (let i = 0; i < ele.length; i ++) {
       // console.log(ele[i])
-      if (ele[i].getAttribute('id') === newText) {
-        console.log("alEX")
+      if (ele[i].innerHTML === newText) {
         return true;
       }
     }
@@ -144,12 +154,9 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-
-
   placeIcon(event) {
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
-    console.log(img.src);
     img.classList.add('icon');
     img.setAttribute('id', this.state.newIconID.toString());
     this.setState({
@@ -196,14 +203,6 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-  hideIcon() {
-    var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon != null) {
-      icon.style.display = 'none';
-    }
-    this.stopPointing()
-  }
-
   startPointing() {
     this.setState({
       actionID: 1,
@@ -220,6 +219,13 @@ class BehaviourMapping extends React.Component {
     }
   }
 
+  hideIcon() {
+    var icon = document.getElementById(this.state.ourIconID.toString())
+    if (icon != null) {
+      icon.style.display = 'none';
+    }
+    this.stopPointing()
+  }
 
   showAll() {
     this.stopPointing()
