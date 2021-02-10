@@ -91,11 +91,9 @@ def getFigureData():
 def getMap():
     get_map_sql =('SELECT map FROM Project WHERE id=?')
     args = (request.args.get('p_id'),)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",type(args), len(args))
     result = query_db(get_map_sql, args, True)
     image = {"image": ""}
     for res in result:
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",res)
         image["image"] = "./uploads/" + res
     try:
         return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
@@ -167,8 +165,11 @@ def fileUpload():
         destination="/".join([target, filename])
         while os.path.exists(destination):
             destination="/".join([target, str(unique) + filename])
-            addMapName(str(unique) + filename, request.form['p_id'])
             unique += 1
+        if unique > 2:
+            print("!!!!!!!!!!!!!!!!!!!!!!!!",addMapName(str(unique - 1) + filename, request.form['p_id']))
+        else:
+            print("!!!!!!!!!!!!!!!!!!!!!!!!",addMapName(filename, request.form['p_id']))
     else:
         raise InvalidUsage("Not allowed file ending", status_code=400)
     try:

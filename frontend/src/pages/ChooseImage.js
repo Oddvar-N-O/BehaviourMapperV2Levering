@@ -24,6 +24,7 @@ class ChooseImage extends React.Component {
         controls: [new Zoom()]
       });
       this.exportImg = this.exportImg.bind(this);
+      this.pauseBeforeRedirect = this.pauseBeforeRedirect.bind(this);
   }
 
   exportImg() {
@@ -62,15 +63,20 @@ class ChooseImage extends React.Component {
           fetch('http://localhost:5000/upload', {
             method: 'POST',
             body: data,
-          }).then(
-            this.props.history.push({
-              pathname: '/mapping',
-              state: {
-                  p_id: this.state.p_id
-              },
-            }),
+          }).then(res => res.json()).then(data => {
+            console.log(data);
+          }).then(setTimeout(this.pauseBeforeRedirect(), 500)
           );
       }); 
+  }
+
+  pauseBeforeRedirect() {
+    this.props.history.push({
+      pathname: '/mapping',
+      state: {
+          p_id: this.state.p_id
+      },
+    });
   }
 
   componentDidMount() {
