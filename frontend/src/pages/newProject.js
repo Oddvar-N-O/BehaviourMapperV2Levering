@@ -11,16 +11,17 @@ class NewProject extends React.Component {
             projectNameLegend: "Project Name",
             projectImageLegend: "Image",
             description: "",
-            imageURL: '',
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#F3F7F0",
+            p_id: "",
         }
         
         this.handleChange = this.handleChange.bind(this);
         this.handleUploadImage = this.handleUploadImage.bind(this);
         this.setRedirect = this.setRedirect.bind(this);
         this.imageChosen = this.imageChosen.bind(this);
+        this.redirectToMapping = this.redirectToMapping.bind(this);
     }
 
     handleChange(event) { 
@@ -58,11 +59,17 @@ class NewProject extends React.Component {
         fetch('http://localhost:5000/upload', {
           method: 'POST',
           body: data,
-        }).then((response) => {
-            response.json().then((body) => {
-            this.setState({ imageURL: `http://localhost:5000/${body.file}` });
-          });
-        }); 
+        }).then(setTimeout(
+            () => this.redirectToMapping(), 500));
+    }
+
+    redirectToMapping() {
+        this.props.history.push({
+            pathname: '/mapping',
+            state: {
+                p_id: this.state.p_id
+            },
+        })
     }
 
     setRedirect(event) {
@@ -97,20 +104,14 @@ class NewProject extends React.Component {
         if (this.state.fromLoadMap){
             data.append('map', this.uploadInput.files[0].name);
         }
-        fetch('http://localhost:5000/addproject', {
+        fetch('addproject', {
         method: 'POST',
         body: data,
         }).then((response) => {
             response.json().then((data) => {
+                this.setState({p_id: data.p_id[0]});
                 if (this.state.fromLoadMap) {
-                    this.handleUploadImage(data.p_id[0], () => {
-                        this.props.history.push({
-                            pathname: '/mapping',
-                            state: {
-                                p_id: data.p_id[0]
-                            },
-                        });
-                    });
+                    this.handleUploadImage(data.p_id[0]);
                 } else {
                     this.props.history.push({
                         pathname: '/chooseImage',

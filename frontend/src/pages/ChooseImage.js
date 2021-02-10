@@ -63,10 +63,8 @@ class ChooseImage extends React.Component {
           fetch('http://localhost:5000/upload', {
             method: 'POST',
             body: data,
-          }).then(res => res.json()).then(data => {
-            console.log(data);
-          }).then(setTimeout(this.pauseBeforeRedirect(), 500)
-          );
+          }).then(setTimeout(
+            () => this.pauseBeforeRedirect(), 500));
       }); 
   }
 

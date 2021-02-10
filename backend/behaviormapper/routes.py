@@ -167,9 +167,9 @@ def fileUpload():
             destination="/".join([target, str(unique) + filename])
             unique += 1
         if unique > 2:
-            print("!!!!!!!!!!!!!!!!!!!!!!!!",addMapName(str(unique - 1) + filename, request.form['p_id']))
+            addMapName(str(unique - 1) + filename, request.form['p_id'])
         else:
-            print("!!!!!!!!!!!!!!!!!!!!!!!!",addMapName(filename, request.form['p_id']))
+            addMapName(filename, request.form['p_id'])
     else:
         raise InvalidUsage("Not allowed file ending", status_code=400)
     try:
