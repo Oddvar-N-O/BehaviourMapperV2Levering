@@ -265,9 +265,9 @@ class BehaviourMapping extends React.Component {
     return (
       <div id='maincont'>
         <div className="sidebar">
-          <div className={this.state.addIcon ? "visible" : "icons-invisible"}>
+          <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
               <AllIcons selectIcon = {this.selectIcon} />
-              <button id="exitIconSelect" onClick={() => this.closeIconSelect()}>Return</button>
+              <button className="exit-icon-select" onClick={() => this.closeIconSelect()}>Close</button>
             </div>
               <ul id="iconList">
                 <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>

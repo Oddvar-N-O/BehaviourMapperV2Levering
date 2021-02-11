@@ -15,7 +15,7 @@
 }
 .sidebar {
     display: flex;
-    width: 200px;
+    width: 20vw;
     order: 1;
     background-color: rgb(34, 34, 34);
     color: rgb(201, 185, 156);
@@ -63,7 +63,7 @@
 }
 .map-image {
     height: 100vh;
-    width: 100vw;
+    width: 800vw;
     order: 3;
 }
 
@@ -84,9 +84,9 @@
     order: 2;
 }
 
-#exitIconSelect {
+.exit-icon-select {
     height: 100%;
-    width: 100px;
+    width: 50%;
     color: aliceblue;
     font-size: 20px;
     background-color: crimson;
