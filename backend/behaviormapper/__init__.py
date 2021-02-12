@@ -4,11 +4,11 @@ from flask_cors import CORS, cross_origin
 import sqlite3
 import mysql.connector
 from mysql.connector import errorcode
-import os
+from Crypto.Random import get_random_bytes
 
 # Create and configure app
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = get_random_bytes(32)
 # CORS implemented so that we don't get errors when trying to access the server from a different server location
 CORS(app)
 app.config.from_object(Config)

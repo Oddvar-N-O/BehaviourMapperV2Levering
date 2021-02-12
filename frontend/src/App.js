@@ -4,7 +4,6 @@ import NewProject from './pages/newProject'
 import Login from './pages/login'
 import Startpage from './pages/startpage'
 import ChooseImage from './pages/ChooseImage'
-// import UploadMap from './pages/UploadMap'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import LoadProject from './pages/loadProject';
@@ -25,15 +24,14 @@ function App() {
     <header className="App-header">
       <p>Flask says {placeholder}</p>
     </header>
-      <Router>
+      <Router basename="/behaviourmapper">
         <Switch>
           <Route path='/' exact component={Login} />
           <Route path='/startpage' component={Startpage} />
           <Route path='/newproject' component={NewProject} />
-          <Route path='/chooseImage' component={ChooseImage} />
+          <Route path='/chooseimage' component={ChooseImage} />
           <Route path='/mapping' component={BehaviourMapping} />
           <Route path='/loadproject' component={LoadProject} />
-          {/* <Route path='/upload' component={UploadMap} /> */}
         </Switch>
       </Router>
     </div>
