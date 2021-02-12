@@ -24,6 +24,7 @@ class BehaviourMapping extends React.Component {
         mapblob: "",
       };
       this.selectIcon = this.addIconToList.bind(this)
+      this.closeIconSelect = this.closeIconSelect.bind(this)
   }
 
   sendDatabaseEvent() {
@@ -246,11 +247,14 @@ class BehaviourMapping extends React.Component {
   }
 
   closeIconSelect() {
-    this.setState({ addIcon: false});
+    if (this.state.addIcon) {
+      this.setState({ addIcon: false});
+    }  
   }
   
   componentDidMount() {
-    fetch(`getprojectmapping?p_id=${this.state.p_id}`).then(res => res.json())
+    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
+    .then(res => res.json())
     .then(data => {
       this.setState({projdata: data});
     });
@@ -266,9 +270,9 @@ class BehaviourMapping extends React.Component {
       <div id='maincont'>
         <div className="sidebar">
           <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
-              <AllIcons selectIcon = {this.selectIcon} />
-              <button className="exit-icon-select" onClick={() => this.closeIconSelect()}>Close</button>
-            </div>
+              <AllIcons selectIcon = {this.selectIcon} 
+              close={() => this.closeIconSelect()}/>
+            </div>  
               <ul id="iconList">
                 <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
                 <li className="buttonLi" onClick={() => this.showAll()}>Show icons</li>

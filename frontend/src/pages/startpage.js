@@ -5,14 +5,7 @@ import { Link } from 'react-router-dom';
 import './startpage.css';
 
 
-// function change_visibility() {
-//   if (new_project) {
-//     new_project = false
-//   }
-//   else {
-//     new_project = true
-//   }
-// }
+
 
 function Startpage() {
   // State for new_project
@@ -33,33 +26,35 @@ function Startpage() {
     return (
       <div className="startpage">
         <h1>Behaviour Mapper</h1>
-        <ul id='start-menu'>
-          {/* NEW PROJECT */}
-          <li onClick={ () => { hideLoadProject(), changeNewVisibility() }}
-            className={new_project ? 'active' : 'passive'}
-            >New Project</li>
-          {/* LOAD PROJECT */}
-          <li onClick={ () => { hideNewProject(), changeLoadVisibility() }}
-            className={load_project ? 'active' : 'passive'}
-          ><Link to={"/loadproject"}>Load Project</Link></li>
-          {/* USER PROFILE */}
-          <li onClick={hideNewProject}>User Profile</li>
-        </ul>
-        <ul id={new_project ? 'load-map' : 'invisible'}>
-          <Link to={{
-              pathname: "/newproject",
-              state: {
-                fromLoadMap: false
-            }
-            }}><li>Use Web-map</li></Link>
-            {/* <li>Use Template??</li> */}
+        <div className="menu">
+          <ul id='start-menu'>
+            {/* NEW PROJECT */}
+            <li onClick={ () => { hideLoadProject(), changeNewVisibility() }}
+              className={new_project ? 'active' : 'passive'}
+              >New Project</li>
+            {/* LOAD PROJECT */}
+            <li onClick={ () => { hideNewProject(), changeLoadVisibility() }}
+              className={load_project ? 'active' : 'passive'}
+            ><Link to={"/loadproject"}>Load Project</Link></li>
+            {/* USER PROFILE */}
+            <li onClick={hideNewProject}>User Profile</li>
+          </ul>
+          <ul id={new_project ? 'load-map' : 'invisible'}>
             <Link to={{
-              pathname: "/newproject",
-              state: {
-                fromLoadMap: true
-            }
-            }}><li>Load Map From File</li></Link>
-        </ul>
+                pathname: "/newproject",
+                state: {
+                  fromLoadMap: false
+              }
+              }}><li>Use Web-map</li></Link>
+              {/* <li>Use Template??</li> */}
+              <Link to={{
+                pathname: "/newproject",
+                state: {
+                  fromLoadMap: true
+              }
+              }}><li>Load Map From File</li></Link>
+          </ul>
+        </div>
       </div>
     );
   }
