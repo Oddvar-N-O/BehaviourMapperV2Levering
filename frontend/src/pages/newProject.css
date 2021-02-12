@@ -30,7 +30,7 @@
     width: 50vw;
     max-width: 540px;
     height: 68vh;
-    margin-top: 12vh;
+    margin-top: 13.5vh;
     background-color: #222020;
     color: #ece8e8;
     border-radius: 5px;
@@ -38,7 +38,7 @@
 }
 
 .new-project-box-upload {
-    height: 73vh;
+    height: 75vh;
 }
 
  #heading-and-form {
@@ -49,7 +49,7 @@
      font-size: 4vh;
      position: absolute;
      right: 26vw;
-     top: 13vh;
+     top: 14.5vh;
      color: #58A4B0;
  }
 
