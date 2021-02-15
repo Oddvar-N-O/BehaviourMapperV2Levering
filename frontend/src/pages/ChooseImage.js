@@ -16,7 +16,7 @@ class ChooseImage extends React.Component {
       this.state = {
         projectName: props.location.state.projectName,
         description: props.location.state.description,
-        p_id: props.location.state.p_id,
+        p_id: "",
       }
       this.map = new Map({
         target: null,
@@ -28,7 +28,31 @@ class ChooseImage extends React.Component {
       this.pauseBeforeRedirect = this.pauseBeforeRedirect.bind(this);
   }
 
+  addProject() {
+    const data = new FormData();
+    data.append('name', this.state.projectName);
+    data.append('description', this.state.description);
+    data.append('startdate', new Date());
+    fetch('addproject', {
+    method: 'POST',
+    body: data,
+    }).then((response) => {
+        response.json().then((data) => {
+            this.setState({p_id: data.p_id[0]});
+            this.props.history.push({
+                pathname: '/chooseImage',
+                state: {
+                    projectName: this.state.projectName,
+                    description: this.state.description,
+                    p_id: data.p_id[0],
+                },
+            });
+        });
+    });
+  }
+
   exportImg() {
+    this.addProject()
     var mapCanvas = document.createElement('canvas');
     var size = this.map.getSize();
     mapCanvas.width = size[0];
