@@ -56,7 +56,7 @@ class NewProject extends React.Component {
         data.append('file', this.uploadInput.files[0]);
         data.append('p_id', p_id);
     
-        fetch('http://localhost:5000/upload', {
+        fetch('upload', {
           method: 'POST',
           body: data,
         }).then(setTimeout(

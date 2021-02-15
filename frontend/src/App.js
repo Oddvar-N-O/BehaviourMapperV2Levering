@@ -5,7 +5,7 @@ import Login from './pages/login'
 import Startpage from './pages/startpage'
 import ChooseImage from './pages/ChooseImage'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import LoadProject from './pages/loadProject';
 
 

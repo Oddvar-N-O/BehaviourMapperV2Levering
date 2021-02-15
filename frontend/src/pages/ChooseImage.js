@@ -60,7 +60,7 @@ class ChooseImage extends React.Component {
           const data = new FormData();
           data.append('file', file);
           data.append('p_id', this.state.p_id)
-          fetch('http://localhost:5000/upload', {
+          fetch('upload', {
             method: 'POST',
             body: data,
           }).then(setTimeout(
