@@ -13,7 +13,7 @@ class NewProject extends React.Component {
             description: "",
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
-            liColor: "#F3F7F0",
+            liColor: "#FDFFFC",
             p_id: "",
         }
         
@@ -44,10 +44,10 @@ class NewProject extends React.Component {
     }
 
     changeColor() {
-        if (this.state.liColor === "#F3F7F0") {
-            this.setState({ liColor: "#FF0000" })
+        if (this.state.liColor === "#FDFFFC") {
+            this.setState({ liColor: "#EF2E3B" })
         } else if (this.state.projectNameLegend === "Project Name"){
-            this.setState({ liColor: "#F3F7F0" })
+            this.setState({ liColor: "#FDFFFC" })
         }  
     }
 

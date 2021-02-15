@@ -88,15 +88,20 @@ class ChooseImage extends React.Component {
 
   render() {
       return (
-        <div id="choose-image">
-          <div className="choose-image-box">
-            <h1>{this.state.projectName}</h1>
+        <div className="choose-image">
+          <div className="choose-image-sidebar">
+            <div className="sidebar-text"> Projectname: <br/> {this.state.projectName}</div>
+            <div className="sidebar-text">Zoom in to choose your location, then click "Use Map" to proceed</div>
+            
+            <button className="choose-image-button" onClick={this.exportImg}>Use Map</button>
+
+          </div>
+            
             <Link to="/startpage" className="close-icon">
                 <AiIcons.AiOutlineClose />
             </Link>
             <div id="choose-image-map"/>
-            <button className="choose-image-button" onClick={this.exportImg}>Choose image</button>
-          </div>
+          
         </div>
       )
   }

@@ -1,6 +1,7 @@
 import React from 'react'
 import Icon from './Icon'
 import './AllIcons.css'
+import * as AiIcons from 'react-icons/ai';
 
 class AllIcons extends React.Component {
     constructor() {
@@ -83,15 +84,17 @@ class AllIcons extends React.Component {
                     <li onClick={() => {
                         this.setState({color: "blue"})}}
                         className={ this.state.color === "blue" ? "selected" : "not-selected" }
-                        >Man</li>
-                    <li onClick={() => {
-                        this.setState({color: "red"})}}
+                        >Man
+                    </li>
+                    <li onClick={() => {this.setState({color: "red"})}}
                         className={ this.state.color === "red" ? "selected" : "not-selected" }
-                        >Woman</li>
-                    <li onClick={() => {
-                        this.setState({color: "green"})}}
+                        >Woman
+                    </li>
+                    <li onClick={() => {this.setState({color: "green"})}}
                         className={ this.state.color === "green" ? "selected" : "not-selected" }
-                        >Child</li>
+                        >Child
+                    </li>
+                    <div className="x" onClick={this.props.close}><AiIcons.AiOutlineClose /></div>
                 </ul>
         
                 <div className={this.state.color==="red" ? "icons-visible" : "icons-invisible"}>
