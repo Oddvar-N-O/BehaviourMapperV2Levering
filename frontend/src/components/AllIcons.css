@@ -4,11 +4,12 @@
     top: 13.5vh;
     width: 45vw;
     height: 73vh;
-    background-color: black;
-    font-size: 30px;
+    background-color: #222020;
+    font-size: 27px;
     min-width: 500px;
     /* padding-bottom: 2vh; */
     border-radius: 5px;
+    color: #ece8e8;
 }
 
 @media only screen and (max-width: 1111.11px) {
@@ -23,12 +24,19 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    
 }
 
-.icon-select li{
-    /* width: 33.333333%; */
+.icon-select .gender-select li{
     text-align: center;
-    /* display: inline; */
+    margin-top: 0;
+    padding: 7px 0 9px;
+}
+
+.x {
+    font-size: 24px;
+    padding: 6px 8px 0 6px;
+    cursor: pointer;
 }
 
 .icons-visible {
@@ -48,18 +56,20 @@
 .single-icon {
     flex: 1 0 21%;
     height: 40px;
-    background-color: black;
+    background-color: #222020;
     cursor: pointer;
 }
 
 .icon-description {
-    background-color: black;
+    background-color: #222020;
     padding: 1vh 0;
+    
 }
 
 .selected {
-    background-color: aliceblue;
+    background-color: #ece8e8;
     border-radius: 3px;
+    color: #58A4B0;
 }
 
 .single-icon:hover {
@@ -67,10 +77,14 @@
 }
 
 .gender-select {
+    display: flex;
     margin-bottom: 2vh;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 0.9px #918D8D solid;
 }
 
 .sidebar .icon-select li {
-    border-bottom: 0.5px aliceblue solid;
+    border-bottom: none;
     
 }

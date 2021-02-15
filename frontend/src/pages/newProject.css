@@ -5,8 +5,14 @@
     .new-project-box {
         width: 70vw;
     }
-    .close-icon {
+    #new-project .close-icon {
         left: 16vw;
+    }
+  }
+
+  @media only screen and (min-width: 1200px) {
+    #new-project .close-icon {
+        left: calc(234px + 50vw);
     }
   }
 
@@ -22,15 +28,17 @@
     justify-content: center;
     align-items: center;
     width: 50vw;
+    max-width: 540px;
     height: 68vh;
-    margin-top: 12vh;
-    background-color: #292828;
+    margin-top: 13.5vh;
+    background-color: #222020;
     color: #ece8e8;
-    box-shadow: 2px 2px 4px #161616;;
+    border-radius: 5px;
+    box-shadow: 2px 2px 4px #222020;;
 }
 
 .new-project-box-upload {
-    height: 73vh;
+    height: 75vh;
 }
 
  #heading-and-form {
@@ -41,15 +49,15 @@
      font-size: 4vh;
      position: absolute;
      right: 26vw;
-     top: 13vh;
-     color: #ece8e8;
+     top: 14.5vh;
+     color: #58A4B0;
  }
 
 #new-project h2 {
     text-align: center;
     font-size: 7.5vh;
     padding-bottom: 3vh;
-    color: #3891A6;
+    color: #58A4B0;
 }
 
 #new-project form {
@@ -70,8 +78,20 @@
     border: none;
     background-color: #ece8e8;
     margin: 0.7vh 0;
-    box-shadow: 4px 4px 8px black;
 }
+
+input, textarea {
+    background-color: #ece8e8;
+      border: 1px solid #CCCCCC;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+      transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+  }
+  
+  input:focus, textarea:focus {
+    border-color: rgba(82, 168, 236, 0.8);
+      box-shadow: 0 1px 1px #58A4B0 inset, 0 0 8px #58A4B0;
+      outline: 0 none;
+  }
 
 #project-name {
     height: 4vh;
@@ -86,12 +106,12 @@
 /* BUTTON */
 
 #new-project li {
-    background-color: #F3F7F0;
+    /* background-color: #FDFFFC; */
     list-style: none;
     padding: 1vh 2vh;
     margin: 7.5px;
-    border: 1.2px solid #19323C;
-    color: #19323C;
+    /* border: 1.2px solid #EF2E3B; */
+    color: #222020;
     border-radius: 25px;
     opacity: 0.85; 
     font-size: 4.5vh;
@@ -106,8 +126,6 @@
 #new-project #start {
     display: block;
 }
-
-
 
 #start_startButton {
     display: block;
@@ -127,9 +145,6 @@
     padding: 4px, 9px;
     margin-bottom: 12px;
 }
-::-webkit-file-upload-button{
-    padding: 6px, 12px;
-}
 
 .upload-button {
     display: inline-block;
@@ -138,5 +153,5 @@
     margin-top: 0.5vh;
     cursor: pointer;
     font-size: 14px;
-    box-shadow: 4px 4px 8px black;
+    box-shadow: 4px 4px 8px #222020;
 }
