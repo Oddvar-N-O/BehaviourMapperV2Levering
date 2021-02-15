@@ -11,19 +11,9 @@ import LoadProject from './pages/loadProject';
 
 
 function App() {
-  const [placeholder, setPlaceholder] = useState('Flask server not running');
-
-  useEffect(() => {
-    fetch('/hello').then(res => res.json()).then(data => {
-      setPlaceholder(data.result);
-    });
-  }, []);
 
   return (
     <div className="App">
-    <header className="App-header">
-      <p>Flask says {placeholder}</p>
-    </header>
       <Router basename="/behaviourmapper">
         <Switch>
           <Route path='/' exact component={Login} />

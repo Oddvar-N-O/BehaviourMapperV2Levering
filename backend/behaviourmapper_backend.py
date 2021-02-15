@@ -1,1 +1,1 @@
-from behaviormapper import app
+from behaviourmapper import app

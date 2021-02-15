@@ -1,5 +1,5 @@
 from flask import jsonify
-from behaviormapper import app
+from behaviourmapper import app
 
 # copied from https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
 class InvalidUsage(Exception):

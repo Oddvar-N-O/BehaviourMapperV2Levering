@@ -12,11 +12,6 @@ def client():
     testing_client = app.test_client()
     yield testing_client
 
-
-def test_hello(client):
-    rv = client.get('/hello')
-    assert json.loads(rv.data) == {'result': "Koplingen mellom flask og react fungerer WEE!"}
-
 def test_db(client):
     rv = client.get(('/initdb'),follow_redirects=True)
     dbtest = {"Users": [1,"kartet"],

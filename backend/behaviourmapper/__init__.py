@@ -5,6 +5,7 @@ import sqlite3
 import mysql.connector
 from mysql.connector import errorcode
 from Crypto.Random import get_random_bytes
+from behaviourmapper.prefixmiddleware import PrefixMiddleware
 
 # Create and configure app
 app = Flask(__name__)
@@ -13,6 +14,8 @@ app.secret_key = get_random_bytes(32)
 CORS(app)
 app.config.from_object(Config)
 app.config["UPLOAD_FOLDER"] = Config.UPLOAD_PATH
+app.config["APPLICATION_ROOT"] = Config.APPLICATION_ROOT
+app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/behaviourmapper')
 
 
 # get an instance of the db
@@ -57,4 +60,4 @@ def close_connection(exception):
 
 # flask_cors.CORS(app, expose_headers='Authorization')
 
-from behaviormapper import routes
+from behaviourmapper import routes

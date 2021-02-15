@@ -1,5 +1,5 @@
-from behaviormapper import app, query_db, init_db, select_db
-from behaviormapper.errorhandlers import InvalidUsage
+from behaviourmapper import app, query_db, init_db, select_db
+from behaviourmapper.errorhandlers import InvalidUsage
 from datetime import datetime, date
 from flask import Flask, redirect, url_for, flash, request, session, send_from_directory
 from time import time
@@ -178,10 +178,6 @@ def fileUpload():
     except:
         raise InvalidUsage("Failed to upload image", status_code=500)
     
-
-@app.route('/hello')
-def say_hello_world():
-    return {"result": "Koplingen mellom flask og react fungerer WEE!"}
 
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
 @app.route('/initdb')
