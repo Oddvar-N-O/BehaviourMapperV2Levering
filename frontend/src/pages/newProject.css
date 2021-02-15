@@ -12,7 +12,7 @@
 
   @media only screen and (min-width: 1200px) {
     #new-project .close-icon {
-        left: calc(234px + 50vw);
+        left: calc(228px + 50vw);
     }
   }
 
@@ -50,7 +50,7 @@
      position: absolute;
      right: 26vw;
      top: 14.5vh;
-     color: #58A4B0;
+     color: #ece8e8;
  }
 
 #new-project h2 {

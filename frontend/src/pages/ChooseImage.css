@@ -20,17 +20,30 @@
     color: #ece8e8;
     order: 1;
 }
-/* .choose-image-sidebar .close-icon {
-    font-size: 4vh;
-    position: absolute;
-    right: 6vw;
-    top: 6vh;
-    color: #ece8e8;
-} */
 
 .sidebar-text {
     margin: 14px;
     font-size: 1em;
+}
+
+.back-icon {
+    position: absolute;
+    top: 8px;
+    left: 14px;
+    font-size: 55px;
+    color: #EF2E3B;
+    cursor: pointer;
+}
+
+.back-icon:hover {
+    opacity: 0.88;
+}
+
+.back-icon-text{
+    position: absolute;
+    top: 15px;
+    left: 60px;
+    color: #918D8D;
 }
 
 /* BUTTONS */

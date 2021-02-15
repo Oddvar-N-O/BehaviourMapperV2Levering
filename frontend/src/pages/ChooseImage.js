@@ -7,6 +7,7 @@ import Zoom from 'ol/control/Zoom';
 import { transform } from 'ol/proj'
 import { Link } from 'react-router-dom';
 import * as AiIcons from 'react-icons/ai';
+import * as BiIcons from 'react-icons/bi';
 import './ChooseImage.css'
 
 class ChooseImage extends React.Component {
@@ -89,7 +90,18 @@ class ChooseImage extends React.Component {
   render() {
       return (
         <div className="choose-image">
-          <div className="choose-image-sidebar">
+            <div className="choose-image-sidebar">
+            <Link to={{
+                pathname: "/newproject",
+                state: {
+                  fromLoadMap: false,
+                  projectName: this.state.projectName,
+                  description: this.state.description,
+              }
+            }}>
+              <BiIcons.BiArrowBack className="back-icon"/>
+            </Link> 
+            {/* <span className="back-icon-text"> go back </span> */}
             <div className="sidebar-text"> Projectname: <br/> {this.state.projectName}</div>
             <div className="sidebar-text">Zoom in to choose your location, then click "Use Map" to proceed</div>
             

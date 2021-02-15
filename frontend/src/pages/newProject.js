@@ -7,10 +7,10 @@ class NewProject extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            projectName: "",
+            projectName: props.location.state.projectName,
+            description: props.location.state.description,
             projectNameLegend: "Project Name",
             projectImageLegend: "Image",
-            description: "",
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#FDFFFC",
