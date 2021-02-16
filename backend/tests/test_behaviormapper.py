@@ -1,7 +1,7 @@
 import json
 import pytest
 import io
-from behaviormapper import app
+from behaviourmapper import app
 from datetime import datetime, date
 import os
 

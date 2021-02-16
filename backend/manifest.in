@@ -1,0 +1,4 @@
+include behaviourmapper/schema.sql
+include config.py
+graft behaviourmapper/static
+global-exclude *.pyc

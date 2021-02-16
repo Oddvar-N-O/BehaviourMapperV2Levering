@@ -2,8 +2,6 @@ from flask import Flask, g
 from config import Config
 from flask_cors import CORS, cross_origin
 import sqlite3
-import mysql.connector
-from mysql.connector import errorcode
 from Crypto.Random import get_random_bytes
 from behaviourmapper.prefixmiddleware import PrefixMiddleware
 
