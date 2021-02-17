@@ -113,14 +113,14 @@ class NewProject extends React.Component {
                 if (this.state.fromLoadMap) {
                     this.handleUploadImage(data.p_id[0]);
                 } else {
-                    this.props.history.push({
-                        pathname: '/chooseImage',
-                        state: {
-                            projectName: this.state.projectName,
-                            description: this.state.description,
-                            p_id: data.p_id[0],
-                        },
-                    });
+                    // this.props.history.push({
+                    //     pathname: '/chooseImage',
+                    //     state: {
+                    //         projectName: this.state.projectName,
+                    //         description: this.state.description,
+                    //         p_id: data.p_id[0],
+                    //     },
+                    // });
                 }  
             });
         });
