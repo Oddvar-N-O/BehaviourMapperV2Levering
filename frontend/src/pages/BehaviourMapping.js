@@ -40,7 +40,7 @@ class BehaviourMapping extends React.Component {
     data.append('f_id', this.state.ourIconID);
     // console.log(data);
 
-    fetch('http://localhost:5000/addevent', {
+    fetch('addevent', {
     method: 'POST',
     body: data,
     }).then((response) => {

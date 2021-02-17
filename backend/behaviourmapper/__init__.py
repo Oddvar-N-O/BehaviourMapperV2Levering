@@ -1,5 +1,5 @@
 from flask import Flask
-from backend.config import Config
+from .config import Config
 from flask_cors import CORS
 
 from Crypto.Random import get_random_bytes

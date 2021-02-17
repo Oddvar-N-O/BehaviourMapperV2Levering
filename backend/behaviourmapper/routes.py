@@ -5,7 +5,7 @@ from flask import Flask, redirect, url_for, flash, request, session, send_from_d
 from time import time
 import json
 import logging
-from backend.config import Config
+from .config import Config
 import os
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
@@ -76,7 +76,7 @@ def getFigure():
     for res in result:
         image["image"] = res
     try:
-        return send_from_directory(Config['STATIC_URL_PATH'], image["image"])
+        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
     except FileNotFoundError:
         abort(404)
 
@@ -99,14 +99,14 @@ def getMap():
     for res in result:
         image["image"] = "./uploads/" + res
     try:
-        return send_from_directory(Config['STATIC_URL_PATH'], image["image"])
+        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
     except FileNotFoundError:
         abort(404)
 
 @bp.route('/favicon.ico')
 def favicon():
     try:
-        return send_from_directory(Config['STATIC_URL_PATH'], "favicon.ico")
+        return send_from_directory(Config.STATIC_URL_PATH, "favicon.ico")
     except FileNotFoundError:
         abort(404)
 
