@@ -1,6 +1,7 @@
 from flask import Flask
 from .config import Config
 from flask_cors import CORS
+import os
 
 from Crypto.Random import get_random_bytes
 # from behaviourmapper.prefixmiddleware import PrefixMiddleware
@@ -8,15 +9,21 @@ from Crypto.Random import get_random_bytes
 
 def create_app(test_config=None):
     # Create and configure app
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=True)
     app.secret_key = get_random_bytes(32)
     # CORS implemented so that we don't get errors when trying to access the server from a different server location
     CORS(app)
     app.config.from_object(Config)
     # Not sure if these two are necessary(may be done on the line above).
-    app.config["UPLOAD_FOLDER"] = Config.UPLOAD_PATH
+    app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
     app.config["APPLICATION_ROOT"] = Config.APPLICATION_ROOT
-    # app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix='/behaviourmapper')
+    app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
+
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
     
     from . import errorhandlers
     app.register_error_handler(errorhandlers.InvalidUsage ,errorhandlers.handle_invalid_usage)
@@ -26,6 +33,8 @@ def create_app(test_config=None):
 
     from . import db
     db.init_app(app)
+
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!", app.config["DATABASE"])
 
     return app
 

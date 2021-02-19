@@ -26,15 +26,16 @@ def get_db():
 
 # initialize db for the first time
 def init_db():
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!", current_app.config["DATABASE"])
     """Clear existing data and create new tables."""
     db = get_db()
 
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
 
-    # with app.app_context():
+    # with current_app.app_context():
     #     db = get_db()
-    #     with app.open_resource('schema.sql', mode='r') as f:
+    #     with current_app.open_resource('schema.sql', mode='r') as f:
     #         db.cursor().executescript(f.read())
     #     db.commit()
 

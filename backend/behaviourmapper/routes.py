@@ -1,7 +1,7 @@
 from .db import query_db, init_db, select_db
 from .errorhandlers import InvalidUsage
 from datetime import datetime, date
-from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint
+from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app
 from time import time
 import json
 import logging
@@ -96,6 +96,7 @@ def getMap():
     args = (request.args.get('p_id'),)
     result = query_db(get_map_sql, args, True)
     image = {"image": ""}
+    print("!!!!!!!!!!!!!!!!!", Config.STATIC_URL_PATH)
     for res in result:
         image["image"] = "./uploads/" + res
     try:
@@ -157,7 +158,8 @@ def getUser():
 
 @bp.route('/upload', methods=['POST'])
 def fileUpload():
-    target=os.path.join(Config.UPLOAD_PATH)
+    target=os.path.join(Config.UPLOAD_FOLDER)
+    print("!!!!!!!!!!!!!!TARGET!!!", target)
     if not os.path.isdir(target):
         os.mkdir(target)
     logger.info("welcome to upload`")
