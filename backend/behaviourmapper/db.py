@@ -6,8 +6,6 @@ from flask import g
 from flask.cli import with_appcontext
 
 # https://github.com/pallets/flask/blob/93dd1709d05a1cf0e886df6223377bdab3b077fb/examples/tutorial/flaskr/db.py
-# to get the backend up and running 
-
 
 # get an instance of the db
 def get_db():
@@ -18,12 +16,6 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-    # db = getattr(g, '_database', None)
-    # if db is None:
-    #     db = g._database = sqlite3.connect(app.config['DATABASE'])
-    # db.row_factory = sqlite3.Row
-    # return db
-
 # initialize db for the first time
 def init_db():
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!", current_app.config["DATABASE"])
@@ -32,12 +24,6 @@ def init_db():
 
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
-
-    # with current_app.app_context():
-    #     db = get_db()
-    #     with current_app.open_resource('schema.sql', mode='r') as f:
-    #         db.cursor().executescript(f.read())
-    #     db.commit()
 
 
 def close_db(e=None):
@@ -48,9 +34,6 @@ def close_db(e=None):
 
     if db is not None:
         db.close()
-    # db = getattr(g, '_database', None)
-    # if db is not None:
-    #     db.close()
 
 def init_app(app):
     app.teardown_appcontext(close_db)
