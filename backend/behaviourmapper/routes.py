@@ -26,10 +26,10 @@ def allowed_file(filename):
 @cross_origin()
 def addProject():
     add_small_project = ("INSERT INTO Project "
-              "(name, description, startdate) "
-              "VALUES (?,?,?)")
+              "(name, description, startdate, u_id) "
+              "VALUES (?,?,?,?)")
     small_project_values = (request.form.get('name'), request.form.get('description'), 
-                        request.form.get('startdate'))
+                        request.form.get('startdate'), 1)
     p_id = query_db(add_small_project, small_project_values)
     return {"p_id": p_id}
     # Add a new project and link a map
