@@ -73,8 +73,11 @@ def getFigure():
     color = request.args.get('color', None)
     result = query_db(get_figure_image_sql, (description, color), True)
     image = {"image": ""}
-    for res in result:
-        image["image"] = res
+    if result != 0:
+        for res in result:
+            image["image"] = res
+    else:
+        raise InvalidUsage("Bad request", status_code=400)
     try:
         return send_from_directory(Config.STATIC_URL_PATH, image["image"])
     except FileNotFoundError:
@@ -96,7 +99,6 @@ def getMap():
     args = (request.args.get('p_id'),)
     result = query_db(get_map_sql, args, True)
     image = {"image": ""}
-    print("!!!!!!!!!!!!!!!!!", Config.STATIC_URL_PATH)
     for res in result:
         image["image"] = "./uploads/" + res
     try:
@@ -159,7 +161,6 @@ def getUser():
 @bp.route('/upload', methods=['POST'])
 def fileUpload():
     target=os.path.join(Config.UPLOAD_FOLDER)
-    print("!!!!!!!!!!!!!!TARGET!!!", target)
     if not os.path.isdir(target):
         os.mkdir(target)
     logger.info("welcome to upload`")

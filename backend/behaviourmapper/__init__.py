@@ -12,10 +12,16 @@ def create_app(test_config=None):
     app.secret_key = get_random_bytes(32)
     # CORS implemented so that we don't get errors when trying to access the server from a different server location
     CORS(app)
-    app.config.from_object(Config)
-    app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
-    app.config["APPLICATION_ROOT"] = Config.APPLICATION_ROOT
-    app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
+    
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py', silent=True)
+        app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
+        # app.config.from_pyfile('config.py', silent=True)
+    
 
     # ensure the instance folder exists
     try:

@@ -18,7 +18,6 @@ def get_db():
 
 # initialize db for the first time
 def init_db():
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!", current_app.config["DATABASE"])
     """Clear existing data and create new tables."""
     db = get_db()
 
