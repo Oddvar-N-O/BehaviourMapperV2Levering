@@ -1,8 +1,7 @@
+import os
 from flask import Flask
 from .config import Config
 from flask_cors import CORS
-import os
-
 from Crypto.Random import get_random_bytes
 
 
@@ -20,7 +19,6 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
-        # app.config.from_pyfile('config.py', silent=True)
     
 
     # ensure the instance folder exists

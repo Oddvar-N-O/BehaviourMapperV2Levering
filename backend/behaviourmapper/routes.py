@@ -223,7 +223,7 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
     newCoordinates = [newX, newY]
     return newCoordinates
 
-@app.route('/createarcgis', methods=['POST'])
+@bp.route('/createarcgis', methods=['POST'])
 @cross_origin()
 def createARCGIS():
     # step 1 create field. Step 2 populate fields
