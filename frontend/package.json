@@ -2,7 +2,8 @@
   "name": "behaviour_mapper",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:5000",
+  "homepage": "https://www.ux.uis.no/behaviourmapper",
+  "proxy": "http://0.0.0.0:5000",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/react": "^11.2.2",

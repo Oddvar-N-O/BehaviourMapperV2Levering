@@ -1,5 +1,4 @@
 from flask import jsonify
-from behaviormapper import app
 
 # copied from https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
 class InvalidUsage(Exception):
@@ -17,7 +16,6 @@ class InvalidUsage(Exception):
         rv['message'] = self.message
         return rv
 
-@app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code

@@ -1,15 +1,18 @@
-from behaviormapper import app, query_db, init_db, select_db
-from behaviormapper.errorhandlers import InvalidUsage
+from .db import query_db, init_db, select_db
+from .errorhandlers import InvalidUsage
 from datetime import datetime, date
-from flask import Flask, redirect, url_for, flash, request, session, send_from_directory
+from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app
 from time import time
 import json
 import logging
-from config import Config
+from .config import Config
 import os
 from werkzeug.utils import secure_filename
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
+from werkzeug.exceptions import abort
+
+bp = Blueprint('behaviourmapper', __name__, url_prefix='/behaviourmapper')
 import shapefile as shp
 
 logging.basicConfig(level=logging.INFO)
@@ -21,25 +24,23 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 # Not all done, must add link to map
-@app.route('/addproject', methods=['POST'])
+@bp.route('/addproject', methods=['POST'])
 @cross_origin()
 def addProject():
     add_small_project = ("INSERT INTO Project "
-              "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY) "
-              "VALUES (?,?,?,?,?,?,?,?)")
+        "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY)"
+        "VALUES (?,?,?,?,?,?,?,?)")
     small_project_values = (request.form.get('name'), request.form.get('description'), 
                         request.form.get('startdate'), request.form.get('zoom'),
                         request.form.get('leftX'), request.form.get('lowerY'),
                         request.form.get('rightX'), request.form.get('upperY'))
     p_id = query_db(add_small_project, small_project_values)
-    print("Addproject")
-    print("PID: " + str(p_id))
     return {"p_id": p_id}
     # Add a new project and link a map
 
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
 # Need to add that you first get all projects, then get all info on a project.
-@app.route('/getproject', methods=['GET'])
+@bp.route('/getproject', methods=['GET'])
 def getProject():
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
     proj_values = (request.args.get('u_id'), request.args.get('name'))
@@ -58,7 +59,7 @@ def getProject():
             result.append(project)
     return json.dumps(result)
 
-@app.route('/getprojectmapping', methods=['GET'])
+@bp.route('/getprojectmapping', methods=['GET'])
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
@@ -71,21 +72,24 @@ def getProjectMapping():
     return json.dumps(result)
 
 # Usage /getfigure?description=<desc>&color=<color>
-@app.route('/getfigure')
+@bp.route('/getfigure')
 def getFigure():
     get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
     description = request.args.get('description', None)
     color = request.args.get('color', None)
     result = query_db(get_figure_image_sql, (description, color), True)
     image = {"image": ""}
-    for res in result:
-        image["image"] = res
+    if result != 0:
+        for res in result:
+            image["image"] = res
+    else:
+        raise InvalidUsage("Bad request", status_code=400)
     try:
-        return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
     except FileNotFoundError:
         abort(404)
 
-@app.route('/getfiguredata')
+@bp.route('/getfiguredata')
 def getFigureData():
     get_figure_data_sql =("SELECT description, color, id FROM Figures")
     result = select_db(get_figure_data_sql)
@@ -95,7 +99,7 @@ def getFigureData():
         data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
     return json.dumps(data)
     
-@app.route('/getmap')
+@bp.route('/getmap')
 def getMap():
     get_map_sql =('SELECT map FROM Project WHERE id=?')
     args = (request.args.get('p_id'),)
@@ -104,19 +108,19 @@ def getMap():
     for res in result:
         image["image"] = "./uploads/" + res
     try:
-        return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
     except FileNotFoundError:
         abort(404)
 
-@app.route('/favicon.ico')
+@bp.route('/favicon.ico')
 def favicon():
     try:
-        return send_from_directory(app.config['STATIC_URL_PATH'], "favicon.ico")
+        return send_from_directory(Config.STATIC_URL_PATH, "favicon.ico")
     except FileNotFoundError:
         abort(404)
 
 # Not done yet, must be checked with actual data
-@app.route('/addevent', methods=['POST'])
+@bp.route('/addevent', methods=['POST'])
 def addEvent():
     project_id = request.form.get('p_id') 
     print("PID ADDEVENT: " + str(project_id))
@@ -129,7 +133,7 @@ def addEvent():
 # add both to event and Project_has_Event
 
 # Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
-@app.route('/getevents') 
+@bp.route('/getevents')
 def getEvents():
     return get_events_func(request.args.get("p_id")) 
 
@@ -159,19 +163,19 @@ def get_events_func(p_id):
         print("-----------------------")
     return json.dumps(events)
 
-@app.route('/adduser', methods=['POST', 'GET'])
+@bp.route('/adduser', methods=['POST', 'GET'])
 def addUser():
     return {"ERROR": "Not Created yet."}
 # add a new user
 
-@app.route('/getuser', methods=['GET'])
+@bp.route('/getuser', methods=['GET'])
 def getUser():
     return {"ERROR": "Not Created yet."}
 # add a new user
 
-@app.route('/upload', methods=['POST'])
+@bp.route('/upload', methods=['POST'])
 def fileUpload():
-    target=os.path.join(Config.UPLOAD_PATH)
+    target=os.path.join(Config.UPLOAD_FOLDER)
     if not os.path.isdir(target):
         os.mkdir(target)
     logger.info("welcome to upload`")
@@ -219,7 +223,7 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
     newCoordinates = [newX, newY]
     return newCoordinates
 
-@app.route('/createarcgis', methods=['POST'])
+@bp.route('/createarcgis', methods=['POST'])
 @cross_origin()
 def createARCGIS():
     # step 1 create field. Step 2 populate fields
@@ -282,17 +286,13 @@ def createARCGIS():
 
     return {}
 
-@app.route('/hello')
-def say_hello_world():
-    return {"result": "Koplingen mellom flask og react fungerer WEE!"}
-
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
-@app.route('/initdb')
+@bp.route('/initdb')
 def initdb():
     init_db()
-    return redirect(url_for("testdb"))
+    return redirect(url_for("behaviourmapper.testdb"))
 
-@app.route('/testdb')
+@bp.route('/testdb')
 def testdb():
     u_id = query_db(add_user, user_values)
     f_id = query_db(add_figure, figure_values)
@@ -301,9 +301,9 @@ def testdb():
     p_id = query_db(add_project, project_values)
     e_id = query_db(add_event, event_values)
     query_db(add_relation, (p_id[-1], e_id[-1]))
-    return redirect(url_for("selectdb"))    
+    return redirect(url_for('behaviourmapper.selectdb'))    
 
-@app.route('/selectdb')
+@bp.route('/selectdb')
 def selectdb():
     result = {"Figures": "", "Users": "", "Project": "", "Project_has_Event": "", "Event": ""}
     table_names = ("Figures", "Users", "Project", "Project_has_Event", "Event")
