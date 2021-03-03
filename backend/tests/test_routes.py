@@ -5,8 +5,6 @@ import pytest
 from datetime import datetime, date
 from backend.behaviourmapper.config import Config
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-
 
 def test_faviconico(client):
     rv = client.get(('/behaviourmapper/favicon.ico'))
@@ -43,10 +41,11 @@ def test_upload_text(client):
     rv = client.post(('/behaviourmapper/upload'), data=data)
     assert rv.status_code == 400
 
-def test_upload_image(client, app):
+def test_upload_image(client):
     image = "bike.png"
-    path = os.path.join(Config.STATIC_URL_PATH + "\\icons\\man\\bike.png")
-    data = { "file": (open(path, 'rb'), image), "p_id": 1}
+    # path = os.path.join(Config.STATIC_URL_PATH + "/icons/man/bike.png")
+    # data = { "file": (open(path, 'rb'), image), "p_id": 1}
+    data = { "file": (open("behaviourmapper/static/icons/man/bike.png", 'rb'), image), "p_id": 1}
     rv = client.post(('/behaviourmapper/upload'), data=data)
     assert rv.status_code == 201
     assert rv.json['file'] == image
