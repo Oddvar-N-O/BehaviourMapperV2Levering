@@ -8,7 +8,9 @@ import logging
 from config import Config
 import os
 from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
+import shapefile as shp
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,11 +25,15 @@ def allowed_file(filename):
 @cross_origin()
 def addProject():
     add_small_project = ("INSERT INTO Project "
-              "(name, description, startdate) "
-              "VALUES (?,?,?)")
+              "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY) "
+              "VALUES (?,?,?,?,?,?,?,?)")
     small_project_values = (request.form.get('name'), request.form.get('description'), 
-                        request.form.get('startdate'))
+                        request.form.get('startdate'), request.form.get('zoom'),
+                        request.form.get('leftX'), request.form.get('lowerY'),
+                        request.form.get('rightX'), request.form.get('upperY'))
     p_id = query_db(add_small_project, small_project_values)
+    print("Addproject")
+    print("PID: " + str(p_id))
     return {"p_id": p_id}
     # Add a new project and link a map
 
@@ -56,6 +62,8 @@ def getProject():
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
+    print("GPMP")
+    print("PID: " + str(proj_values))
     project = query_db(get_proj_sql, proj_values, True)
     result = []
     for data in project:
@@ -110,7 +118,9 @@ def favicon():
 # Not done yet, must be checked with actual data
 @app.route('/addevent', methods=['POST'])
 def addEvent():
-    project_id = 1 # find clever way to get this dynamically
+    project_id = request.form.get('p_id') 
+    print("PID ADDEVENT: " + str(project_id))
+    # find clever way to get this dynamically
     d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
                         request.form.get('created'), request.form.get('f_id'))
     e_id = query_db(add_event, d_event_values) # Adds to Event table in db
@@ -119,27 +129,34 @@ def addEvent():
 # add both to event and Project_has_Event
 
 # Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
-@app.route('/getevents')
+@app.route('/getevents') 
 def getEvents():
-    get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")
-    get_event_sql = ("SELECT * FROM Event WHERE id=?")
-    p_id = request.args.get("p_id")
-    try:
-        int(p_id)
-    except:
+    return get_events_func(request.args.get("p_id")) 
+
+def get_events_func(p_id):    
+    get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")    
+    get_event_sql = ("SELECT * FROM Event WHERE id=?")     
+    try:         
+        int(p_id)    
+    except:         
         raise InvalidUsage("Bad arg", status_code=400)
 
     query_e_ids = query_db(get_eventIds_sql, (p_id,))
     query_e_ids = query_e_ids[:-1]
 
     e_ids = []
-    for e_id in query_e_ids:
-        e_ids.append(e_id[0])
+    for e_id in query_e_ids:        
+        e_ids.append(e_id[0])    
+    # events = []
     events = []
 
     for e_id in e_ids:
+        print("EID: " + str(e_id))
         query_event = query_db(get_event_sql, (str(e_id),), True)
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
+        print("EID: " + str(e_id))
+        print("centCoord: " + str(query_event[2]))
+        print("-----------------------")
     return json.dumps(events)
 
 @app.route('/adduser', methods=['POST', 'GET'])
@@ -177,7 +194,93 @@ def fileUpload():
         return {"file": filename}, 201
     except:
         raise InvalidUsage("Failed to upload image", status_code=500)
+
+def getElementXandY(element):
+    stringCoord = element.split(",")
+    intCoord = list(map(float, stringCoord))
+    return intCoord
+
+def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
+    imgCoordinates = getElementXandY(imgCoordinates)
+    startPoint = [leftX, upperY] 
+
+    lengthMapX = rightX - leftX
+    lenghtMapY = upperY - lowerY
+    onePixelX = lengthMapX / 615
+    onePixelY = lenghtMapY / 684
+
+    pixelsFromStartX = imgCoordinates[0]
+    distanceFromX = pixelsFromStartX * onePixelX
+    pixelsFromStartY = imgCoordinates[1]
+    distanceFromY = pixelsFromStartY * onePixelY
+    newX = startPoint[0] + distanceFromX
+    newY = startPoint[1] - distanceFromY
+
+    newCoordinates = [newX, newY]
+    return newCoordinates
+
+@app.route('/createarcgis', methods=['POST'])
+@cross_origin()
+def createARCGIS():
+    # step 1 create field. Step 2 populate fields
+    # enter folder
+    # shapefile = outline of a building and 
+    target=os.path.join(Config.UPLOAD_PATH)
+    if not os.path.isdir(target):
+        os.mkdir(target)
+
+    eventsJSON = get_events_func(request.form.get('p_id'))
+    events = json.loads(eventsJSON)
     
+    imageCoord = []
+    for event in events:
+        print(event)
+        imageCoord.append(event[2])
+
+    get_proj_sql = ("SELECT * FROM Project WHERE id=?")
+    pid = (request.form.get('p_id'))
+    print("PID: " + str(pid))
+    print("PID[0]: " + str(pid[0]))
+    print()
+    project_values = query_db(get_proj_sql, (str(pid),), True)
+    print(len(project_values))
+    print()
+    leftX = float(project_values[8])
+    lowerY = float(project_values[9])
+    rightX = float(project_values[10])
+    upperY = float(project_values[11])
+
+    iconCoord = []
+
+    for coordSet in imageCoord:
+        iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
+
+    
+    w = shp.Writer('behaviormapper/static/arcGISprojects/modifyThis/tree')
+    # clog her
+    w.autoBalance = 1
+    w.field('Background', 'C', '40') # image
+
+    point_ID = 1
+
+    """ w.point(leftX, lowerY)
+    w.record('lower left corner')
+    w.point(leftX, upperY)
+    w.record('upper left corner')
+    w.point(rightX, lowerY)
+    w.record('lower right corner')
+    w.point(rightX, upperY)
+    w.record('upper right corner') """
+    
+    for coordinateSet in iconCoord:
+        x = coordinateSet[0]
+        y = coordinateSet[1]
+        w.point(x, y)
+        w.record(str(point_ID), 'Point')
+        print(point_ID)
+        point_ID += 1
+
+    return {}
 
 @app.route('/hello')
 def say_hello_world():
