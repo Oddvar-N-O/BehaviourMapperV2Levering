@@ -6,3 +6,4 @@ python_dotenv==0.15.0
 Werkzeug==1.0.1
 pytest==6.2.1
 flask-oidc==1.4.0
+pyshp===2.1.3

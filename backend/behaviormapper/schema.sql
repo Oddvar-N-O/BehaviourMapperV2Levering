@@ -17,6 +17,10 @@ CREATE TABLE IF NOT EXISTS [Project] (
     startdate DATETIME NULL,
     enddate DATETIME NULL,
     zoom VARCHAR NULL,
+    leftX VARCHAR NULL,
+    lowerY VARCHAR NULL,
+    rightX VARCHAR NULL,
+    upperY VARCHAR NULL,
     u_id INTEGER,
     FOREIGN KEY (u_id) REFERENCES "Users"(id)
 );

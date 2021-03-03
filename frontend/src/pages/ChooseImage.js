@@ -7,6 +7,8 @@ import Zoom from 'ol/control/Zoom';
 import { transform } from 'ol/proj'
 import { Link } from 'react-router-dom';
 import * as AiIcons from 'react-icons/ai';
+import * as BiIcons from 'react-icons/bi';
+import {transformExtent} from 'ol/proj';
 import './ChooseImage.css'
 
 class ChooseImage extends React.Component {
@@ -15,7 +17,7 @@ class ChooseImage extends React.Component {
       this.state = {
         projectName: props.location.state.projectName,
         description: props.location.state.description,
-        p_id: props.location.state.p_id,
+        p_id: "",
       }
       this.map = new Map({
         target: null,
@@ -23,8 +25,33 @@ class ChooseImage extends React.Component {
         view: new View({center: transform([5.733107, 58.969975], 'EPSG:4326', 'EPSG:3857'), zoom: 12}),
         controls: [new Zoom()]
       });
-      this.exportImg = this.exportImg.bind(this);
+      this.addProject = this.addProject.bind(this);
       this.pauseBeforeRedirect = this.pauseBeforeRedirect.bind(this);
+  }
+
+  addProject() {
+    let centerCoordinates = this.map.getView().calculateExtent(this.map.getSize());
+    console.log('centCord: ' + centerCoordinates)
+    centerCoordinates = transformExtent(centerCoordinates, 'EPSG:3857', 'EPSG:4326');
+    const data = new FormData();
+    const zoom = this.map.getView().getZoom()
+    data.append('name', this.state.projectName);
+    data.append('description', this.state.description);
+    data.append('startdate', new Date());
+    data.append('zoom', zoom);
+    data.append('leftX', centerCoordinates[0]);
+    data.append('lowerY', centerCoordinates[1]);
+    data.append('rightX', centerCoordinates[2]);
+    data.append('upperY', centerCoordinates[3]);
+    fetch('addproject', {
+    method: 'POST',
+    body: data,
+    }).then((response) => {
+        response.json().then((data) => {
+            this.setState({p_id: data.p_id[0]});
+        });
+        this.exportImg()
+    });
   }
 
   exportImg() {
@@ -60,11 +87,11 @@ class ChooseImage extends React.Component {
           const data = new FormData();
           data.append('file', file);
           data.append('p_id', this.state.p_id)
-          fetch('http://localhost:5000/upload', {
+          fetch('upload', {
             method: 'POST',
             body: data,
           }).then(setTimeout(
-            () => this.pauseBeforeRedirect(), 500));
+            () => this.pauseBeforeRedirect(), 1500));
       }); 
   }
 
@@ -89,11 +116,22 @@ class ChooseImage extends React.Component {
   render() {
       return (
         <div className="choose-image">
-          <div className="choose-image-sidebar">
+            <div className="choose-image-sidebar">
+            <Link to={{
+                pathname: "/newproject",
+                state: {
+                  fromLoadMap: false,
+                  projectName: this.state.projectName,
+                  description: this.state.description,
+              }
+            }}>
+              <BiIcons.BiArrowBack className="back-icon"/>
+            </Link> 
+            {/* <span className="back-icon-text"> go back </span> */}
             <div className="sidebar-text"> Projectname: <br/> {this.state.projectName}</div>
             <div className="sidebar-text">Zoom in to choose your location, then click "Use Map" to proceed</div>
             
-            <button className="choose-image-button" onClick={this.exportImg}>Use Map</button>
+            <button className="choose-image-button" onClick={this.addProject}>Use Map</button>
 
           </div>
             

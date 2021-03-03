@@ -43,14 +43,18 @@ function Startpage() {
             <Link to={{
                 pathname: "/newproject",
                 state: {
-                  fromLoadMap: false
+                  fromLoadMap: false,
+                  projectName: "",
+                  description: "",
               }
               }}><li>Use Web-map</li></Link>
               {/* <li>Use Template??</li> */}
               <Link to={{
                 pathname: "/newproject",
                 state: {
-                  fromLoadMap: true
+                  fromLoadMap: true,
+                  projectName: "",
+                  description: "",
               }
               }}><li>Load Map From File</li></Link>
           </ul>

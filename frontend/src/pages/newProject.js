@@ -7,10 +7,10 @@ class NewProject extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            projectName: "",
+            projectName: props.location.state.projectName,
+            description: props.location.state.description,
             projectNameLegend: "Project Name",
             projectImageLegend: "Image",
-            description: "",
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#FDFFFC",
@@ -28,7 +28,7 @@ class NewProject extends React.Component {
         const {name, value} = event.target;
         this.setState({
             [name]: value
-        })
+        }, function() {})
         if (this.state.projectNameLegend === "Project Name Required" && event.target.id === "project-name") {
             this.setState({projectNameLegend: "Project Name"}, () => {
                 this.changeColor();
@@ -60,7 +60,7 @@ class NewProject extends React.Component {
           method: 'POST',
           body: data,
         }).then(setTimeout(
-            () => this.redirectToMapping(), 500));
+            () => this.redirectToMapping(), 1000));
     }
 
     redirectToMapping() {
@@ -97,33 +97,31 @@ class NewProject extends React.Component {
         
     }
     handleRedirect() {
-        const data = new FormData();
-        data.append('name', this.state.projectName);
-        data.append('description', this.state.description);
-        data.append('startdate', new Date());
         if (this.state.fromLoadMap){
+            const data = new FormData();
+            data.append('name', this.state.projectName);
+            data.append('description', this.state.description);
+            data.append('startdate', new Date());
             data.append('map', this.uploadInput.files[0].name);
-        }
-        fetch('addproject', {
-        method: 'POST',
-        body: data,
-        }).then((response) => {
-            response.json().then((data) => {
-                this.setState({p_id: data.p_id[0]});
-                if (this.state.fromLoadMap) {
+            
+            fetch('addproject', {
+            method: 'POST',
+            body: data,
+            }).then((response) => {
+                response.json().then((data) => {
+                    this.setState({p_id: data.p_id[0]});
                     this.handleUploadImage(data.p_id[0]);
-                } else {
-                    this.props.history.push({
-                        pathname: '/chooseImage',
-                        state: {
-                            projectName: this.state.projectName,
-                            description: this.state.description,
-                            p_id: data.p_id[0],
-                        },
-                    });
-                }  
+                });
             });
-        });
+        } else {
+            this.props.history.push({
+                pathname: '/chooseImage',
+                state: {
+                    projectName: this.state.projectName,
+                    description: this.state.description,
+                },
+            });
+        }  
     }
 
     render() {
@@ -176,3 +174,36 @@ class NewProject extends React.Component {
     }
 }
 export default NewProject
+
+
+
+
+// handleRedirect() {
+//     const data = new FormData();
+//     data.append('name', this.state.projectName);
+//     data.append('description', this.state.description);
+//     data.append('startdate', new Date());
+//     if (this.state.fromLoadMap){
+//         data.append('map', this.uploadInput.files[0].name);
+//     }
+//     fetch('addproject', {
+//     method: 'POST',
+//     body: data,
+//     }).then((response) => {
+//         response.json().then((data) => {
+//             this.setState({p_id: data.p_id[0]});
+//             if (this.state.fromLoadMap) {
+//                 this.handleUploadImage(data.p_id[0]);
+//             } else {
+//                 this.props.history.push({
+//                     pathname: '/chooseImage',
+//                     state: {
+//                         projectName: this.state.projectName,
+//                         description: this.state.description,
+//                         p_id: data.p_id[0],
+//                     },
+//                 });
+//             }  
+//         });
+//     });
+// }
