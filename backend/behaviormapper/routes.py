@@ -325,7 +325,7 @@ def addMapName(mapname, p_id):
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("kartet",)
 event_values = [45,"12991.29291 2929.21", "12:12:12"]
-project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom"]
+project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", 1,2,3,4]
 
 # sql for å bruke alle felt.
 add_user = ("INSERT INTO Users (feideinfo)"
@@ -334,8 +334,8 @@ add_event = ("INSERT INTO Event "
               "(direction, center_coordinate, created, f_id) "
               "VALUES (?,?,?,?)")
 add_project = ("INSERT INTO Project "
-              "(name, description, screenshot, map, startdate, enddate, zoom, u_id) "
-              "VALUES (?,?,?,?,?,?,?,?)")
+              "(name, description, screenshot, map, startdate, enddate, zoom, leftX, lowerY, rightX, upperY, u_id) "
+              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
 add_figure = ("INSERT INTO Figures "
                 "(description, color, image, other_attributes) "
                 "VALUES (?,?,?,?)")
