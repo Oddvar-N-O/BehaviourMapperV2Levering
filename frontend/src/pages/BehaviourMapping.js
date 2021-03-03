@@ -9,8 +9,7 @@ class BehaviourMapping extends React.Component {
 
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
-        icons: [
-        ],
+        icons: [],
         ourSRC: null,
         sendNewIconToBD: false,
         newIconID: 0,
@@ -20,7 +19,10 @@ class BehaviourMapping extends React.Component {
         ourMouseCoord: {x: 0, y: 0,},
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
+        f_id: "",
+        iconSRC: "",
         projdata: [],
+        formerEvents: [],
         mapblob: "",
       };
       this.selectIcon = this.addIconToList.bind(this)
@@ -30,14 +32,17 @@ class BehaviourMapping extends React.Component {
   sendDatabaseEvent() {
     // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
-    const coordinates = [this.state.ourIconCoord.x-25, this.state.ourIconCoord.y-25];
+    const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
+    data.append('p_id', this.state.p_id);
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
-    data.append('f_id', this.state.ourIconID);
+    // change this
+    data.append('f_id', this.state.f_id);
+    data.append('icon_src', this.state.iconSRC);
     // console.log(data);
 
     fetch('addevent', {
@@ -51,10 +56,11 @@ class BehaviourMapping extends React.Component {
   updateCoord(event) {
     this.setState({
       ourMouseCoord: {
-        x: event.clientX,
+        x: event.clientX - 200,
         y: event.clientY,
       }
     });
+    // console.log(this.state.ourMouseCoord)
   }
 
   newIcon() {
@@ -92,8 +98,13 @@ class BehaviourMapping extends React.Component {
     this.setState({icons: [...this.state.icons, newSrc]}, function() {
     });
     li.setAttribute('id', newSrc);
-
-    let newText = this.setInnerHTML(e.target.getAttribute('id'));    
+    let newText = this.setInnerHTML(e.target.getAttribute('id'));
+    this.setState({
+      f_id: newText
+    });
+    this.setState({
+      iconSRC: newSrc
+    });      
     let foundObject = this.objectExists(newText);
     let alreadyExists = this.alreadyInList(newText, list)
 
@@ -166,16 +177,17 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     });
     document.getElementById('iconContainer').appendChild(img);
-    img.style.top =  (event.clientY)+'px';
-    img.style.left = (event.clientX) +'px';
-    var x = event.clientX;
+    img.style.top =  (event.clientY-20)+'px';
+    img.style.left = (event.clientX-25) +'px';
+    var x = event.clientX - 200;
     var y = event.clientY;
     this.setState({
       ourIconCoord: {
-        x: x,
-        y: y,
+        x: x-20,
+        y: y-25,
       }
-    });
+    }, function() {});
+    // this.getScreenSize();
   }
 
  pointIcon() {
@@ -252,6 +264,19 @@ class BehaviourMapping extends React.Component {
     }  
   }
   
+  loadExistingIcons() {
+    console.log('Former Events: ' + this.state.formerEvents)
+
+  }
+
+  setScreenSize() { // det funker å kalle denne fra placeIcon, men ikke
+    // coponent did mount
+    console.log(document.querySelector('.map-image').naturalWidth);
+    console.log(document.querySelector('.map-image').naturalHeight);
+    console.log('projdata: ' + this.state.projdata)
+    console.log('mapblob: ' + this.state.formerEvents)
+  }
+  
   componentDidMount() {
     fetch(`getprojectmapping?p_id=${this.state.p_id}`)
     .then(res => res.json())
@@ -262,6 +287,25 @@ class BehaviourMapping extends React.Component {
       .then(images => {
         let image = URL.createObjectURL(images);
         this.setState({mapblob: image});
+    });
+    fetch(`getevents?p_id=${this.state.p_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({formerEvents: data});
+    });
+    setTimeout(() => this.loadExistingIcons(), 500);
+  }
+
+  argCIS() {
+    const data = new FormData();
+    const name = [this.state.name];
+    const p_id = this.state.p_id;
+    data.append('name', name);
+    data.append('p_id', p_id);
+    fetch('http://localhost:5000/createarcgis', {
+      method: 'POST',
+      body: data,
+      }).then((response) => {
       });
   }
 
@@ -277,10 +321,16 @@ class BehaviourMapping extends React.Component {
                 <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
                 <li className="buttonLi" onClick={() => this.showAll()}>Show icons</li>
                 <li className="buttonLi" onClick={() => this.hideAll()}>Hide icons</li>
+                <li className="buttonLi" onClick={() => this.argCIS()}>ArcGIS</li>
+                <li className="buttonLi">
+                  <button className="zoom-button">+</button>
+                  <button className="zoom-button">-</button>
+                </li>
               </ul>
         </div>
         
-        <img alt="" onMouseMove={e => this.updateCoord(e)} 
+        <img alt="" onMouseMove={e => this.updateCoord(e)}
+            id='map-image' 
             onClick={e => this.takeAction(e)} 
             className='map-image' 
             src={this.state.mapblob} />
