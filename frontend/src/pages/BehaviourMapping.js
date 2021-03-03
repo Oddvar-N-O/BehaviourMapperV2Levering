@@ -71,6 +71,7 @@ class BehaviourMapping extends React.Component {
   setInnerHTML(str) {
     if (str != null) {
       let descr = str.split(' ');
+      console.log(descr)
       descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
       switch(descr[1]) {
         case 'blue':
@@ -99,7 +100,7 @@ class BehaviourMapping extends React.Component {
     });
     li.setAttribute('id', newSrc);
     let newText = this.setInnerHTML(e.target.getAttribute('id'));
-    this.setState({
+    this.setState({ // not here
       f_id: newText
     });
     this.setState({
@@ -269,8 +270,7 @@ class BehaviourMapping extends React.Component {
 
   }
 
-  setScreenSize() { // det funker å kalle denne fra placeIcon, men ikke
-    // coponent did mount
+  setScreenSize() {
     console.log(document.querySelector('.map-image').naturalWidth);
     console.log(document.querySelector('.map-image').naturalHeight);
     console.log('projdata: ' + this.state.projdata)

@@ -21,6 +21,7 @@ class AllIcons extends React.Component {
         fetch(`getfiguredata`)
         .then(response => response.json()) 
         .then(data => {
+            console.log('DATA: ' + data[1].id)
             this.setState({
                 allIconData: data
             })
@@ -50,7 +51,8 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
-                    color={data.color}/>
+                    color={data.color}
+                    f_id={data.id}/>
                     </div>
                     <div className="icon-description">{data.description}
                 </div>
@@ -61,7 +63,8 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon
                     description={data.description} 
-                    color={data.color}/>
+                    color={data.color}
+                    f_id={data.id}/>
                     </div>
                     <div className="icon-description">{data.description}
                 </div>
@@ -72,7 +75,8 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
-                    color={data.color}/>
+                    color={data.color}
+                    f_id={data.id}/>
                     </div>
                     <div className="icon-description">{data.description}
                 </div>

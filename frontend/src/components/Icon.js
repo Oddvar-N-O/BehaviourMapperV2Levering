@@ -6,17 +6,17 @@ function Icon(props) {
     
     useEffect(() => {
         fetch(`getfigure?description=${props.description}&color=${props.color}`)
-        .then(result => result.blob()) 
+        .then(result => result.blob())
         .then(images => {
             var image = URL.createObjectURL(images)
             setIcon(image)
         })
     },
-    [props.description, props.color]); 
+    [props.description, props.color, props.id]); 
     
-    return (
+    return ( // dette funker ikke
         <>  
-            <img id={props.description + " " + props.color} className="single-icon" alt="icon" src={icon}></img>
+            <img id={props.description + " " + props.color + " " + props.id} className="single-icon" alt="icon" src={icon}></img>
         </>
     );    
 }

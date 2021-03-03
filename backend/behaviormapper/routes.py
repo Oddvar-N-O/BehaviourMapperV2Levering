@@ -32,8 +32,6 @@ def addProject():
                         request.form.get('leftX'), request.form.get('lowerY'),
                         request.form.get('rightX'), request.form.get('upperY'))
     p_id = query_db(add_small_project, small_project_values)
-    print("Addproject")
-    print("PID: " + str(p_id))
     return {"p_id": p_id}
     # Add a new project and link a map
 
@@ -62,20 +60,22 @@ def getProject():
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
-    print("GPMP")
-    print("PID: " + str(proj_values))
     project = query_db(get_proj_sql, proj_values, True)
     result = []
     for data in project:
          result.append(data)
     return json.dumps(result)
 
-# Usage /getfigure?description=<desc>&color=<color>
+# Usage /getfigure?description=<desc>&color=<color>&id=<id>
 @app.route('/getfigure')
 def getFigure():
     get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
     description = request.args.get('description', None)
     color = request.args.get('color', None)
+    # f_id = request.args.get('id', None)
+    # This print does not trigger
+    # print(description)
+
     result = query_db(get_figure_image_sql, (description, color), True)
     image = {"image": ""}
     for res in result:
@@ -119,7 +119,6 @@ def favicon():
 @app.route('/addevent', methods=['POST'])
 def addEvent():
     project_id = request.form.get('p_id') 
-    print("PID ADDEVENT: " + str(project_id))
     # find clever way to get this dynamically
     d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
                         request.form.get('created'), request.form.get('f_id'))
@@ -151,12 +150,8 @@ def get_events_func(p_id):
     events = []
 
     for e_id in e_ids:
-        print("EID: " + str(e_id))
         query_event = query_db(get_event_sql, (str(e_id),), True)
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
-        print("EID: " + str(e_id))
-        print("centCoord: " + str(query_event[2]))
-        print("-----------------------")
     return json.dumps(events)
 
 @app.route('/adduser', methods=['POST', 'GET'])
@@ -234,17 +229,11 @@ def createARCGIS():
     
     imageCoord = []
     for event in events:
-        print(event)
         imageCoord.append(event[2])
 
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     pid = (request.form.get('p_id'))
-    print("PID: " + str(pid))
-    print("PID[0]: " + str(pid[0]))
-    print()
     project_values = query_db(get_proj_sql, (str(pid),), True)
-    print(len(project_values))
-    print()
     leftX = float(project_values[8])
     lowerY = float(project_values[9])
     rightX = float(project_values[10])
@@ -255,29 +244,21 @@ def createARCGIS():
     for coordSet in imageCoord:
         iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
 
-    
-    w = shp.Writer('behaviormapper/static/arcGISprojects/modifyThis/tree')
+    # autoincrement
+    w = shp.Writer('behaviormapper/static/shapefiles/shapefile')
+    # p_id = query_db(add_small_project, small_project_values)
+
     # clog her
     w.autoBalance = 1
     w.field('Background', 'C', '40') # image
 
     point_ID = 1
-
-    """ w.point(leftX, lowerY)
-    w.record('lower left corner')
-    w.point(leftX, upperY)
-    w.record('upper left corner')
-    w.point(rightX, lowerY)
-    w.record('lower right corner')
-    w.point(rightX, upperY)
-    w.record('upper right corner') """
     
     for coordinateSet in iconCoord:
         x = coordinateSet[0]
         y = coordinateSet[1]
         w.point(x, y)
         w.record(str(point_ID), 'Point')
-        print(point_ID)
         point_ID += 1
 
     return {}
@@ -300,6 +281,7 @@ def testdb():
     project_values.append(u_id[-1])
     p_id = query_db(add_project, project_values)
     e_id = query_db(add_event, event_values)
+    shp_id = query_db(add_shapefile, shapefile_values)
     query_db(add_relation, (p_id[-1], e_id[-1]))
     return redirect(url_for("selectdb"))    
 
