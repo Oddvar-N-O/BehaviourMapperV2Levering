@@ -28,7 +28,7 @@ class NewProject extends React.Component {
         const {name, value} = event.target;
         this.setState({
             [name]: value
-        })
+        }, function() {})
         if (this.state.projectNameLegend === "Project Name Required" && event.target.id === "project-name") {
             this.setState({projectNameLegend: "Project Name"}, () => {
                 this.changeColor();
@@ -60,7 +60,7 @@ class NewProject extends React.Component {
           method: 'POST',
           body: data,
         }).then(setTimeout(
-            () => this.redirectToMapping(), 500));
+            () => this.redirectToMapping(), 1000));
     }
 
     redirectToMapping() {

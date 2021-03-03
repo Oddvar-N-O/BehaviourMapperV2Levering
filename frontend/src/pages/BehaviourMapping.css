@@ -44,6 +44,11 @@
     min-width: 200px;
 }
 
+.zoom-button {
+    min-width: 80px;
+    margin-right: 10px;
+}
+
 #iconList {
     width: 200px;
 }
@@ -61,8 +66,10 @@
     display: flex;
 }
 .map-image {
-    height: 100vh;
-    width: calc(100vw - 200px);
+    /* height: 100vh;
+    width: calc(100vw - 200px);*/
+    height: 684px;
+    width: 624px;
     order: 3;
 }
 
