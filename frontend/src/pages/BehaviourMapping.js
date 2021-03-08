@@ -5,8 +5,6 @@ import './BehaviourMapping.css'
 class BehaviourMapping extends React.Component {
   constructor(props) {
       super(props)
-
-
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         icons: [],
@@ -24,10 +22,27 @@ class BehaviourMapping extends React.Component {
         projdata: [],
         formerEvents: [],
         mapblob: "",
+        onlyObservation: true,
+        drawLine: false,
+        coords: [],
+        quartercoords: 0,
       };
-      this.selectIcon = this.addIconToList.bind(this)
-      this.closeIconSelect = this.closeIconSelect.bind(this)
+      this.canvas = React.createRef();
+      this.myImage = React.createRef();
+
+      this.selectIcon = this.addIconToList.bind(this);
+      this.closeIconSelect = this.closeIconSelect.bind(this);
+      this.newIcon = this.newIcon.bind(this);
+      this.showAll = this.showAll.bind(this);
+      this.hideAll = this.hideAll.bind(this);
+      this.argCIS = this.argCIS.bind(this);
+      this.changeMode = this.changeMode.bind(this);
+      this.drawLine = this.drawLine.bind(this);
+      this.addToDrawList = this.addToDrawList.bind(this);
+      this.drawFunction = this.drawFunction.bind(this);
   }
+
+
 
   sendDatabaseEvent() {
     // rettningen, xogykoordinat, tid, icon
@@ -91,7 +106,7 @@ class BehaviourMapping extends React.Component {
   }
 
   addIconToList(e) {
-    let list = document.getElementById('iconList');
+    let list = document.getElementById('icon-list');
     let li = document.createElement('li');
 
     let newSrc = e.target.src;
@@ -176,7 +191,7 @@ class BehaviourMapping extends React.Component {
     this.setState({
       newIconID: this.state.newIconID + 1
     });
-    document.getElementById('iconContainer').appendChild(img);
+    document.getElementById('icon-container').appendChild(img);
     img.style.top =  (event.clientY-20)+'px';
     img.style.left = (event.clientX-25) +'px';
     var x = event.clientX - 200;
@@ -264,19 +279,6 @@ class BehaviourMapping extends React.Component {
     }  
   }
   
-  loadExistingIcons() {
-    console.log('Former Events: ' + this.state.formerEvents)
-
-  }
-
-  setScreenSize() { // det funker å kalle denne fra placeIcon, men ikke
-    // coponent did mount
-    console.log(document.querySelector('.map-image').naturalWidth);
-    console.log(document.querySelector('.map-image').naturalHeight);
-    console.log('projdata: ' + this.state.projdata)
-    console.log('mapblob: ' + this.state.formerEvents)
-  }
-  
   componentDidMount() {
     fetch(`getprojectmapping?p_id=${this.state.p_id}`)
     .then(res => res.json())
@@ -293,7 +295,14 @@ class BehaviourMapping extends React.Component {
     .then(data => {
       this.setState({formerEvents: data});
     });
-    setTimeout(() => this.loadExistingIcons(), 500);
+
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    const img = this.myImage.current;
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+    }
+
   }
 
   argCIS() {
@@ -302,12 +311,80 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
-    fetch('http://localhost:5000/createarcgis', {
+    fetch('createarcgis', {
       method: 'POST',
       body: data,
       }).then((response) => {
       });
   }
+
+  changeMode() {
+    this.setState({onlyObservation: !this.state.onlyObservation});
+  }
+
+  drawLine() {
+    this.setState({drawLine: true});
+  }
+
+  addToDrawList(e) {
+    // kjører hver gang en flytter på touchen. 
+    if (this.state.quartercoords === 0) {
+      let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
+      this.setState({coords: [...this.state.coords, currCoords]});
+    }
+    this.quarterAmountOfCoords();
+  }
+
+  quarterAmountOfCoords() {
+    if (this.state.quartercoords === 7 ) {
+      this.setState({quartercoords: 0})
+    } else {
+      this.setState({quartercoords: this.state.quartercoords + 1})
+    }
+  }
+
+  drawFunction(){
+    if (this.state.coords.length === 0) {
+      return
+    }
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    let lastTwoCoords = [this.state.coords[this.state.coords.length - 1][0], 
+      this.state.coords[this.state.coords.length - 1][1],
+      this.state.coords[this.state.coords.length - 3][0], 
+      this.state.coords[this.state.coords.length - 3][1]];
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.moveTo(this.state.coords[0][0], this.state.coords[0][1]);
+    for (let coord of this.state.coords) {
+      ctx.lineTo(coord[0], coord[1]);
+    }
+    this.drawArrow(ctx, lastTwoCoords);
+    ctx.stroke();
+    this.setState({drawLine: false});
+    this.setState({coords: []});
+    
+    // bruke litt samme metoder som gjort i mappingen for å få en ny linje hver gang og kunne vise alle og skjule alle linjer.
+  }
+
+  drawArrow(ctx, lastTwoCoords) {
+    let degreerot = Math.atan2(
+      lastTwoCoords[0] - lastTwoCoords[2],
+      -(lastTwoCoords[1] - lastTwoCoords[3]),
+    );
+    let degrees = degreerot*180/Math.PI + 90;
+    let angle1 = (degrees + 25) * (Math.PI / 180);
+    let angle2 = (degrees - 25) * (Math.PI / 180);
+    let bottomX = 15 * Math.cos(angle1);
+    let bottomY = 15 * Math.sin(angle1);
+    let topX = 15 * Math.cos(angle2);
+    let topY = 15 * Math.sin(angle2);
+    ctx.moveTo(lastTwoCoords[0] + bottomX, lastTwoCoords[1] + bottomY);
+    ctx.lineTo(lastTwoCoords[0], lastTwoCoords[1]);
+    ctx.lineTo(lastTwoCoords[0] + topX, lastTwoCoords[1] + topY);
+  }
+
 
   render() {
     return (
@@ -317,24 +394,38 @@ class BehaviourMapping extends React.Component {
               <AllIcons selectIcon = {this.selectIcon} 
               close={() => this.closeIconSelect()}/>
             </div>  
-              <ul id="iconList">
-                <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
-                <li className="buttonLi" onClick={() => this.showAll()}>Show icons</li>
-                <li className="buttonLi" onClick={() => this.hideAll()}>Hide icons</li>
-                <li className="buttonLi" onClick={() => this.argCIS()}>ArcGIS</li>
-                <li className="buttonLi">
-                  <button className="zoom-button">+</button>
-                  <button className="zoom-button">-</button>
-                </li>
+              <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
+                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
+                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+                <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+              </ul>
+              <ul className={this.state.onlyObservation ? "invisible" : "visible"}>
+                <li className="buttonLi" onClick={this.newIcon}>Add Interview</li>
+                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
               </ul>
         </div>
         
+        <canvas 
+          onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+          onTouchEnd={this.drawFunction}
+          onTouchStart={e => console.log(e)}
+          height={684}
+          width={624}
+          ref={this.canvas}
+        />
         <img alt="" onMouseMove={e => this.updateCoord(e)}
-            id='map-image' 
-            onClick={e => this.takeAction(e)} 
-            className='map-image' 
-            src={this.state.mapblob} />
-          <div id="iconContainer" />
+          id='map-image' 
+          onClick={e => this.takeAction(e)} 
+          className='map-image, invisible'
+          src={this.state.mapblob}
+          ref={this.myImage}
+          
+        />
+        <div id="icon-container" />
+        
 
       </div>
     );

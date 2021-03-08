@@ -49,7 +49,7 @@
     margin-right: 10px;
 }
 
-#iconList {
+#icon-list {
     width: 200px;
 }
 
@@ -60,16 +60,24 @@
     order: 2;
 }
 
+.visible {
+    display: block;
+}
+
+.invisible {
+    display: none; 
+}
+
 /*ModImg*/
 
 #maincont {
     display: flex;
 }
-.map-image {
-    /* height: 100vh;
-    width: calc(100vw - 200px);*/
-    height: 684px;
-    width: 624px;
+#maincont canvas {
+    height: 100vh;
+    width: calc(100vw - 200px);
+    /* height: 684px;
+    width: 624px; */
     order: 3;
 }
 
