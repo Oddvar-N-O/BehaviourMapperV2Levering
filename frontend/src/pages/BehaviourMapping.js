@@ -1,6 +1,8 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
-import './BehaviourMapping.css'
+import Interview from '../components/interview';
+import './BehaviourMapping.css';
+import classNames from 'classnames';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -24,8 +26,9 @@ class BehaviourMapping extends React.Component {
         mapblob: "",
         onlyObservation: true,
         drawLine: false,
+        addInterview: false,
         coords: [],
-        quartercoords: 0,
+        eightOfCoords: 0,
       };
       this.canvas = React.createRef();
       this.myImage = React.createRef();
@@ -40,6 +43,7 @@ class BehaviourMapping extends React.Component {
       this.drawLine = this.drawLine.bind(this);
       this.addToDrawList = this.addToDrawList.bind(this);
       this.drawFunction = this.drawFunction.bind(this);
+      this.addInterview = this.addInterview.bind(this);
   }
 
 
@@ -278,32 +282,6 @@ class BehaviourMapping extends React.Component {
       this.setState({ addIcon: false});
     }  
   }
-  
-  componentDidMount() {
-    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projdata: data});
-    });
-    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
-      .then(images => {
-        let image = URL.createObjectURL(images);
-        this.setState({mapblob: image});
-    });
-    fetch(`getevents?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({formerEvents: data});
-    });
-
-    const canvas = this.canvas.current;
-    const ctx = canvas.getContext("2d");
-    const img = this.myImage.current;
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-    }
-
-  }
 
   argCIS() {
     const data = new FormData();
@@ -321,6 +299,10 @@ class BehaviourMapping extends React.Component {
   changeMode() {
     this.setState({onlyObservation: !this.state.onlyObservation});
   }
+  addInterview() {
+    console.log(this.state.addInterview)
+    this.setState({addInterview: !this.state.addInterview});
+  }
 
   drawLine() {
     this.setState({drawLine: true});
@@ -328,23 +310,23 @@ class BehaviourMapping extends React.Component {
 
   addToDrawList(e) {
     // kjører hver gang en flytter på touchen. 
-    if (this.state.quartercoords === 0) {
+    if (this.state.eightOfCoords === 0) {
       let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
       this.setState({coords: [...this.state.coords, currCoords]});
     }
-    this.quarterAmountOfCoords();
+    this.oneEigthOfCoords();
   }
 
-  quarterAmountOfCoords() {
-    if (this.state.quartercoords === 7 ) {
-      this.setState({quartercoords: 0})
+  oneEigthOfCoords() {
+    if (this.state.eightOfCoords === 7 ) {
+      this.setState({eightOfCoords: 0})
     } else {
-      this.setState({quartercoords: this.state.quartercoords + 1})
+      this.setState({eightOfCoords: this.state.eightOfCoords + 1})
     }
   }
 
   drawFunction(){
-    if (this.state.coords.length === 0) {
+    if (this.state.coords.length <= 3 ) {
       return
     }
     const canvas = this.canvas.current;
@@ -386,40 +368,95 @@ class BehaviourMapping extends React.Component {
   }
 
 
+
+  componentDidMount() {
+    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({projdata: data});
+    });
+    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
+      .then(images => {
+        let image = URL.createObjectURL(images);
+        this.setState({mapblob: image});
+    });
+    fetch(`getevents?p_id=${this.state.p_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({formerEvents: data});
+    });
+
+    // resize the canvas to fill map part of window dynamically
+    var firstTime = 0;
+    (function(canvas, image) {
+      window.addEventListener('resize', resizeCanvas, false);
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth - 200;
+        canvas.height = window.innerHeight;
+        drawStuff(); 
+      }
+      resizeCanvas();
+  
+      function drawStuff() {
+        let ctx = canvas.getContext("2d");
+        if (firstTime === 0) {
+          image.onload = () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          }
+          firstTime++;
+        } else {
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+              // draw all lines again.
+      }
+    })(this.canvas.current, this.myImage.current);
+  }
+  
+
   render() {
+    let imageClassList = classNames({
+      'map-image': true,
+      'visible': this.state.onlyObservation,
+      'invisible': !this.state.onlyObservation
+    });
+    let canvasClassList = classNames({
+      'map-image': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
     return (
       <div id='maincont'>
         <div className="sidebar">
           <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
               <AllIcons selectIcon = {this.selectIcon} 
               close={() => this.closeIconSelect()}/>
-            </div>  
-              <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
-                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
-                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-                <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-              </ul>
-              <ul className={this.state.onlyObservation ? "invisible" : "visible"}>
-                <li className="buttonLi" onClick={this.newIcon}>Add Interview</li>
-                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-              </ul>
+          </div> 
+          <div className={this.state.addInterview ? "interview" : "invisible"}> <Interview/> </div> 
+            <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
+              <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+              <li className="buttonLi" onClick={this.showAll}>Show icons</li>
+              <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+              <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
+              <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+            </ul>
+            <ul className={this.state.onlyObservation ? "invisible" : "visible"}>
+              <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
+              <li className="buttonLi" onClick={this.drawLine}>Add line</li>
+              <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+            </ul>
         </div>
         
         <canvas 
           onTouchMove={this.state.drawLine ? this.addToDrawList : null}
           onTouchEnd={this.drawFunction}
-          onTouchStart={e => console.log(e)}
-          height={684}
-          width={624}
+          className={canvasClassList}
           ref={this.canvas}
         />
         <img alt="" onMouseMove={e => this.updateCoord(e)}
           id='map-image' 
           onClick={e => this.takeAction(e)} 
-          className='map-image, invisible'
+          className={imageClassList}
           src={this.state.mapblob}
           ref={this.myImage}
           
@@ -430,6 +467,6 @@ class BehaviourMapping extends React.Component {
       </div>
     );
   }
-} // <AllIcons closeIconSelect = {this.closeIconSelect} />
+}
 
 export default BehaviourMapping;
