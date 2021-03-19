@@ -18,7 +18,7 @@ class AllIcons extends React.Component {
     };
 
     componentDidMount() {
-        fetch(`getfiguredata`)
+        fetch(window.backend_url + `getfiguredata`)
         .then(response => response.json()) 
         .then(data => {
             this.setState({

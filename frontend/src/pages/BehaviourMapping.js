@@ -29,9 +29,12 @@ class BehaviourMapping extends React.Component {
         addInterview: false,
         coords: [],
         eightOfCoords: 0,
+        interviews: [],
+        i_ids: [],
       };
       this.canvas = React.createRef();
       this.myImage = React.createRef();
+      this.interviewElement = React.createRef();
 
       this.selectIcon = this.addIconToList.bind(this);
       this.closeIconSelect = this.closeIconSelect.bind(this);
@@ -44,6 +47,7 @@ class BehaviourMapping extends React.Component {
       this.addToDrawList = this.addToDrawList.bind(this);
       this.drawFunction = this.drawFunction.bind(this);
       this.addInterview = this.addInterview.bind(this);
+      this.saveInterview = this.saveInterview.bind(this);
   }
 
 
@@ -62,14 +66,11 @@ class BehaviourMapping extends React.Component {
     // change this
     data.append('f_id', this.state.f_id);
     data.append('icon_src', this.state.iconSRC);
-    // console.log(data);
 
-    fetch('addevent', {
+    fetch(window.backend_url +'addevent', {
     method: 'POST',
     body: data,
-    }).then((response) => {
-      // console.log(response);
-    });
+    })
   }
 
   updateCoord(event) {
@@ -79,7 +80,6 @@ class BehaviourMapping extends React.Component {
         y: event.clientY,
       }
     });
-    // console.log(this.state.ourMouseCoord)
   }
 
   newIcon() {
@@ -101,9 +101,7 @@ class BehaviourMapping extends React.Component {
         default:
           descr[1] = "Child";
       }
-      // console.log(descr);
       let innerHTML = descr[0] + ": " + descr[1];
-      // console.log(innerHTML);
       return innerHTML; 
     }
     return console.error("Prøv på Nytt");
@@ -154,7 +152,6 @@ class BehaviourMapping extends React.Component {
 
   objectExists(newText) {
     if (newText === undefined) {
-      console.log("undefined!")
       return false;
     }
     return true;
@@ -162,9 +159,7 @@ class BehaviourMapping extends React.Component {
 
   alreadyInList(newText, list) {
     let ele = list.getElementsByTagName('li')
-    // console.log(ele);
     for (let i = 0; i < ele.length; i ++) {
-      // console.log(ele[i])
       if (ele[i].innerHTML === newText) {
         return true;
       }
@@ -262,7 +257,6 @@ class BehaviourMapping extends React.Component {
     this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
-      // console.log('id ' + i);
       icon = document.getElementById(i.toString());
       icon.style.display = 'block';
     }
@@ -289,19 +283,72 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
-    fetch('createarcgis', {
+    fetch(window.backend_url +'createarcgis', {
       method: 'POST',
       body: data,
-      }).then((response) => {
-      });
+      })
   }
 
   changeMode() {
     this.setState({onlyObservation: !this.state.onlyObservation});
+    this.setState({addIcon: false});
+    this.setState({addInterview: false});
   }
-  addInterview() {
-    console.log(this.state.addInterview)
-    this.setState({addInterview: !this.state.addInterview});
+
+  addInterview(whichInterview=0) {
+    if (whichInterview > 0) {
+      this.interviewElement.current.setState({alreadySaved: true});
+      this.interviewElement.current.setInterview(this.state.interviews[whichInterview-1])
+      if (!this.state.addInterview) {
+        this.setState({addInterview: !this.state.addInterview});
+      }
+    } else {
+      this.interviewElement.current.clearInterview();
+      this.interviewElement.current.setState({alreadySaved: false})
+      this.setState({addInterview: !this.state.addInterview});
+    }
+    
+  }
+
+  saveInterview(e) {
+    e.preventDefault();
+    let list = document.getElementsByClassName('interview-sidebar-li')[0];
+    let li = document.createElement('li');
+
+    let interviewNumber = this.state.interviews.length + 1;
+    let newText = "Interview number: " + interviewNumber;
+    
+    if (this.objectExists(newText) === true) {
+      this.setState({interviews: [...this.state.interviews, e.target.form.childNodes[1].value]});
+      this.interviewElement.current.clearInterview();
+      this.sendInterviewToDb(this.interviewElement.current.state.interview);
+      
+      li.innerHTML = newText;
+      li.addEventListener('click', (e) => {
+        this.addInterview(e.target.innerText[e.target.innerText.length - 1]);
+      });
+      list.appendChild(li);
+
+      this.addInterview();
+    }
+  }
+
+  sendInterviewToDb(interviewData) {
+    const data = new FormData();
+    const interview = interviewData;
+    const p_id = this.state.p_id;
+    data.append('interview', interview);
+    data.append('p_id', p_id);
+    fetch(window.backend_url + 'addinterview', {
+      method: 'POST',
+      body: data,
+      })
+    //   .then((res) => {
+    //     res.json().then((data) => {
+    //       // most likely not needed, can just use interviewnumber to get the correct text.
+    //      this.setState({i_ids: [...this.state.i_ids, data.i_id[0]]});
+    //     });
+    // });
   }
 
   drawLine() {
@@ -370,17 +417,17 @@ class BehaviourMapping extends React.Component {
 
 
   componentDidMount() {
-    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
+    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}`)
     .then(res => res.json())
     .then(data => {
       this.setState({projdata: data});
     });
-    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
+    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}`).then(res => res.blob())
       .then(images => {
         let image = URL.createObjectURL(images);
         this.setState({mapblob: image});
     });
-    fetch(`getevents?p_id=${this.state.p_id}`)
+    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}`)
     .then(res => res.json())
     .then(data => {
       this.setState({formerEvents: data});
@@ -425,6 +472,11 @@ class BehaviourMapping extends React.Component {
       'invisible': this.state.onlyObservation,
       'visible': !this.state.onlyObservation
     });
+    let interviewLiClassList = classNames({
+      'interview-sidebar-li': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
     return (
       <div id='maincont'>
         <div className="sidebar">
@@ -432,7 +484,13 @@ class BehaviourMapping extends React.Component {
               <AllIcons selectIcon = {this.selectIcon} 
               close={() => this.closeIconSelect()}/>
           </div> 
-          <div className={this.state.addInterview ? "interview" : "invisible"}> <Interview/> </div> 
+          <div className={this.state.addInterview ? "interview" : "invisible"}> 
+            <Interview 
+              close={this.addInterview}
+              save={this.saveInterview}
+              ref={this.interviewElement}
+            /> 
+          </div> 
             <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
               <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
               <li className="buttonLi" onClick={this.showAll}>Show icons</li>
@@ -440,7 +498,7 @@ class BehaviourMapping extends React.Component {
               <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
               <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
             </ul>
-            <ul className={this.state.onlyObservation ? "invisible" : "visible"}>
+            <ul className={interviewLiClassList}>
               <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
               <li className="buttonLi" onClick={this.drawLine}>Add line</li>
               <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
