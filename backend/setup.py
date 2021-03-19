@@ -15,5 +15,6 @@ setup(
         'flask-oidc',
         'pycryptodome',
         'pyshp',
+        'flask-oidc',
     ],
 )

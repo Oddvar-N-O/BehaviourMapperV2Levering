@@ -10,13 +10,20 @@ import os
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import abort
+import shapefile as shp
 
 bp = Blueprint('behaviourmapper', __name__, url_prefix='/behaviourmapper')
-import shapefile as shp
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger('')
+
+@bp.route('/')
+def index():
+    if oidc.user_loggedin:
+        return 'Welcome %s' % oidc.user_getfield('email')
+    else:
+        return 'Not logged in'
 
 # Set allowed filenames
 def allowed_file(filename):
@@ -49,7 +56,9 @@ def addInterview():
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
 # Need to add that you first get all projects, then get all info on a project.
 @bp.route('/getproject', methods=['GET'])
+@oidc.accept_token()
 def getProject():
+    print(g.oidc_token_info['sub'])
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
     proj_values = (request.args.get('u_id'), request.args.get('name'))
     if proj_values[1] == None:
