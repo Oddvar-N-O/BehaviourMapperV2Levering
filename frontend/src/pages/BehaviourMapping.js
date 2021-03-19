@@ -1,12 +1,12 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
-import './BehaviourMapping.css'
+import Interview from '../components/interview';
+import './BehaviourMapping.css';
+import classNames from 'classnames';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
       super(props)
-
-
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         icons: [],
@@ -24,10 +24,33 @@ class BehaviourMapping extends React.Component {
         projdata: [],
         formerEvents: [],
         mapblob: "",
+        onlyObservation: true,
+        drawLine: false,
+        addInterview: false,
+        coords: [],
+        eightOfCoords: 0,
+        interviews: [],
+        i_ids: [],
       };
-      this.selectIcon = this.addIconToList.bind(this)
-      this.closeIconSelect = this.closeIconSelect.bind(this)
+      this.canvas = React.createRef();
+      this.myImage = React.createRef();
+      this.interviewElement = React.createRef();
+
+      this.selectIcon = this.addIconToList.bind(this);
+      this.closeIconSelect = this.closeIconSelect.bind(this);
+      this.newIcon = this.newIcon.bind(this);
+      this.showAll = this.showAll.bind(this);
+      this.hideAll = this.hideAll.bind(this);
+      this.argCIS = this.argCIS.bind(this);
+      this.changeMode = this.changeMode.bind(this);
+      this.drawLine = this.drawLine.bind(this);
+      this.addToDrawList = this.addToDrawList.bind(this);
+      this.drawFunction = this.drawFunction.bind(this);
+      this.addInterview = this.addInterview.bind(this);
+      this.saveInterview = this.saveInterview.bind(this);
   }
+
+
 
   sendDatabaseEvent() {
     // rettningen, xogykoordinat, tid, icon
@@ -43,14 +66,11 @@ class BehaviourMapping extends React.Component {
     // change this
     data.append('f_id', this.state.f_id);
     data.append('icon_src', this.state.iconSRC);
-    // console.log(data);
 
-    fetch('addevent', {
+    fetch(window.backend_url +'addevent', {
     method: 'POST',
     body: data,
-    }).then((response) => {
-      // console.log(response);
-    });
+    })
   }
 
   updateCoord(event) {
@@ -60,7 +80,6 @@ class BehaviourMapping extends React.Component {
         y: event.clientY,
       }
     });
-    // console.log(this.state.ourMouseCoord)
   }
 
   newIcon() {
@@ -82,16 +101,14 @@ class BehaviourMapping extends React.Component {
         default:
           descr[1] = "Child";
       }
-      // console.log(descr);
       let innerHTML = descr[0] + ": " + descr[1];
-      // console.log(innerHTML);
       return innerHTML; 
     }
     return console.error("Prøv på Nytt");
   }
 
   addIconToList(e) {
-    let list = document.getElementById('iconList');
+    let list = document.getElementById('icon-list');
     let li = document.createElement('li');
 
     let newSrc = e.target.src;
@@ -135,7 +152,6 @@ class BehaviourMapping extends React.Component {
 
   objectExists(newText) {
     if (newText === undefined) {
-      console.log("undefined!")
       return false;
     }
     return true;
@@ -143,9 +159,7 @@ class BehaviourMapping extends React.Component {
 
   alreadyInList(newText, list) {
     let ele = list.getElementsByTagName('li')
-    // console.log(ele);
     for (let i = 0; i < ele.length; i ++) {
-      // console.log(ele[i])
       if (ele[i].innerHTML === newText) {
         return true;
       }
@@ -176,7 +190,7 @@ class BehaviourMapping extends React.Component {
     this.setState({
       newIconID: this.state.newIconID + 1
     });
-    document.getElementById('iconContainer').appendChild(img);
+    document.getElementById('icon-container').appendChild(img);
     img.style.top =  (event.clientY-20)+'px';
     img.style.left = (event.clientX-25) +'px';
     var x = event.clientX - 200;
@@ -243,7 +257,6 @@ class BehaviourMapping extends React.Component {
     this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
-      // console.log('id ' + i);
       icon = document.getElementById(i.toString());
       icon.style.display = 'block';
     }
@@ -263,38 +276,6 @@ class BehaviourMapping extends React.Component {
       this.setState({ addIcon: false});
     }  
   }
-  
-  loadExistingIcons() {
-    console.log('Former Events: ' + this.state.formerEvents)
-
-  }
-
-  setScreenSize() { // det funker å kalle denne fra placeIcon, men ikke
-    // coponent did mount
-    console.log(document.querySelector('.map-image').naturalWidth);
-    console.log(document.querySelector('.map-image').naturalHeight);
-    console.log('projdata: ' + this.state.projdata)
-    console.log('mapblob: ' + this.state.formerEvents)
-  }
-  
-  componentDidMount() {
-    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projdata: data});
-    });
-    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
-      .then(images => {
-        let image = URL.createObjectURL(images);
-        this.setState({mapblob: image});
-    });
-    fetch(`getevents?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({formerEvents: data});
-    });
-    setTimeout(() => this.loadExistingIcons(), 500);
-  }
 
   argCIS() {
     const data = new FormData();
@@ -302,43 +283,248 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
-    fetch('http://localhost:5000/createarcgis', {
+    fetch(window.backend_url +'createarcgis', {
       method: 'POST',
       body: data,
-      }).then((response) => {
-      });
+      })
   }
 
+  changeMode() {
+    this.setState({onlyObservation: !this.state.onlyObservation});
+    this.setState({addIcon: false});
+    this.setState({addInterview: false});
+  }
+
+  addInterview(whichInterview=0) {
+    if (whichInterview > 0) {
+      this.interviewElement.current.setState({alreadySaved: true});
+      this.interviewElement.current.setInterview(this.state.interviews[whichInterview-1])
+      if (!this.state.addInterview) {
+        this.setState({addInterview: !this.state.addInterview});
+      }
+    } else {
+      this.interviewElement.current.clearInterview();
+      this.interviewElement.current.setState({alreadySaved: false})
+      this.setState({addInterview: !this.state.addInterview});
+    }
+    
+  }
+
+  saveInterview(e) {
+    e.preventDefault();
+    let list = document.getElementsByClassName('interview-sidebar-li')[0];
+    let li = document.createElement('li');
+
+    let interviewNumber = this.state.interviews.length + 1;
+    let newText = "Interview number: " + interviewNumber;
+    
+    if (this.objectExists(newText) === true) {
+      this.setState({interviews: [...this.state.interviews, e.target.form.childNodes[1].value]});
+      this.interviewElement.current.clearInterview();
+      this.sendInterviewToDb(this.interviewElement.current.state.interview);
+      
+      li.innerHTML = newText;
+      li.addEventListener('click', (e) => {
+        this.addInterview(e.target.innerText[e.target.innerText.length - 1]);
+      });
+      list.appendChild(li);
+
+      this.addInterview();
+    }
+  }
+
+  sendInterviewToDb(interviewData) {
+    const data = new FormData();
+    const interview = interviewData;
+    const p_id = this.state.p_id;
+    data.append('interview', interview);
+    data.append('p_id', p_id);
+    fetch(window.backend_url + 'addinterview', {
+      method: 'POST',
+      body: data,
+      })
+    //   .then((res) => {
+    //     res.json().then((data) => {
+    //       // most likely not needed, can just use interviewnumber to get the correct text.
+    //      this.setState({i_ids: [...this.state.i_ids, data.i_id[0]]});
+    //     });
+    // });
+  }
+
+  drawLine() {
+    this.setState({drawLine: true});
+  }
+
+  addToDrawList(e) {
+    // kjører hver gang en flytter på touchen. 
+    if (this.state.eightOfCoords === 0) {
+      let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
+      this.setState({coords: [...this.state.coords, currCoords]});
+    }
+    this.oneEigthOfCoords();
+  }
+
+  oneEigthOfCoords() {
+    if (this.state.eightOfCoords === 7 ) {
+      this.setState({eightOfCoords: 0})
+    } else {
+      this.setState({eightOfCoords: this.state.eightOfCoords + 1})
+    }
+  }
+
+  drawFunction(){
+    if (this.state.coords.length <= 3 ) {
+      return
+    }
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    let lastTwoCoords = [this.state.coords[this.state.coords.length - 1][0], 
+      this.state.coords[this.state.coords.length - 1][1],
+      this.state.coords[this.state.coords.length - 3][0], 
+      this.state.coords[this.state.coords.length - 3][1]];
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.moveTo(this.state.coords[0][0], this.state.coords[0][1]);
+    for (let coord of this.state.coords) {
+      ctx.lineTo(coord[0], coord[1]);
+    }
+    this.drawArrow(ctx, lastTwoCoords);
+    ctx.stroke();
+    this.setState({drawLine: false});
+    this.setState({coords: []});
+    
+    // bruke litt samme metoder som gjort i mappingen for å få en ny linje hver gang og kunne vise alle og skjule alle linjer.
+  }
+
+  drawArrow(ctx, lastTwoCoords) {
+    let degreerot = Math.atan2(
+      lastTwoCoords[0] - lastTwoCoords[2],
+      -(lastTwoCoords[1] - lastTwoCoords[3]),
+    );
+    let degrees = degreerot*180/Math.PI + 90;
+    let angle1 = (degrees + 25) * (Math.PI / 180);
+    let angle2 = (degrees - 25) * (Math.PI / 180);
+    let bottomX = 15 * Math.cos(angle1);
+    let bottomY = 15 * Math.sin(angle1);
+    let topX = 15 * Math.cos(angle2);
+    let topY = 15 * Math.sin(angle2);
+    ctx.moveTo(lastTwoCoords[0] + bottomX, lastTwoCoords[1] + bottomY);
+    ctx.lineTo(lastTwoCoords[0], lastTwoCoords[1]);
+    ctx.lineTo(lastTwoCoords[0] + topX, lastTwoCoords[1] + topY);
+  }
+
+
+
+  componentDidMount() {
+    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({projdata: data});
+    });
+    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}`).then(res => res.blob())
+      .then(images => {
+        let image = URL.createObjectURL(images);
+        this.setState({mapblob: image});
+    });
+    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({formerEvents: data});
+    });
+
+    // resize the canvas to fill map part of window dynamically
+    var firstTime = 0;
+    (function(canvas, image) {
+      window.addEventListener('resize', resizeCanvas, false);
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth - 200;
+        canvas.height = window.innerHeight;
+        drawStuff(); 
+      }
+      resizeCanvas();
+  
+      function drawStuff() {
+        let ctx = canvas.getContext("2d");
+        if (firstTime === 0) {
+          image.onload = () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          }
+          firstTime++;
+        } else {
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+              // draw all lines again.
+      }
+    })(this.canvas.current, this.myImage.current);
+  }
+  
+
   render() {
+    let imageClassList = classNames({
+      'map-image': true,
+      'visible': this.state.onlyObservation,
+      'invisible': !this.state.onlyObservation
+    });
+    let canvasClassList = classNames({
+      'map-image': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
+    let interviewLiClassList = classNames({
+      'interview-sidebar-li': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
     return (
       <div id='maincont'>
         <div className="sidebar">
           <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
               <AllIcons selectIcon = {this.selectIcon} 
               close={() => this.closeIconSelect()}/>
-            </div>  
-              <ul id="iconList">
-                <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
-                <li className="buttonLi" onClick={() => this.showAll()}>Show icons</li>
-                <li className="buttonLi" onClick={() => this.hideAll()}>Hide icons</li>
-                <li className="buttonLi" onClick={() => this.argCIS()}>ArcGIS</li>
-                <li className="buttonLi">
-                  <button className="zoom-button">+</button>
-                  <button className="zoom-button">-</button>
-                </li>
-              </ul>
+          </div> 
+          <div className={this.state.addInterview ? "interview" : "invisible"}> 
+            <Interview 
+              close={this.addInterview}
+              save={this.saveInterview}
+              ref={this.interviewElement}
+            /> 
+          </div> 
+            <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
+              <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+              <li className="buttonLi" onClick={this.showAll}>Show icons</li>
+              <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+              <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
+              <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+            </ul>
+            <ul className={interviewLiClassList}>
+              <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
+              <li className="buttonLi" onClick={this.drawLine}>Add line</li>
+              <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+            </ul>
         </div>
         
+        <canvas 
+          onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+          onTouchEnd={this.drawFunction}
+          className={canvasClassList}
+          ref={this.canvas}
+        />
         <img alt="" onMouseMove={e => this.updateCoord(e)}
-            id='map-image' 
-            onClick={e => this.takeAction(e)} 
-            className='map-image' 
-            src={this.state.mapblob} />
-          <div id="iconContainer" />
+          id='map-image' 
+          onClick={e => this.takeAction(e)} 
+          className={imageClassList}
+          src={this.state.mapblob}
+          ref={this.myImage}
+          
+        />
+        <div id="icon-container" />
+        
 
       </div>
     );
   }
-} // <AllIcons closeIconSelect = {this.closeIconSelect} />
+}
 
 export default BehaviourMapping;

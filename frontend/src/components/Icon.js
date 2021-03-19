@@ -5,7 +5,7 @@ function Icon(props) {
     const [icon, setIcon] = useState("")
     
     useEffect(() => {
-        fetch(`getfigure?description=${props.description}&color=${props.color}`)
+        fetch(window.backend_url + `getfigure?description=${props.description}&color=${props.color}`)
         .then(result => result.blob()) 
         .then(images => {
             var image = URL.createObjectURL(images)

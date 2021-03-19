@@ -1,0 +1,57 @@
+.interview-box {
+    position: absolute;
+    left: 27.5vw;
+    top: 13.5vh;
+    width: 45vw;
+    height: 73vh;
+    background-color: #222020;
+    font-size: 27px;
+    min-width: 500px;
+    border-radius: 5px;
+    color: #ece8e8;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.interview-box form {
+    height: 80%;
+    width: 80%;
+}
+.interview-box textarea {
+    height: 85%;
+    width: 100%;
+}
+.interview-box input {
+    list-style: none;
+    padding: 0.5vh 2vh;
+    margin: 1vh;
+    color: #222020;
+    border-radius: 25px;
+    opacity: 0.85; 
+    font-size: 3vh;
+    text-align: center; 
+    cursor: pointer;
+}
+
+.interview-box-heading {
+    order: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.interview-box-heading h2 {
+    text-align: center;
+    font-size: 7.5vh;
+    padding-bottom: 2vh;
+    color: #58A4B0;
+}
+.interview-box-heading .x {
+    position: absolute;
+    right: 2vw;
+    top: 4vh;
+    font-size: 3.75vh;
+}
+.interview-box .visible {
+    display: "";
+}

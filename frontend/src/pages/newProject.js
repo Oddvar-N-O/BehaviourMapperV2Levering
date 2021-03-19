@@ -56,7 +56,7 @@ class NewProject extends React.Component {
         data.append('file', this.uploadInput.files[0]);
         data.append('p_id', p_id);
     
-        fetch('upload', {
+        fetch(window.backend_url + 'upload', {
           method: 'POST',
           body: data,
         }).then(setTimeout(
@@ -104,7 +104,7 @@ class NewProject extends React.Component {
             data.append('startdate', new Date());
             data.append('map', this.uploadInput.files[0].name);
             
-            fetch('addproject', {
+            fetch(window.backend_url + 'addproject', {
             method: 'POST',
             body: data,
             }).then((response) => {
@@ -174,36 +174,3 @@ class NewProject extends React.Component {
     }
 }
 export default NewProject
-
-
-
-
-// handleRedirect() {
-//     const data = new FormData();
-//     data.append('name', this.state.projectName);
-//     data.append('description', this.state.description);
-//     data.append('startdate', new Date());
-//     if (this.state.fromLoadMap){
-//         data.append('map', this.uploadInput.files[0].name);
-//     }
-//     fetch('addproject', {
-//     method: 'POST',
-//     body: data,
-//     }).then((response) => {
-//         response.json().then((data) => {
-//             this.setState({p_id: data.p_id[0]});
-//             if (this.state.fromLoadMap) {
-//                 this.handleUploadImage(data.p_id[0]);
-//             } else {
-//                 this.props.history.push({
-//                     pathname: '/chooseImage',
-//                     state: {
-//                         projectName: this.state.projectName,
-//                         description: this.state.description,
-//                         p_id: data.p_id[0],
-//                     },
-//                 });
-//             }  
-//         });
-//     });
-// }

@@ -25,6 +25,19 @@ CREATE TABLE IF NOT EXISTS [Project] (
     FOREIGN KEY (u_id) REFERENCES "Users"(id)
 );
 
+DROP TABLE IF EXISTS "InterviewEvents";
+
+CREATE TABLE IF NOT EXISTS "InterviewEvents" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"interview"	VARCHAR NULL,
+    "area" VARCHAR NULL,
+    "lines" VARCHAR NULL,
+    "point" VARCHAR NULL,
+	"p_id"	INTEGER NOT NULL,
+    FOREIGN KEY (p_id) REFERENCES "Project"(id)
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
 DROP TABLE IF EXISTS "Figures";
 
 CREATE TABLE IF NOT EXISTS "Figures" (
