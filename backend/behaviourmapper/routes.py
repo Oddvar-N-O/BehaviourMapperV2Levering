@@ -1,5 +1,6 @@
 from .db import query_db, init_db, select_db
 from .errorhandlers import InvalidUsage
+from . import oidc 
 from datetime import datetime, date
 from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app
 from time import time
@@ -18,12 +19,20 @@ logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger('')
 
+#This is only for testing 
 @bp.route('/')
 def index():
     if oidc.user_loggedin:
         return 'Welcome %s' % oidc.user_getfield('email')
     else:
+        print(oidc)
         return 'Not logged in'
+
+#This is only for testing 
+@bp.route('/login')
+@oidc.require_login
+def login():
+    return 'Welcome %s' % oidc.user_getfield('email')
 
 # Set allowed filenames
 def allowed_file(filename):
@@ -56,9 +65,7 @@ def addInterview():
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
 # Need to add that you first get all projects, then get all info on a project.
 @bp.route('/getproject', methods=['GET'])
-@oidc.accept_token()
 def getProject():
-    print(g.oidc_token_info['sub'])
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
     proj_values = (request.args.get('u_id'), request.args.get('name'))
     if proj_values[1] == None:
