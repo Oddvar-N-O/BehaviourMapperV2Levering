@@ -1,7 +1,7 @@
 import './App.css';
 import BehaviourMapping from './pages/BehaviourMapping'
 import NewProject from './pages/newProject'
-import Login from './pages/login'
+import Login from './pages/auth/login'
 import Startpage from './pages/startpage'
 import ChooseImage from './pages/ChooseImage'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
@@ -16,7 +16,7 @@ function App() {
     <div className="App">
       <Router basename="/behaviourmapper">
         <Switch>
-          <Route path='/' exact component={Login} />
+          {/* <Route path='/' exact component={} /> */}
           <Route path='/startpage' component={Startpage} />
           <Route path='/newproject' component={NewProject} />
           <Route path='/chooseimage' component={ChooseImage} />
