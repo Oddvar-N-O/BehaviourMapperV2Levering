@@ -155,3 +155,10 @@ input, textarea {
     font-size: 14px;
     box-shadow: 4px 4px 8px #222020;
 }
+
+.loading{
+    height: 30px;
+    position: absolute;
+    left: 100px;
+    top: 100px;
+}

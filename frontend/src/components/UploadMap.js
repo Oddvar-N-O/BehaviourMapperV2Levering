@@ -16,6 +16,7 @@ class UploadMap extends React.Component {
     }
 
     handleUploadImage(ev) {
+        alert("upload start")
         ev.preventDefault();
     
         const data = new FormData();
@@ -30,6 +31,7 @@ class UploadMap extends React.Component {
             this.setState({ imageURL: `http://localhost:5000/${body.file}` });
           });
         });
+        alert("upload finished")
     }
 
     render() {
