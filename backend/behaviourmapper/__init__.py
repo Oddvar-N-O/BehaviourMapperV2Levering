@@ -5,6 +5,7 @@ from flask_cors import CORS
 from Crypto.Random import get_random_bytes
 from flask_oidc import OpenIDConnect, oidc-register
 
+oidc = OpenIDConnect()
 
 def create_app(test_config=None):
     # Create and configure app
@@ -12,7 +13,6 @@ def create_app(test_config=None):
     app.secret_key = get_random_bytes(32)
     # CORS implemented so that we don't get errors when trying to access the server from a different server location
     CORS(app)
-    
     
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -22,18 +22,22 @@ def create_app(test_config=None):
         OIDC_CLIENT_SECRETS=os.path.join(app.instance_path, 'client_secrets.json'),
         # OIDC_COOKIE_SECURE=False,
         # OIDC_CALLBACK_ROUTE= '/oidc/callback',
-        # OIDC_SCOPES=["openid", "email", "profile"],
         # OIDC_ID_TOKEN_COOKIE_NAME = 'oidc_token',
-    )
+        )
+        oidc.init_app(app)
         
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
     
+<<<<<<< HEAD
     
   
     oidc = OpenIDConnect(app)
     oidc-register https://auth.dataporten.no/.well-known/openid-configuration http://localhost:3000/behaviourmapper/startpage 
+=======
+>>>>>>> 9c99df00e781100bc3d5ef7f09d43823c620d3e9
 
     # ensure the instance folder exists
     try:
