@@ -1,11 +1,13 @@
 import os
-from flask import Flask
-from .config import Config
-from flask_cors import CORS
-from Crypto.Random import get_random_bytes
-from flask_oidc import OpenIDConnect, oidc-register
 
-oidc = OpenIDConnect()
+from Crypto.Random import get_random_bytes
+from flask import Flask
+from flask_cors import CORS
+from flask_oidc import OpenIDConnect
+
+from .config import Config
+
+oidc = OpenIDConnect(http="https://auth.dataporten.no/.well-known/openid-configuration")
 
 def create_app(test_config=None):
     # Create and configure app
@@ -18,11 +20,12 @@ def create_app(test_config=None):
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
         app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
+        print(app.instance_path)
         app.config.from_mapping(
         OIDC_CLIENT_SECRETS=os.path.join(app.instance_path, 'client_secrets.json'),
         # OIDC_COOKIE_SECURE=False,
-        # OIDC_CALLBACK_ROUTE= '/oidc/callback',
-        # OIDC_ID_TOKEN_COOKIE_NAME = 'oidc_token',
+        # OIDC_CALLBACK_ROUTE= '/oidc_callback',
+        # # OIDC_ID_TOKEN_COOKIE_NAME = 'oidc_token',
         )
         oidc.init_app(app)
         
@@ -31,13 +34,6 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     
-<<<<<<< HEAD
-    
-  
-    oidc = OpenIDConnect(app)
-    oidc-register https://auth.dataporten.no/.well-known/openid-configuration http://localhost:3000/behaviourmapper/startpage 
-=======
->>>>>>> 9c99df00e781100bc3d5ef7f09d43823c620d3e9
 
     # ensure the instance folder exists
     try:

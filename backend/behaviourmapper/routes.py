@@ -2,7 +2,7 @@ from .db import query_db, init_db, select_db
 from .errorhandlers import InvalidUsage
 from . import oidc 
 from datetime import datetime, date
-from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app
+from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app, g
 from time import time
 import json
 import logging
@@ -32,6 +32,12 @@ def index():
 @bp.route('/login')
 @oidc.require_login
 def login():
+    return 'Welcome %s' % oidc.user_getfield('email')
+
+#This is only for testing 
+@bp.route('/oidc_callback')
+@oidc.require_login
+def oidc_callback():
     return 'Welcome %s' % oidc.user_getfield('email')
 
 # Set allowed filenames
