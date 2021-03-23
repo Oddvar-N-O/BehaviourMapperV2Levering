@@ -307,14 +307,14 @@ def createARCGIS():
     w.autoBalance = 1
     w.field('Background', 'C', '40')
 
-    w.point(leftX, lowerY)
+    """ w.point(leftX, lowerY)
     w.record('LL')
     w.point(leftX, upperY)
     w.record('UL')
     w.point(rightX, lowerY)
     w.record('LR')
     w.point(rightX, upperY)
-    w.record('UR')
+    w.record('UR')"""
 
     point_ID = 1
     for coordinateSet in iconCoord:

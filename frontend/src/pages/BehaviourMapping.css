@@ -77,7 +77,7 @@
 .map-image {
     height: 100vh;
     width: calc(100vw - 200px);
-    min-height: 400px;
+    min-height: 300px;
     min-width: 400px;
     order: 3;
 }

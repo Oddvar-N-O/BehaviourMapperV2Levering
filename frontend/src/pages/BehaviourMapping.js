@@ -36,6 +36,7 @@ class BehaviourMapping extends React.Component {
       };
       this.canvasRef = React.createRef();
       this.handleScroll = this.handleScroll.bind(this)
+      // this.moveIcon = this.moveIcon.bind(this)
       this.handleResize = this.handleResize.bind(this);
 
       this.selectIcon = this.addIconToList.bind(this)
@@ -48,8 +49,7 @@ class BehaviourMapping extends React.Component {
       originalCoord: coordinates,
       originalSize: currentSize,
     };
-    this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {
-    });
+    this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {});
   }
 
   sendEventToDatabase() {
@@ -59,8 +59,8 @@ class BehaviourMapping extends React.Component {
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
-    this.createIconObject(coordinates, currentSize)
-    console.log(this.state.iconObjects);
+    console.log('SDB');
+    // this.createIconObject(coordinates, currentSize)
     data.append('p_id', this.state.p_id);
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
@@ -89,10 +89,12 @@ class BehaviourMapping extends React.Component {
     this.setState({ addIcon: true })
   }
 
+  /*            onDrop={e => this.dropImg(e)}
+            onDragOver={e => this.letImgDrop(e)}*/
+
   setInnerHTML(str) {
     if (str != null) {
       let descr = str.split(' ');
-      console.log(descr)
      //  descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
       switch(descr[1]) {
         case 'blue':
@@ -104,7 +106,6 @@ class BehaviourMapping extends React.Component {
         default:
           descr[1] = "Child";
       }
-      console.log(descr)
       return descr;
     }
   }
@@ -257,8 +258,39 @@ class BehaviourMapping extends React.Component {
     }  
   }
   
+  addListenerToImage(img) {
+    console.log('start');
+    img.addEventListener('click', function() {
+      if (img.style.border == '4px solid red') {
+        img.style.border = 'none';
+        img.style.borderRadius = '5px';
+        let id = img.getAttribute('id');
+        
+        // let iconInfo = this.state.iconObjects[id];
+  
+        // let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+        // icon.style.left = (coords[0] + 200) +'px';
+        // icon.style.top =  (coords[1]) +'px';
+      } else {
+        img.style.border = '4px solid red';
+      }
+    });
+    img.click();
+  }
+
+  /* letImgDrop(ev) {
+    ev.preventDefault();
+  }*/
+  
+  
+  /*dropImg(ev) {
+    // console.log(ev.target.getAttribute('id'));
+    console.log(this.state.ourMouseCoord);
+    document.getElementById()
+  }*/
 
   placeIcon(event) {
+    this.findScreenSize()
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
@@ -281,12 +313,15 @@ class BehaviourMapping extends React.Component {
     }
     img.style.left = coordinates[0] + 200 +'px';
     img.style.top =  coordinates[1] +'px';
+    let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
+    this.createIconObject(coordinates, imageSizeOnCreation);
     this.setState({
       ourIconCoord: {
         x: coordinates[0],
         y: coordinates[1],
       }
     }, function() {});
+    this.addListenerToImage(img);
     this.findScreenSize();
   }
   
@@ -325,62 +360,43 @@ class BehaviourMapping extends React.Component {
     if (this.state.formerEvents != []) {
       if (this.state.currentScreenSize.x != 0) {
         this.findScreenSize();
-        if (this.state.currentScreenSize.x != this.state.formerScreenSize.x) {
-          this.placeEventsAfterChange()
-        }
+        // if (this.state.currentScreenSize.x != this.state.formerScreenSize.x || ) {
+        this.placeEventsAfterChange()
+        // }
         this.setState({formerScreenSize: this.state.currentScreenSize});
       }
     }
   }
 
+  findNewCoordinates(oldSize, coords) {
+    let percentx = coords[0] / oldSize[0];
+    let percenty = coords[1] / oldSize[1];
+    // console.log('oldX: ' + coords[0])
+    // console.log('oldY: ' + coords[1])
+    let mapImage = document.querySelector('.map-image');
+    let newXsize = mapImage.width;
+    let newYsize = mapImage.height;
+    let newXcoord = newXsize * percentx;
+    let newYcoord = newYsize * percenty;
+    let newccords = [];
+    newccords[0] = newXcoord;
+    newccords[1] = newYcoord;
+    // console.log('newX: ' + newXcoord);
+    // console.log('newY: ' + newYcoord);
+    return newccords;
+  }
+
   placeEventsAfterChange() {
     let icon;
     for (var i=0; i<this.state.newIconID; i++) {
-      console.log('ID: ' + i);
       icon = document.getElementById(i.toString());
+      let iconInfo = this.state.iconObjects[i];
 
-      let screenx = this.state.currentScreenSize.x;
-      let screeny = this.state.currentScreenSize.y;
-      console.log('len: ' + this.state.iconObjects.length);
-      console.log('icobj: ' + this.state.iconObjects);
-      console.log('relobj: ' + this.state.iconObjects[i]);
-      // console.log(this.state.iconObjects[i][0])
-      console.log(' ')
-      let coords = this.state.iconObjects[i][0];
-      // console.log('coord: ' + coords);
-      let originalScreenSize = this.state.iconObjects[i][1];
-      // console.log('OSS: ' + originalScreenSize);
-
-      /* let percentx = coords[0] / oldSize[0];
-      let percenty = coords[1] / oldSize[1];
-      let mapImage = document.querySelector('.map-image');
-      let newXsize = mapImage.width;
-      let newYsize = mapImage.height;
-      let newXcoord = newXsize * percentx;
-      let newYcoord = newYsize * percenty;
-      coords[0] = newXcoord;
-      coords[1] = newYcoord;
-      return coords;*/
-
-      console.log('------------------------')
-      
-      /*if (icon != null) {
-        let iconx = icon.offsetLeft;
-        let icony = icon.offsetTop;
-        let percentx = iconx / formerx;
-        let percenty = icony / formery;
-        let newXcoord = screenx * percentx;
-        let newYcoord = screeny * percenty;
-        console.log('X: ' + iconx + ' / ' + formerx + ' = ' + percentx);
-        console.log('------------------------')
-
-        document.getElementById('iconContainer').appendChild(icon);
-        icon.style.left = (newXcoord) +'px';
-        icon.style.top =  (newYcoord) +'px';
-      } else {
-        console.log('ERROR');
-      }*/
+      let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+      icon.style.left = (coords[0] + 200) +'px';
+      icon.style.top =  (coords[1]) +'px';
     }
+    
   }
 
 
@@ -390,8 +406,6 @@ class BehaviourMapping extends React.Component {
     this.findScreenSize(); // currentScreenSize.x and .y
     this.initiateFormerScreenSize();
     window.addEventListener('resize', this.handleResize);
-    // window.onresize = this.handleResize;
-
     // const canvas = this.canvasRef.current;
     // const ctx = canvas.getContext('2d')
 
@@ -465,14 +479,12 @@ class BehaviourMapping extends React.Component {
     for (let i=0; i<this.state.formerEvents.length; i++) {
 
       let eventset = this.state.formerEvents[i];
-      // console.log(eventset[0][3]);
       let imageSizeOnCreation = this.findIntegerCoordinates(eventset[0][3]);
-      let coord = this.findIntegerCoordinates(eventset[0][2])
+      var coord = this.findIntegerCoordinates(eventset[0][2])
       this.createIconObject(coord, imageSizeOnCreation);
-      coord = this.findNewCoordinates(imageSizeOnCreation, coord);
       let rotation = eventset[0][1]
       let f_id = eventset[0][5]
-      console.log(this.state.iconObjects);
+      coord = this.findNewCoordinates(imageSizeOnCreation, coord);
       this.placeFormerEvent(f_id, coord, rotation);
     }
   }
@@ -485,22 +497,7 @@ class BehaviourMapping extends React.Component {
     return coord;
   }
 
-  findNewCoordinates(oldSize, coords) {
-
-    let percentx = coords[0] / oldSize[0];
-    let percenty = coords[1] / oldSize[1];
-    let mapImage = document.querySelector('.map-image');
-    let newXsize = mapImage.width;
-    let newYsize = mapImage.height;
-    let newXcoord = newXsize * percentx;
-    let newYcoord = newYsize * percenty;
-    coords[0] = newXcoord;
-    coords[1] = newYcoord;
-    return coords;
-  }
-
   placeFormerEvent(f_id, coord, rotation) {
-    // console.log('cordx: ' + coord[0] + ', y: ' + coord[1]);
     let src;
     fetch(`getimagefromID?f_id=${f_id}`)
     .then(result => result.blob())
@@ -509,6 +506,8 @@ class BehaviourMapping extends React.Component {
 
       let img = document.createElement('img');
       img.setAttribute('id', this.state.newIconID.toString());
+      this.addListenerToImage(img);
+      img.click();
       this.setState({
         newIconID: this.state.newIconID + 1
       }, function() {});   
@@ -542,7 +541,6 @@ class BehaviourMapping extends React.Component {
     fetch('exportarcgis')
     .then(res => res.blob())
     .then(data => {
-      // console.log('FD: ' + data);
       // for å gjøre bolbben til en fil
       /* blob.lastModifiedDate = new Date();
       blob.name = 'yeet';
@@ -625,7 +623,7 @@ class BehaviourMapping extends React.Component {
         </div>
         <img alt="" onMouseMove={e => this.updateCoord(e)}
             id='map-image' 
-            onClick={e => this.takeAction(e)} 
+            onClick={e => this.takeAction(e)}
             className='map-image' 
             src={this.state.mapblob} />
         <div id="iconContainer" />
