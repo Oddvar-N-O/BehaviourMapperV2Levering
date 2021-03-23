@@ -15,6 +15,21 @@
     border-radius: 5px;
     box-shadow: 2px 2px 4px #161616;
 }
+#container {
+    min-width: 300px;
+    min-height: 300px;
+    /*background-color: #58A4B0;*/
+}
+#opplastetKart {
+    z-index: 2;
+}
+.icon {
+    color: #ece8e8;
+    position:absolute;
+    width: 50px;
+    height: 50px;
+    z-index: 3;
+}
 #load-project h1, #load-project p, #load-project img{
     color: #ece8e8;
     padding: 1vh;
@@ -69,4 +84,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/*LOADPROJECT 2*/
+
+.buttonLi{
+    margin-top: 0px;
+    color: #ece8e8;
+    background-color: #222020;
+    border-bottom: 2px #58A4B0 solid;
+    min-width: 200px;
+}
+
+#iconList {
+    width: 200px;
 }

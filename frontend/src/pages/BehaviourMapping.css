@@ -44,6 +44,15 @@
     min-width: 200px;
 }
 
+#input-li {
+    display: 'none';
+}
+
+#arcgis-input {
+    height: 20px;
+    display: 'none';
+}
+
 .zoom-button {
     min-width: 80px;
     margin-right: 10px;
@@ -66,11 +75,21 @@
     display: flex;
 }
 .map-image {
-    /* height: 100vh;
-    width: calc(100vw - 200px);*/
-    height: 684px;
-    width: 624px;
+    height: 100vh;
+    width: calc(100vw - 200px);
+    min-height: 400px;
+    min-width: 400px;
     order: 3;
+}
+
+#canvas {
+    border: 1px solid black;
+    background-color: blue;
+    display: none;
+}
+
+#downlaod {
+    display: none;
 }
 
 .icon {

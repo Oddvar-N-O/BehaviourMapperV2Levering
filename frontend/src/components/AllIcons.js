@@ -21,7 +21,7 @@ class AllIcons extends React.Component {
         fetch(`getfiguredata`)
         .then(response => response.json()) 
         .then(data => {
-            console.log('DATA: ' + data[1].id)
+            // console.log('DATA: ' + data[1].id)
             this.setState({
                 allIconData: data
             })
