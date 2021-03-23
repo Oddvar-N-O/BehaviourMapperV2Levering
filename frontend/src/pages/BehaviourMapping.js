@@ -91,7 +91,10 @@ class BehaviourMapping extends React.Component {
     if (str != null) {
       let descr = str.split(' ');
       descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
-      switch(descr[1]) {
+      for (let i=1; i<descr.length-1; i++) {
+        descr[0] += " " + descr[i]
+      }
+      switch(descr[descr.length-1]) {
         case 'blue':
           descr[1] = "Man";
           break;
