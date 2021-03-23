@@ -14,6 +14,7 @@
     "enzyme-adapter-react-16": "^1.15.6",
     "express": "^4.17.1",
     "leaflet": "^1.7.1",
+    "mobx": "^6.1.8",
     "mobx-react": "^7.1.0",
     "oidc-client": "^1.11.5",
     "oidc-react": "^1.4.0",
