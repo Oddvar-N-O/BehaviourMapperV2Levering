@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask
 from .config import Config
@@ -5,7 +6,7 @@ from flask_cors import CORS
 from Crypto.Random import get_random_bytes
 from flask_oidc import OpenIDConnect, oidc-register
 
-oidc = OpenIDConnect()
+oidc = OpenIDConnect()git 
 
 def create_app(test_config=None):
     # Create and configure app
@@ -31,13 +32,10 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     
-<<<<<<< HEAD
     
   
     oidc = OpenIDConnect(app)
     oidc-register https://auth.dataporten.no/.well-known/openid-configuration http://localhost:3000/behaviourmapper/startpage 
-=======
->>>>>>> 9c99df00e781100bc3d5ef7f09d43823c620d3e9
 
     # ensure the instance folder exists
     try:
