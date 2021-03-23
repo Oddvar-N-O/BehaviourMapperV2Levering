@@ -17,6 +17,7 @@ function App() {
       <Router basename="/behaviourmapper">
         <Switch>
           {/* <Route path='/' exact component={} /> */}
+          {/* <Route path='/' exact component={Login} /> */}
           <Route path='/startpage' component={Startpage} />
           <Route path='/newproject' component={NewProject} />
           <Route path='/chooseimage' component={ChooseImage} />
