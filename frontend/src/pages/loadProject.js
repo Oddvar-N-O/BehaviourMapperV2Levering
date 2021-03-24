@@ -79,12 +79,31 @@ function LoadProject() {
   const placeAllFormerEvents = () => { // tried async + await
     for (let i=0; i<allEvents.length; i++) {
       let eventset = allEvents[i]
-      console.log(eventset);
+     //  console.log(eventset);
       let f_id = eventset[eventset.length - 1];
-      console.log('f_id: ' + f_id);
-      let coord = findIntegerCoordinates(eventset[2]);
-      placeFormerEvent(f_id, coord);
+      let rotation = eventset[1]
+      let originalSize = findIntegerCoordinates(eventset[3]);
+      let originalCoord = findIntegerCoordinates(eventset[2]);
+      let coord = findNewCoord(originalSize, originalCoord)
+      placeFormerEvent(f_id, coord, rotation);
     }
+  }
+
+  const findNewCoord = (originalSize, originalCoord) => {
+      console.log('OC: ' + originalCoord);
+      let percentx = originalCoord[0] / originalSize[0];
+      let percenty = originalCoord[1] / originalSize[1];
+      // let mapImage = document.getElementById('opplastetKart');
+      let newXsize = 300; //mapImage.width;
+      let newYsize = 300; // mapImage.height;
+      let newXcoord = newXsize * percentx;
+      let newYcoord = newYsize * percenty;
+      let newccords = [];
+      newccords[0] = newXcoord;
+      newccords[1] = newYcoord;
+      console.log('NC: ' + newccords);
+      console.log('-------')
+    return newccords;
   }
 
   const findIntegerCoordinates = (coord) => {
@@ -94,21 +113,24 @@ function LoadProject() {
     return coord;
   }
 
-  const placeFormerEvent = (f_id, coord) => {
+  const placeFormerEvent = (f_id, coord, rotation) => {
     let src;
-    console.log('src: ' + src);
     fetch(`getimagefromID?f_id=${f_id}`)
     .then(result => result.blob())
     .then(images => {
       src = URL.createObjectURL(images)
       let img = document.createElement('img'); 
       img.classList.add('icon');
-      img.style.width = '10px';
-      img.style.height = '10px';
+      img.style.width = '20px';
+      img.style.height = '20px';
       img.src = src;
       document.getElementById('container').appendChild(img);
-      img.style.top =  (coord[1]+180)+'px';
-      img.style.left = (coord[0]+205) +'px';
+
+      img.style.top =  (coord[1] + 300)+'px';
+      img.style.left = (coord[0] + 400) +'px';
+      if (rotation != null) {
+        img.style.transform = rotation;
+      }
     });
     return null;
   }
@@ -123,8 +145,8 @@ function LoadProject() {
             <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
               <h1>{currProj["name"]}</h1>
               <p>Project id: {currProj["id"]} Name: {currProj["name"]} Screenshot: {currProj["screenshot"]}</p>
-              <img alt={'Screenshot av kartet til '+ currImage + '.'} src={currImage} id='opplastetKart' />
               <div id="container"></div>
+              <img alt={'Screenshot av kartet til '+ currImage + '.'} src={currImage} id='opplastetKart' />
             </div>
             <button>
                 <Link to={{

@@ -89,9 +89,6 @@ class BehaviourMapping extends React.Component {
     this.setState({ addIcon: true })
   }
 
-  /*            onDrop={e => this.dropImg(e)}
-            onDragOver={e => this.letImgDrop(e)}*/
-
   setInnerHTML(str) {
     if (str != null) {
       let descr = str.split(' ');
@@ -371,8 +368,6 @@ class BehaviourMapping extends React.Component {
   findNewCoordinates(oldSize, coords) {
     let percentx = coords[0] / oldSize[0];
     let percenty = coords[1] / oldSize[1];
-    // console.log('oldX: ' + coords[0])
-    // console.log('oldY: ' + coords[1])
     let mapImage = document.querySelector('.map-image');
     let newXsize = mapImage.width;
     let newYsize = mapImage.height;
@@ -381,8 +376,6 @@ class BehaviourMapping extends React.Component {
     let newccords = [];
     newccords[0] = newXcoord;
     newccords[1] = newYcoord;
-    // console.log('newX: ' + newXcoord);
-    // console.log('newY: ' + newYcoord);
     return newccords;
   }
 

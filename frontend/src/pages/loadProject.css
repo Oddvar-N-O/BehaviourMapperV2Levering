@@ -15,13 +15,11 @@
     border-radius: 5px;
     box-shadow: 2px 2px 4px #161616;
 }
-#container {
+#opplastetKart {
     min-width: 300px;
     min-height: 300px;
-    /*background-color: #58A4B0;*/
-}
-#opplastetKart {
-    z-index: 2;
+    max-width: 500px;
+    max-height: 500px;
 }
 .icon {
     color: #ece8e8;
