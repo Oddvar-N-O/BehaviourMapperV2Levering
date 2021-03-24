@@ -1,6 +1,6 @@
 from .db import query_db, init_db, select_db
 from .errorhandlers import InvalidUsage
-from . import oidc 
+from . import oidc
 from datetime import datetime, date
 from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app, g
 from time import time
@@ -13,32 +13,18 @@ from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import abort
 import shapefile as shp
 
-bp = Blueprint('behaviourmapper', __name__, url_prefix='/behaviourmapper')
+bp = Blueprint('behaviourmapper', __name__)
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger('')
 
-#This is only for testing 
-@bp.route('/')
-def index():
-    if oidc.user_loggedin:
-        return 'Welcome %s' % oidc.user_getfield('email')
-    else:
-        print(oidc)
-        return 'Not logged in'
+# Add possibility to be rerouted to frondend loginsite.
+@bp.route('/logout')
+def logout():
+    oidc.logout()
+    return redirect("https://auth.datapor   ten.no/openid/endsession")
 
-#This is only for testing 
-@bp.route('/login')
-@oidc.require_login
-def login():
-    return 'Welcome %s' % oidc.user_getfield('email')
-
-#This is only for testing 
-@bp.route('/oidc_callback')
-@oidc.require_login
-def oidc_callback():
-    return 'Welcome %s' % oidc.user_getfield('email')
 
 # Set allowed filenames
 def allowed_file(filename):
@@ -47,6 +33,7 @@ def allowed_file(filename):
 # Not all done, must add link to map
 @bp.route('/addproject', methods=['POST'])
 @cross_origin()
+@oidc.require_login
 def addProject():
     add_small_project = ("INSERT INTO Project "
         "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY)"
@@ -60,6 +47,7 @@ def addProject():
     # Add a new project and link a map
 
 @bp.route('/addinterview', methods=['POST'])
+@oidc.require_login
 def addInterview():
     add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
     args = (request.form.get('interview'), request.form.get('p_id'))
@@ -71,7 +59,10 @@ def addInterview():
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
 # Need to add that you first get all projects, then get all info on a project.
 @bp.route('/getproject', methods=['GET'])
+@oidc.require_login
 def getProject():
+    if oidc.user_loggedin:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
     proj_values = (request.args.get('u_id'), request.args.get('name'))
     if proj_values[1] == None:
@@ -90,6 +81,7 @@ def getProject():
     return json.dumps(result)
 
 @bp.route('/getprojectmapping', methods=['GET'])
+@oidc.require_login
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
@@ -101,6 +93,7 @@ def getProjectMapping():
 
 # Usage /getfigure?description=<desc>&color=<color>
 @bp.route('/getfigure')
+@oidc.require_login
 def getFigure():
     get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
     description = request.args.get('description', None)
@@ -118,6 +111,7 @@ def getFigure():
         abort(404)
 
 @bp.route('/getfiguredata')
+@oidc.require_login
 def getFigureData():
     get_figure_data_sql =("SELECT description, color, id FROM Figures")
     result = select_db(get_figure_data_sql)
@@ -128,6 +122,7 @@ def getFigureData():
     return json.dumps(data)
     
 @bp.route('/getmap')
+@oidc.require_login
 def getMap():
     get_map_sql =('SELECT map FROM Project WHERE id=?')
     args = (request.args.get('p_id'),)
@@ -141,6 +136,7 @@ def getMap():
         abort(404)
 
 @bp.route('/favicon.ico')
+@oidc.require_login
 def favicon():
     try:
         return send_from_directory(Config.STATIC_URL_PATH, "favicon.ico")
@@ -149,6 +145,7 @@ def favicon():
 
 # Not done yet, must be checked with actual data
 @bp.route('/addevent', methods=['POST'])
+@oidc.require_login
 def addEvent():
     project_id = request.form.get('p_id') 
     # find clever way to get this dynamically
@@ -161,6 +158,7 @@ def addEvent():
 
 # Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
 @bp.route('/getevents')
+@oidc.require_login
 def getEvents():
     return get_events_func(request.args.get("p_id")) 
 
@@ -187,16 +185,19 @@ def get_events_func(p_id):
     return json.dumps(events)
 
 @bp.route('/adduser', methods=['POST', 'GET'])
+@oidc.require_login
 def addUser():
     return {"ERROR": "Not Created yet."}
 # add a new user
 
 @bp.route('/getuser', methods=['GET'])
+@oidc.require_login
 def getUser():
     return {"ERROR": "Not Created yet."}
 # add a new user
 
 @bp.route('/upload', methods=['POST'])
+@oidc.require_login
 def fileUpload():
     target=os.path.join(Config.UPLOAD_FOLDER)
     if not os.path.isdir(target):
@@ -249,6 +250,7 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
     return newCoordinates
 
 @bp.route('/createarcgis', methods=['POST'])
+@oidc.require_login
 @cross_origin()
 def createARCGIS():
     # step 1 create field. Step 2 populate fields
@@ -306,11 +308,13 @@ def createARCGIS():
 
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
 @bp.route('/initdb')
+@oidc.require_login
 def initdb():
     init_db()
     return redirect(url_for("behaviourmapper.testdb"))
 
 @bp.route('/testdb')
+@oidc.require_login
 def testdb():
     u_id = query_db(add_user, user_values)
     f_id = query_db(add_figure, figure_values)
@@ -322,6 +326,7 @@ def testdb():
     return redirect(url_for('behaviourmapper.selectdb'))    
 
 @bp.route('/selectdb')
+@oidc.require_login
 def selectdb():
     result = {"Figures": "", "Users": "", "Project": "", "Project_has_Event": "", "Event": ""}
     table_names = ("Figures", "Users", "Project", "Project_has_Event", "Event")

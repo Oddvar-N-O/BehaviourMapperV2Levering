@@ -10,4 +10,4 @@ class Config(object):
     STATIC_URL_PATH = os.path.join(basedir, "static")
     ALLOWED_EXTENSIONS = {"jpg", "png", "jpeg", "pdf", "gif"}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-    OIDC_CLIENT_SECRETS = get_random_bytes(48)
+    
