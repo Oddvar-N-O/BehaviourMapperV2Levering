@@ -24,7 +24,7 @@ def create_app(test_config=None):
         app.config.from_pyfile('config.py', silent=True)
         app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
         app.config.from_mapping(
-        OIDC_CLIENT_SECRETS=os.path.join(app.instance_path, 'client_secrets.json'),
+        OIDC_CLIENT_SECRETS=os.path.join(Config.STATIC_URL_PATH, 'client_secrets.json'),
         OIDC_COOKIE_SECURE=False,
         OIDC_CALLBACK_ROUTE= '/',
         )

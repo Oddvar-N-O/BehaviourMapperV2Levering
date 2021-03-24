@@ -23,7 +23,7 @@ logger = logging.getLogger('')
 @bp.route('/logout')
 def logout():
     oidc.logout()
-    return redirect("https://auth.datapor   ten.no/openid/endsession")
+    return redirect("https://auth.dataporten.no/openid/endsession")
 
 
 # Set allowed filenames
