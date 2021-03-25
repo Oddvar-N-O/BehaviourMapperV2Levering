@@ -21,14 +21,12 @@ logger = logging.getLogger('')
 
 # Add possibility to be rerouted to frondend loginsite.
 @bp.route('/logout')
-@cross_origin()
 def logout():
     oidc.logout()
     return redirect("https://auth.dataporten.no/openid/endsession")
 
 @bp.route('/login')
 @oidc.require_login
-@cross_origin()
 def login():
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
@@ -75,7 +73,6 @@ def allowed_file(filename):
 
 # Not all done, must add link to map
 @bp.route('/addproject', methods=['POST'])
-@cross_origin()
 @oidc.require_login
 def addProject():
     add_small_project = ("INSERT INTO Project "
@@ -280,7 +277,6 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
 
 @bp.route('/createarcgis', methods=['POST'])
 @oidc.require_login
-@cross_origin()
 def createARCGIS():
     # step 1 create field. Step 2 populate fields
     # enter folder
