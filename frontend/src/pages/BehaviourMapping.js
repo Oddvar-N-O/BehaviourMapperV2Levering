@@ -3,6 +3,7 @@ import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
 import './BehaviourMapping.css';
 import classNames from 'classnames';
+import { Authenticated } from './auth/AuthContext'
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -478,51 +479,53 @@ class BehaviourMapping extends React.Component {
       'visible': !this.state.onlyObservation
     });
     return (
-      <div id='maincont'>
-        <div className="sidebar">
-          <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
-              <AllIcons selectIcon = {this.selectIcon} 
-              close={() => this.closeIconSelect()}/>
-          </div> 
-          <div className={this.state.addInterview ? "interview" : "invisible"}> 
-            <Interview 
-              close={this.addInterview}
-              save={this.saveInterview}
-              ref={this.interviewElement}
-            /> 
-          </div> 
-            <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-              <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
-              <li className="buttonLi" onClick={this.showAll}>Show icons</li>
-              <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-              <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
-              <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-            </ul>
-            <ul className={interviewLiClassList}>
-              <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
-              <li className="buttonLi" onClick={this.drawLine}>Add line</li>
-              <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-            </ul>
-        </div>
-        
-        <canvas 
-          onTouchMove={this.state.drawLine ? this.addToDrawList : null}
-          onTouchEnd={this.drawFunction}
-          className={canvasClassList}
-          ref={this.canvas}
-        />
-        <img alt="" onMouseMove={e => this.updateCoord(e)}
-          id='map-image' 
-          onClick={e => this.takeAction(e)} 
-          className={imageClassList}
-          src={this.state.mapblob}
-          ref={this.myImage}
+      <Authenticated>
+        <div id='maincont'>
+          <div className="sidebar">
+            <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
+                <AllIcons selectIcon = {this.selectIcon} 
+                close={() => this.closeIconSelect()}/>
+            </div> 
+            <div className={this.state.addInterview ? "interview" : "invisible"}> 
+              <Interview 
+                close={this.addInterview}
+                save={this.saveInterview}
+                ref={this.interviewElement}
+              /> 
+            </div> 
+              <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
+                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
+                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+                <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+              </ul>
+              <ul className={interviewLiClassList}>
+                <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
+                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+              </ul>
+          </div>
           
-        />
-        <div id="icon-container" />
-        
+          <canvas 
+            onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+            onTouchEnd={this.drawFunction}
+            className={canvasClassList}
+            ref={this.canvas}
+          />
+          <img alt="" onMouseMove={e => this.updateCoord(e)}
+            id='map-image' 
+            onClick={e => this.takeAction(e)} 
+            className={imageClassList}
+            src={this.state.mapblob}
+            ref={this.myImage}
+            
+          />
+          <div id="icon-container" />
+          
 
-      </div>
+        </div>
+      </Authenticated>
     );
   }
 }

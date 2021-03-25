@@ -13,7 +13,7 @@ from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import abort
 import shapefile as shp
 
-bp = Blueprint('behaviourmapper', __name__)
+bp = Blueprint('behaviourmapper', __name__, url_prefix="/behaviourmapper")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,10 +21,53 @@ logger = logging.getLogger('')
 
 # Add possibility to be rerouted to frondend loginsite.
 @bp.route('/logout')
+@cross_origin()
 def logout():
     oidc.logout()
     return redirect("https://auth.dataporten.no/openid/endsession")
 
+@bp.route('/login')
+@oidc.require_login
+@cross_origin()
+def login():
+    if oidc.user_loggedin:
+        email = oidc.user_getfield('email')
+        openid = oidc.user_getfield('sub')
+        print(current_app.config)
+        if not userInDB(openid):
+            addUser(openid, email)
+        return openid
+    else:
+        return {"ERROR": "Please log in."}
+
+# add this to all functions as a security measure
+def authenticateUser(u_id):
+    if oidc.user_getfield('sub') == u_id:
+        return True
+    else:
+        return False
+
+def userInDB(openid):
+    find_user = ("SELECT email FROM Users WHERE openid=?")
+    res = query_db(find_user, (openid,), True)
+    if res == 0:
+        return False
+    elif res != 0:
+        return True
+
+def addUser(openid, email):
+    add_user = ("INSERT INTO Users (openid, email)"
+               "VALUES (?,?)")
+    query_db(add_user, (openid, email))
+
+@bp.route('/getuseremail', methods=['GET'])
+@oidc.require_login
+def getUserEmail():
+    if authenticateUser(request.args.get('u_id')):
+        get_user_email = ("SELECT email FROM Users WHERE openid=? ")
+        values = (request.args.get('u_id'),)
+        res = query_db(get_user_email, values, True)
+        return json.dumps(res[0])
 
 # Set allowed filenames
 def allowed_file(filename):
@@ -61,8 +104,6 @@ def addInterview():
 @bp.route('/getproject', methods=['GET'])
 @oidc.require_login
 def getProject():
-    if oidc.user_loggedin:
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
     proj_values = (request.args.get('u_id'), request.args.get('name'))
     if proj_values[1] == None:
@@ -183,18 +224,6 @@ def get_events_func(p_id):
         query_event = query_db(get_event_sql, (str(e_id),), True)
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
     return json.dumps(events)
-
-@bp.route('/adduser', methods=['POST', 'GET'])
-@oidc.require_login
-def addUser():
-    return {"ERROR": "Not Created yet."}
-# add a new user
-
-@bp.route('/getuser', methods=['GET'])
-@oidc.require_login
-def getUser():
-    return {"ERROR": "Not Created yet."}
-# add a new user
 
 @bp.route('/upload', methods=['POST'])
 @oidc.require_login
@@ -346,13 +375,13 @@ def addMapName(mapname, p_id):
 
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
-user_values = ("kartet",)
+user_values = ("openid","email@email.com")
 event_values = [45,"12991.29291 2929.21", "12:12:12"]
 project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", 1,2,3,4]
 
 # sql for å bruke alle felt.
-add_user = ("INSERT INTO Users (feideinfo)"
-               "VALUES (?)")
+add_user = ("INSERT INTO Users (openid, email)"
+               "VALUES (?,?)")
 add_event = ("INSERT INTO Event "
               "(direction, center_coordinate, created, f_id) "
               "VALUES (?,?,?,?)")
