@@ -1,17 +1,20 @@
-from .db import query_db, init_db, select_db
-from .errorhandlers import InvalidUsage
-from . import oidc
-from datetime import datetime, date
-from flask import Flask, redirect, url_for, flash, request, session, send_from_directory, Blueprint, current_app, g
-from time import time
 import json
 import logging
-from .config import Config
 import os
-from werkzeug.utils import secure_filename
+from datetime import date, datetime
+from time import time
+
+import shapefile as shp
+from flask import (Blueprint, Flask, current_app, flash, g, redirect, request,
+                   send_from_directory, session, url_for)
 from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import abort
-import shapefile as shp
+from werkzeug.utils import secure_filename
+
+from . import oidc
+from .config import Config
+from .db import init_db, query_db, select_db
+from .errorhandlers import InvalidUsage
 
 bp = Blueprint('behaviourmapper', __name__, url_prefix="/behaviourmapper")
 
@@ -19,31 +22,40 @@ logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger('')
 
-# Add possibility to be rerouted to frondend loginsite.
+# Add possibility to be rerouted to frontend loginsite.
 @bp.route('/logout')
 def logout():
+    localhost:5000/behaviourmapper/login
     oidc.logout()
     return redirect("https://auth.dataporten.no/openid/endsession")
+
+@bp.route('/print')
+def printroute():
+    print(current_app.config)
+    return "HEI"
 
 @bp.route('/login')
 @oidc.require_login
 def login():
+    print(current_app.config)
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
         openid = oidc.user_getfield('sub')
-        print(current_app.config)
         if not userInDB(openid):
             addUser(openid, email)
-        return openid
+        return "ehs"
+        # return redirect('http://localhost:3000/behaviourmapper/startpage')
     else:
         return {"ERROR": "Please log in."}
 
 # add this to all functions as a security measure
 def authenticateUser(u_id):
-    if oidc.user_getfield('sub') == u_id:
-        return True
-    else:
-        return False
+    if oidc.user_loggedin:
+        if oidc.user_getfield('sub') == u_id:
+            return True
+        else:
+            return False
+    return False
 
 def userInDB(openid):
     find_user = ("SELECT email FROM Users WHERE openid=?")
@@ -59,7 +71,6 @@ def addUser(openid, email):
     query_db(add_user, (openid, email))
 
 @bp.route('/getuseremail', methods=['GET'])
-@oidc.require_login
 def getUserEmail():
     if authenticateUser(request.args.get('u_id')):
         get_user_email = ("SELECT email FROM Users WHERE openid=? ")
@@ -73,7 +84,6 @@ def allowed_file(filename):
 
 # Not all done, must add link to map
 @bp.route('/addproject', methods=['POST'])
-@oidc.require_login
 def addProject():
     add_small_project = ("INSERT INTO Project "
         "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY)"
@@ -87,7 +97,6 @@ def addProject():
     # Add a new project and link a map
 
 @bp.route('/addinterview', methods=['POST'])
-@oidc.require_login
 def addInterview():
     add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
     args = (request.form.get('interview'), request.form.get('p_id'))
@@ -99,8 +108,9 @@ def addInterview():
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
 # Need to add that you first get all projects, then get all info on a project.
 @bp.route('/getproject', methods=['GET'])
-@oidc.require_login
 def getProject():
+    print(oidc.user_loggedin, authenticateUser(request.args.get('u_id')))
+    # if oidc.user_loggedin and authenticateUser(request.args.get('u_id')):
     get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
     proj_values = (request.args.get('u_id'), request.args.get('name'))
     if proj_values[1] == None:
@@ -117,9 +127,12 @@ def getProject():
         else:
             result.append(project)
     return json.dumps(result)
+    # else:
+    #     logger.info("Not logged in.")
+    #     return {"ERROR": "ERROR"}
+        
 
 @bp.route('/getprojectmapping', methods=['GET'])
-@oidc.require_login
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
@@ -129,74 +142,8 @@ def getProjectMapping():
          result.append(data)
     return json.dumps(result)
 
-# Usage /getfigure?description=<desc>&color=<color>
-@bp.route('/getfigure')
-@oidc.require_login
-def getFigure():
-    get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
-    description = request.args.get('description', None)
-    color = request.args.get('color', None)
-    result = query_db(get_figure_image_sql, (description, color), True)
-    image = {"image": ""}
-    if result != 0:
-        for res in result:
-            image["image"] = res
-    else:
-        raise InvalidUsage("Bad request", status_code=400)
-    try:
-        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
-    except FileNotFoundError:
-        abort(404)
-
-@bp.route('/getfiguredata')
-@oidc.require_login
-def getFigureData():
-    get_figure_data_sql =("SELECT description, color, id FROM Figures")
-    result = select_db(get_figure_data_sql)
-    result = result[:-1]
-    data = []
-    for res in result:
-        data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
-    return json.dumps(data)
-    
-@bp.route('/getmap')
-@oidc.require_login
-def getMap():
-    get_map_sql =('SELECT map FROM Project WHERE id=?')
-    args = (request.args.get('p_id'),)
-    result = query_db(get_map_sql, args, True)
-    image = {"image": ""}
-    for res in result:
-        image["image"] = "./uploads/" + res
-    try:
-        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
-    except FileNotFoundError:
-        abort(404)
-
-@bp.route('/favicon.ico')
-@oidc.require_login
-def favicon():
-    try:
-        return send_from_directory(Config.STATIC_URL_PATH, "favicon.ico")
-    except FileNotFoundError:
-        abort(404)
-
-# Not done yet, must be checked with actual data
-@bp.route('/addevent', methods=['POST'])
-@oidc.require_login
-def addEvent():
-    project_id = request.form.get('p_id') 
-    # find clever way to get this dynamically
-    d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
-                        request.form.get('created'), request.form.get('f_id'))
-    e_id = query_db(add_event, d_event_values) # Adds to Event table in db
-    query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
-    return {}
-# add both to event and Project_has_Event
-
 # Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
 @bp.route('/getevents')
-@oidc.require_login
 def getEvents():
     return get_events_func(request.args.get("p_id")) 
 
@@ -222,8 +169,67 @@ def get_events_func(p_id):
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
     return json.dumps(events)
 
+# Usage /getfigure?description=<desc>&color=<color>
+@bp.route('/getfigure')
+def getFigure():
+    get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
+    description = request.args.get('description', None)
+    color = request.args.get('color', None)
+    result = query_db(get_figure_image_sql, (description, color), True)
+    image = {"image": ""}
+    if result != 0:
+        for res in result:
+            image["image"] = res
+    else:
+        raise InvalidUsage("Bad request", status_code=400)
+    try:
+        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
+    except FileNotFoundError:
+        abort(404)
+
+@bp.route('/getfiguredata')
+def getFigureData():
+    get_figure_data_sql =("SELECT description, color, id FROM Figures")
+    result = select_db(get_figure_data_sql)
+    result = result[:-1]
+    data = []
+    for res in result:
+        data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
+    return json.dumps(data)
+    
+@bp.route('/getmap')
+def getMap():
+    get_map_sql =('SELECT map FROM Project WHERE id=?')
+    args = (request.args.get('p_id'),)
+    result = query_db(get_map_sql, args, True)
+    image = {"image": ""}
+    for res in result:
+        image["image"] = "./uploads/" + res
+    try:
+        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
+    except FileNotFoundError:
+        abort(404)
+
+@bp.route('/favicon.ico')
+def favicon():
+    try:
+        return send_from_directory(Config.STATIC_URL_PATH, "favicon.ico")
+    except FileNotFoundError:
+        abort(404)
+
+# Not done yet, must be checked with actual data
+@bp.route('/addevent', methods=['POST'])
+def addEvent():
+    project_id = request.form.get('p_id') 
+    # find clever way to get this dynamically
+    d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
+                        request.form.get('created'), request.form.get('f_id'))
+    e_id = query_db(add_event, d_event_values) # Adds to Event table in db
+    query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
+    return {}
+# add both to event and Project_has_Event
+
 @bp.route('/upload', methods=['POST'])
-@oidc.require_login
 def fileUpload():
     target=os.path.join(Config.UPLOAD_FOLDER)
     if not os.path.isdir(target):
@@ -276,7 +282,6 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
     return newCoordinates
 
 @bp.route('/createarcgis', methods=['POST'])
-@oidc.require_login
 def createARCGIS():
     # step 1 create field. Step 2 populate fields
     # enter folder
@@ -333,13 +338,11 @@ def createARCGIS():
 
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
 @bp.route('/initdb')
-@oidc.require_login
 def initdb():
     init_db()
     return redirect(url_for("behaviourmapper.testdb"))
 
 @bp.route('/testdb')
-@oidc.require_login
 def testdb():
     u_id = query_db(add_user, user_values)
     f_id = query_db(add_figure, figure_values)
@@ -351,7 +354,6 @@ def testdb():
     return redirect(url_for('behaviourmapper.selectdb'))    
 
 @bp.route('/selectdb')
-@oidc.require_login
 def selectdb():
     result = {"Figures": "", "Users": "", "Project": "", "Project_has_Event": "", "Event": ""}
     table_names = ("Figures", "Users", "Project", "Project_has_Event", "Event")

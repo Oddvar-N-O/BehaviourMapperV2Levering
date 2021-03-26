@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './login.css'
+import { Authenticated } from './auth/AuthContext'
 
 class Login extends React.Component {
     constructor(props) {
@@ -12,24 +12,18 @@ class Login extends React.Component {
     }
 
     login() {
-        console.log(this.state.u_id)
+        <Authenticated>
+            {window.location.href = 'http://localhost:5000/behaviourmapper/login'}
+        </Authenticated>
     }
 
 
     render() { 
         return ( 
             <div className="login">
-                <button>
-                    <Link to={{
-                            pathname: "/startpage",
-                            
-                            state: {
-                              u_id: this.state.u_id,
-                            },
-                            }}>Login
-                        </Link>
-                </button>
-              </div>
+                <h1>Behaviour Mapper</h1>
+                <button onClick={this.login}>Login</button>     
+            </div>
          );
     }
 }

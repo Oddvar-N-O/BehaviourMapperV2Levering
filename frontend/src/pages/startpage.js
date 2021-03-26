@@ -18,7 +18,7 @@ function Startpage() {
   const [load_project, setLoadProject] = useState(false)
   const changeLoadVisibility = () => setLoadProject(!load_project) 
   const hideLoadProject = () => setLoadProject(false) 
-  const logout = () => window.location.href = "https://auth.dataporten.no/openid/endsession"
+  const logout = () => window.location.href = window.backend_url + "/logout"
   
   // State for User Profile
   // const [user_profile, setUserProfile] = useState(false)

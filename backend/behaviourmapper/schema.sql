@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS [Project] (
     rightX VARCHAR NULL,
     upperY VARCHAR NULL,
     u_id INTEGER,
-    FOREIGN KEY (u_id) REFERENCES "Users"(id)
+    FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
 
 DROP TABLE IF EXISTS "InterviewEvents";

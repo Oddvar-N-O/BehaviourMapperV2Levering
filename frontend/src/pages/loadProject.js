@@ -8,28 +8,52 @@ import { Authenticated, useToken } from './auth/AuthContext'
 function LoadProject() {
   const [allProjects, setAllProjects] = useState('No projects found');
   const [allEvents, setallEvents] = useState('No event for this project')
-  const [currProj, setCurrProj] = useState({"id": 99999999999999999n});
+  const [currProj, setCurrProj] = useState({"id": null});
   const [showProjInfo, setshowProjInfo] = useState(false);
-  const { access_token } = useToken()
-
+  const { access_token } = useToken();
+  const [userID, setUserID] = useState(null);
 
   useEffect(() => {
-    // get userID from loggedonuser
-    const userID = 1;
+    var fetchstring = `https://auth.dataporten.no/openid/userinfo`
+    fetch(fetchstring, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      }
+    }).then(res => res.json()).then(data => {
+      setUserID(data.sub);
+    });
+  }, [access_token]);
+
+  useEffect(() => {
+    if (userID === null) {
+      return
+    }
     var fetchstring = window.backend_url + `getproject?u_id=${userID}`
     fetch(fetchstring).then(res => res.json()).then(data => {
       setAllProjects(data);
     });
-  }, []);
+  }, [userID]);
+
 
   useEffect(() => {
-    var fetchstring = window.backend_url + `getevents?p_id=${currProj['id']}&access_token=pi` 
+    if (currProj['id'] === null) {
+      return
+    }
+    var fetchstring = window.backend_url + `getevents?p_id=${currProj['id']}` 
     fetch(fetchstring).then(res => res.json()).then(data => {
       if (data["message"] !== "Bad arg") {
         setallEvents(data);
       }
     });
   }, [currProj]);
+  // , {
+  //   method: 'GET',
+  //   headers: {
+  //     Authorization: `Bearer ${access_token}`,
+  //     origin: "http://localhost:3000/behaviourmapper/startpage"
+  //     }
+  //   }
 
   const getCurrProj = (index) => {
     for (var i = 0; i < allProjects.length; i++) {
@@ -57,7 +81,6 @@ function LoadProject() {
             <AiIcons.AiOutlineClose />
           </Link>
           <SidebarLP  getCurrProj={getCurrProj} projects={allProjects} />
-          <div>{access_token}</div>
           <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
             <h1>Description: {currProj["description"]}</h1>
             <p>Project id: {currProj["id"]} Name: {currProj["name"]} Screenshot: {currProj["screenshot"]} Events: {allEvents}</p>
