@@ -17,6 +17,7 @@ class NewProject extends React.Component {
             liColor: "#FDFFFC",
             p_id: "",
             u_id: window.sessionStorage.getItem('uID'),
+            loading: false,
         }
         
         this.handleChange = this.handleChange.bind(this);
@@ -24,6 +25,7 @@ class NewProject extends React.Component {
         this.setRedirect = this.setRedirect.bind(this);
         this.imageChosen = this.imageChosen.bind(this);
         this.redirectToMapping = this.redirectToMapping.bind(this);
+        this.Loading = this.Loading.bind(this)
     }
 
     handleChange(event) { 
@@ -54,6 +56,7 @@ class NewProject extends React.Component {
     }
 
     handleUploadImage(p_id) {
+        this.setState({ loading: true })
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
         data.append('p_id', p_id);
@@ -63,7 +66,8 @@ class NewProject extends React.Component {
           method: 'POST',
           body: data,
         }).then(setTimeout(
-            () => this.redirectToMapping(), 1000));
+            () => this.redirectToMapping(), 3000));
+        console.log('upload done')
     }
 
     redirectToMapping() {
@@ -129,10 +133,22 @@ class NewProject extends React.Component {
         }  
     }
 
+    Loading() {
+        if (this.this.state.loading) {
+            return <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
+        }
+        return <div>hei</div>
+    }
+
     render() {
+        let loadingGif
+        if (this.state.loading) {
+            loadingGif = <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
+        }
         return (
             <Authenticated>
-                <div id="new-project">
+                <div className="new-project">
+                    {loadingGif}
                     <div className={ this.state.fromLoadMap ? 'new-project-box-upload' : 'new-project-box'}>
                         <Link to="/startpage" className="close-icon">
                             <AiIcons.AiOutlineClose />

@@ -57,6 +57,8 @@
 
 #icon-list {
     width: 200px;
+    height: 100vh;
+    overflow: auto;
 }
 
 .map{   
@@ -90,6 +92,11 @@
     display: flex;
 }
 .map-image {
+
+    /* height: 100vh;
+    width: calc(100vw - 200px); */
+    height: 684px;
+    width: 624px;
     order: 3;
 }
 
