@@ -6,7 +6,7 @@ function Login() {
   const color = 'green'
 
   useEffect(() => {
-    fetch(`getfigure?description=bike&color=${color}`)
+    fetch(window.backend_url + `getfigure?description=bike&color=${color}`)
     .then(res => res.blob())
     .then(images => {
       var image = URL.createObjectURL(images)
@@ -15,7 +15,7 @@ function Login() {
     },
   []);
   useEffect(() => {
-    fetch('getproject?u_id=1&name=prosjektnamn')
+    fetch(window.backend_url + 'getproject?u_id=1&name=prosjektnamn')
     .then(res => res.json())
     .then(data => {
       setPlaceholder(data)

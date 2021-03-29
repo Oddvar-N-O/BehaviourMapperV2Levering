@@ -23,12 +23,12 @@ class UploadMap extends React.Component {
         data.append('file', this.uploadInput.files[0]);
         // data.append('filename', this.fileName.value);
     
-        fetch('http://localhost:5000/upload', {
+        fetch(window.backend_url + 'upload', {
           method: 'POST',
           body: data,
         }).then((response) => {
           response.json().then((body) => {
-            this.setState({ imageURL: `http://localhost:5000/${body.file}` });
+            this.setState({ imageURL: window.backend_url + `${body.file}` });
           });
         });
         alert("upload finished")

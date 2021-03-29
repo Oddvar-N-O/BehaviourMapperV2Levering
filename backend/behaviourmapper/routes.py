@@ -8,7 +8,6 @@ import logging
 from .config import Config
 import os
 from werkzeug.utils import secure_filename
-from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import abort
 
@@ -17,7 +16,7 @@ import shapefile as shp
 
 logging.basicConfig(level=logging.INFO)
 
-logger = logging.getLogger('HELLO WORLD')
+logger = logging.getLogger('')
 
 # Set allowed filenames
 def allowed_file(filename):
@@ -37,6 +36,15 @@ def addProject():
     p_id = query_db(add_small_project, small_project_values)
     return {"p_id": p_id}
     # Add a new project and link a map
+
+@bp.route('/addinterview', methods=['POST'])
+def addInterview():
+    add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
+    args = (request.form.get('interview'), request.form.get('p_id'))
+    i_id = query_db(add_interview, args)
+    return {"i_id": i_id}
+
+
 
 # Usage /getproject?u_id=<u-id>&name=<name> or /getproject?u_id=<u-id>
 # Need to add that you first get all projects, then get all info on a project.
@@ -63,8 +71,6 @@ def getProject():
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
-    print("GPMP")
-    print("PID: " + str(proj_values))
     project = query_db(get_proj_sql, proj_values, True)
     result = []
     for data in project:
@@ -123,7 +129,6 @@ def favicon():
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
     project_id = request.form.get('p_id') 
-    print("PID ADDEVENT: " + str(project_id))
     # find clever way to get this dynamically
     d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
                         request.form.get('created'), request.form.get('f_id'))
@@ -155,12 +160,8 @@ def get_events_func(p_id):
     events = []
 
     for e_id in e_ids:
-        print("EID: " + str(e_id))
         query_event = query_db(get_event_sql, (str(e_id),), True)
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
-        print("EID: " + str(e_id))
-        print("centCoord: " + str(query_event[2]))
-        print("-----------------------")
     return json.dumps(events)
 
 @bp.route('/adduser', methods=['POST', 'GET'])
@@ -194,9 +195,11 @@ def fileUpload():
     else:
         raise InvalidUsage("Not allowed file ending", status_code=400)
     try:
+        logger.info("file uploaded")
         file.save(destination)
         return {"file": filename}, 201
     except:
+        logger.info("Failed to upload image")
         raise InvalidUsage("Failed to upload image", status_code=500)
 
 def getElementXandY(element):
@@ -229,7 +232,7 @@ def createARCGIS():
     # step 1 create field. Step 2 populate fields
     # enter folder
     # shapefile = outline of a building and 
-    target=os.path.join(Config.UPLOAD_PATH)
+    target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
     if not os.path.isdir(target):
         os.mkdir(target)
 
@@ -238,17 +241,11 @@ def createARCGIS():
     
     imageCoord = []
     for event in events:
-        print(event)
         imageCoord.append(event[2])
 
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     pid = (request.form.get('p_id'))
-    print("PID: " + str(pid))
-    print("PID[0]: " + str(pid[0]))
-    print()
     project_values = query_db(get_proj_sql, (str(pid),), True)
-    print(len(project_values))
-    print()
     leftX = float(project_values[8])
     lowerY = float(project_values[9])
     rightX = float(project_values[10])
@@ -260,7 +257,7 @@ def createARCGIS():
         iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
 
     
-    w = shp.Writer('behaviormapper/static/arcGISprojects/modifyThis/tree')
+    w = shp.Writer(os.path.join(target, 'tree'))
     # clog her
     w.autoBalance = 1
     w.field('Background', 'C', '40') # image
@@ -281,7 +278,6 @@ def createARCGIS():
         y = coordinateSet[1]
         w.point(x, y)
         w.record(str(point_ID), 'Point')
-        print(point_ID)
         point_ID += 1
 
     return {}

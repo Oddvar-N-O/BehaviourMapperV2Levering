@@ -14,14 +14,14 @@ function LoadProject() {
   useEffect(() => {
     // get userID from loggedonuser
     const userID = 1;
-    var fetchstring = `getproject?u_id=${userID}`
+    var fetchstring = window.backend_url + `getproject?u_id=${userID}`
     fetch(fetchstring).then(res => res.json()).then(data => {
       setAllProjects(data);
     });
   }, []);
 
   useEffect(() => {
-    var fetchstring = `getevents?p_id=${currProj['id']}`
+    var fetchstring = window.backend_url + `getevents?p_id=${currProj['id']}`
     fetch(fetchstring).then(res => res.json()).then(data => {
       if (data["message"] !== "Bad arg") {
         setallEvents(data);

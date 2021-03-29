@@ -43,7 +43,7 @@ class ChooseImage extends React.Component {
     data.append('lowerY', centerCoordinates[1]);
     data.append('rightX', centerCoordinates[2]);
     data.append('upperY', centerCoordinates[3]);
-    fetch('addproject', {
+    fetch(window.backend_url + 'addproject', {
     method: 'POST',
     body: data,
     }).then((response) => {
@@ -87,7 +87,7 @@ class ChooseImage extends React.Component {
           const data = new FormData();
           data.append('file', file);
           data.append('p_id', this.state.p_id)
-          fetch('upload', {
+          fetch(window.backend_url + 'upload', {
             method: 'POST',
             body: data,
           }).then(setTimeout(
