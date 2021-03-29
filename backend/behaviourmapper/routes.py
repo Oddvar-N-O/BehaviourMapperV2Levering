@@ -46,7 +46,7 @@ def login():
 # add this to all functions as a security measure
 def authenticateUser(u_id):
     if getSession(u_id) != 0:
-        if getSession(u_id) == u_id:
+        if getSession(u_id)[0] == u_id:
             return True
         else:
             return False
@@ -73,7 +73,7 @@ def setSession(openid):
 def getSession(openid):
     add_session = ("SELECT * FROM Session WHERE openid=?")
     res = query_db(add_session, (openid,), True)
-    return res[0]
+    return res
 
 def clearSession():
     clear_session = ("DELETE FROM Session ")
