@@ -1,5 +1,9 @@
-INSERT INTO Users (feideinfo)
-               VALUES ("kartet");
+
+INSERT INTO Users (openid, email)
+                VALUES ("openid", "email@email.com");
+            
+INSERT INTO Session (openid) 
+                VALUES ("openid");
 
 INSERT INTO Event (direction, center_coordinate, created, f_id)
 	VALUES (45,"12991.29291 2929.21", "12:12:12", 20);

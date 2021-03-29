@@ -1,9 +1,16 @@
 DROP TABLE IF EXISTS "Users" ;
 
 CREATE TABLE IF NOT EXISTS "Users" (
-	"id"	INTEGER NOT NULL UNIQUE,
-	"feideinfo"	VARCHAR NULL,
-	PRIMARY KEY("id" AUTOINCREMENT)
+	"openid"    VARCHAR NULL UNIQUE,
+    "email" VARCHAR NULL,
+	PRIMARY KEY("openid")
+);
+
+DROP TABLE IF EXISTS "Session" ;
+
+CREATE TABLE IF NOT EXISTS "Session" (
+	"openid"    VARCHAR NULL UNIQUE,
+	PRIMARY KEY("openid")
 );
 
 DROP TABLE IF EXISTS [Project];
@@ -22,7 +29,7 @@ CREATE TABLE IF NOT EXISTS [Project] (
     rightX VARCHAR NULL,
     upperY VARCHAR NULL,
     u_id INTEGER,
-    FOREIGN KEY (u_id) REFERENCES "Users"(id)
+    FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
 
 DROP TABLE IF EXISTS "InterviewEvents";

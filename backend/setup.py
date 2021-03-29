@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='behaviourmapper',
-    version='0.0.3.24',
+    version='0.0.3.25',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
@@ -15,5 +15,6 @@ setup(
         'flask-oidc',
         'pycryptodome',
         'pyshp',
+        'flask-oidc',
     ],
 )

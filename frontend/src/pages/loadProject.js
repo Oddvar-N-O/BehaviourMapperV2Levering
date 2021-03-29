@@ -3,31 +3,38 @@ import { Link } from 'react-router-dom';
 import SidebarLP from '../components/sidebarLP';
 import * as AiIcons from 'react-icons/ai';
 import './loadProject.css'
+import { Authenticated } from './auth/AuthContext'
 
 function LoadProject() {
   const [allProjects, setAllProjects] = useState('No projects found');
   const [allEvents, setallEvents] = useState('No event for this project')
-  const [currProj, setCurrProj] = useState({"id": 99999999999999999n});
+  const [currProj, setCurrProj] = useState({"id": null});
   const [showProjInfo, setshowProjInfo] = useState(false);
-
+  const u_id = window.sessionStorage.getItem('uID');
 
   useEffect(() => {
-    // get userID from loggedonuser
-    const userID = 1;
-    var fetchstring = window.backend_url + `getproject?u_id=${userID}`
+    if (u_id === null) {
+      return
+    }
+    var fetchstring = window.backend_url + `getproject?u_id=${u_id}`
     fetch(fetchstring).then(res => res.json()).then(data => {
       setAllProjects(data);
     });
-  }, []);
+  }, [u_id]);
+
 
   useEffect(() => {
-    var fetchstring = window.backend_url + `getevents?p_id=${currProj['id']}`
+    if (currProj['id'] === null || u_id === null) {
+      return
+    }
+    var fetchstring = window.backend_url + `getevents?p_id=${currProj['id']}&u_id=${u_id}` 
     fetch(fetchstring).then(res => res.json()).then(data => {
       if (data["message"] !== "Bad arg") {
         setallEvents(data);
       }
     });
-  }, [currProj]);
+  }, [currProj, u_id]);
+
 
   const getCurrProj = (index) => {
     for (var i = 0; i < allProjects.length; i++) {
@@ -48,32 +55,34 @@ function LoadProject() {
   }
 
   return (
-        <div id="load-project">
-          <div className="load-project-box">
-            <Link to="/startpage" className="close-icon">
-              <AiIcons.AiOutlineClose />
-            </Link>
-            <SidebarLP  getCurrProj={getCurrProj} projects={allProjects} />
-            <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
-              <h1>Description: {currProj["description"]}</h1>
-              <p>Project id: {currProj["id"]} Name: {currProj["name"]} Screenshot: {currProj["screenshot"]} Events: {allEvents}</p>
-              <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} id='opplastetKart' />
-              <button>
-                <Link to={{
-                        pathname: "/mapping",
-                        data: {
-                            project: currProj,
-                            events: {allEvents},
-                          },
-                        state: {
-                          p_id: currProj['id'],
+    <Authenticated>
+      <div id="load-project">
+        <div className="load-project-box">
+          <Link to="/startpage" className="close-icon">
+            <AiIcons.AiOutlineClose />
+          </Link>
+          <SidebarLP  getCurrProj={getCurrProj} projects={allProjects} />
+          <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
+            <h1>Description: {currProj["description"]}</h1>
+            <p>Project id: {currProj["id"]} Name: {currProj["name"]} Screenshot: {currProj["screenshot"]} Events: {allEvents}</p>
+            <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} id='opplastetKart' />
+            <button>
+              <Link to={{
+                      pathname: "/mapping",
+                      data: {
+                          project: currProj,
+                          events: {allEvents},
                         },
-                        }}>Choose this project
-                </Link>
-              </button>
-            </div>
+                      state: {
+                        p_id: currProj['id'],
+                      },
+                      }}>Choose this project
+              </Link>
+            </button>
           </div>
         </div>
+      </div>
+    </Authenticated>
   )
 }
-export default LoadProject
+export default LoadProject;
