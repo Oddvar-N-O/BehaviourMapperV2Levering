@@ -1,25 +1,20 @@
-@media only screen and (max-width: 600px) {
+/* @media only screen and (max-width: 600px) {
     .new-project-box h2 {
         font-size: 4.5vh;
     }
-    .new-project-box {
-        width: 70vw;
-    }
-    #new-project .close-icon {
-        left: 16vw;
-    }
-  }
+  } */
 
-  @media only screen and (min-width: 1200px) {
+  /* @media only screen and (min-width: 1200px) {
     #new-project .close-icon {
         left: calc(228px + 50vw);
     }
-  }
+  } */
 
-#new-project {
+.new-project {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     justify-content: center;
+    height: 100vh;
 }
 
 .new-project-box, .new-project-box-upload {
@@ -27,57 +22,83 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 50vw;
-    max-width: 540px;
-    height: 68vh;
-    margin-top: 13.5vh;
+    width: 540px;
+    /* max-width: 540px; */
+    height: 500px;
+    margin-top: 80px;
     background-color: #222020;
     color: #ece8e8;
     border-radius: 5px;
-    box-shadow: 2px 2px 4px #222020;;
+    box-shadow: 2px 2px 4px #222020;
+}
+
+/* @media only screen and (max-width: 525px) {
+    .new-project-box, .new-project-box-upload {
+        width: 100vw;
+    }
+    .new-project h2 {
+        font-size: 2vw;
+    }
+    .loading{
+        height: 90px;
+        position: absolute;
+        left: calc(110px + 50vw);
+        top: 590px;
+    }
+} */
+
+
+.loading{
+    height: 30px;
+    position: absolute;
+    left: calc(110px + 50vw);
+    top: 590px;
+}
+
+
+.close-icon {
+    font-size: 30px;
+    position: absolute;
+    left: calc(235px + 50vw);
+    top: 87px;
+    color: #ece8e8;
 }
 
 .new-project-box-upload {
-    height: 75vh;
+    height: 570px;
 }
 
  #heading-and-form {
      width: 80%;
  }
 
-.close-icon {
-     font-size: 4vh;
-     position: absolute;
-     right: 26vw;
-     top: 14.5vh;
-     color: #ece8e8;
- }
-
-#new-project h2 {
+.new-project h2 {
     text-align: center;
-    font-size: 7.5vh;
-    padding-bottom: 3vh;
+    font-size: 55px;
+    padding-bottom: 20px;
     color: #58A4B0;
 }
 
-#new-project form {
+
+
+.new-project form {
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 3vh;
-    margin: 1vh 0;
+    font-size: 20px;
+    margin: 5px 0;
     text-align: left;
 }
 
 /* FORM */
 #project-name, #description {
     width: 100%;
-    font-size: 2.5vh;
+    font-size: 18px;
     border: none;
     background-color: #ece8e8;
-    margin: 0.7vh 0;
+    margin: 5px 0;
 }
 
 input, textarea {
@@ -85,6 +106,7 @@ input, textarea {
       border: 1px solid #CCCCCC;
       box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
       transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+      color: #222020;
   }
   
   input:focus, textarea:focus {
@@ -94,36 +116,36 @@ input, textarea {
   }
 
 #project-name {
-    height: 4vh;
+    height: 30px;
     
 }
 
 #description {
-    height: 25vh;
+    height: 210px;
     resize: none;
 }
 
 /* BUTTON */
 
-#new-project li {
+.new-project li {
     /* background-color: #FDFFFC; */
     list-style: none;
-    padding: 1vh 2vh;
+    padding: 8px 15px;
     margin: 7.5px;
     /* border: 1.2px solid #EF2E3B; */
     color: #222020;
     border-radius: 25px;
     opacity: 0.85; 
-    font-size: 4.5vh;
+    font-size: 32px;
     text-align: center; 
     cursor: pointer;
 }
 
-#new-project #choose-name {
+.new-project #choose-name {
     display: block;
 }
 
-#new-project #start {
+.new-project #start {
     display: block;
 }
 
@@ -133,7 +155,7 @@ input, textarea {
 
 /* FILE BUTTONS */
 
-#new-project .hide-file-management {
+.new-project .hide-file-management {
     display: none;
 }
 
@@ -150,15 +172,16 @@ input, textarea {
     display: inline-block;
     padding: 4px 8px;
     border-radius: 7px;
-    margin-top: 0.5vh;
+    margin-top: 4px;
     cursor: pointer;
     font-size: 14px;
     box-shadow: 4px 4px 8px #222020;
 }
 
-.loading{
-    height: 30px;
-    position: absolute;
-    left: 100px;
-    top: 100px;
-}
+
+
+@media screen and (max-width: 525px) {
+    .new-project-box, .new-project-box-upload {width: 100vw;}
+    .new-project h2 {font-size: 10vw;}
+    .close-icon {left: 5px;}
+  }

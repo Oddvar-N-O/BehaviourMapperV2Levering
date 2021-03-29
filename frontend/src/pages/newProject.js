@@ -141,7 +141,7 @@ class NewProject extends React.Component {
             loadingGif = <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
         }
         return (
-            <div id="new-project">
+            <div className="new-project">
                 {loadingGif}
                 <div className={ this.state.fromLoadMap ? 'new-project-box-upload' : 'new-project-box'}>
                     <Link to="/startpage" className="close-icon">
