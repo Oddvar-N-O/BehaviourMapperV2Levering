@@ -22,7 +22,6 @@ def create_app(test_config=None):
         # load the instance config, if it exists, when not testing
         app.config.from_object(Config)
         app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
-        print(Config.STATIC_URL_PATH)
         app.config.from_mapping(
         OIDC_CLIENT_SECRETS=os.path.join(Config.STATIC_URL_PATH, 'client_secrets.json'),
         OIDC_COOKIE_SECURE=False,

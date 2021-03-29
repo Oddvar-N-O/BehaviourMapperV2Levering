@@ -41,7 +41,7 @@ def login():
         setSession(openid)
         return redirect('http://localhost:3000/behaviourmapper/startpage')
     else:
-        return {"ERROR": "Please log in."}
+        raise InvalidUsage("Bad request", status_code=400)
 
 # add this to all functions as a security measure
 def authenticateUser(u_id):
@@ -88,7 +88,7 @@ def getUserEmail():
         return json.dumps(res[0])
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 # Set allowed filenames
 def allowed_file(filename):
@@ -109,7 +109,7 @@ def addProject():
         return {"p_id": p_id}
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 @bp.route('/addinterview', methods=['POST'])
 def addInterview():
@@ -120,7 +120,7 @@ def addInterview():
         return {"i_id": i_id}
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 
 
@@ -147,7 +147,7 @@ def getProject():
         return json.dumps(result)
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
         
 
 @bp.route('/getprojectmapping', methods=['GET'])
@@ -162,7 +162,7 @@ def getProjectMapping():
         return json.dumps(result)
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 # Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
 @bp.route('/getevents')
@@ -171,7 +171,7 @@ def getEvents():
         return get_events_func(request.args.get("p_id"))
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 def get_events_func(p_id):    
     get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")    
@@ -215,7 +215,7 @@ def getFigure():
             abort(404)
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 @bp.route('/getfiguredata')
 def getFigureData():
@@ -229,7 +229,7 @@ def getFigureData():
         return json.dumps(data)
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
     
     
 @bp.route('/getmap')
@@ -247,7 +247,7 @@ def getMap():
             abort(404)
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
     
 
 @bp.route('/favicon.ico')
@@ -268,7 +268,7 @@ def addEvent():
         return {}
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 # add both to event and Project_has_Event
 
 @bp.route('/upload', methods=['POST'])
@@ -301,7 +301,7 @@ def fileUpload():
             raise InvalidUsage("Failed to upload image", status_code=500)
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
     
 
 def getElementXandY(element):
@@ -385,7 +385,7 @@ def createARCGIS():
         return {}
     else:
         logger.info("Not logged in.")
-        return {"ERROR": "ERROR"}
+        raise InvalidUsage("Bad request", status_code=400)
 
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
 @bp.route('/initdb')
