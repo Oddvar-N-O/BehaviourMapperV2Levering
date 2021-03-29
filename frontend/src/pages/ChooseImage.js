@@ -19,6 +19,7 @@ class ChooseImage extends React.Component {
         projectName: props.location.state.projectName,
         description: props.location.state.description,
         p_id: "",
+        u_id: window.sessionStorage.getItem('uID'),
       }
       this.map = new Map({
         target: null,
@@ -44,6 +45,7 @@ class ChooseImage extends React.Component {
     data.append('lowerY', centerCoordinates[1]);
     data.append('rightX', centerCoordinates[2]);
     data.append('upperY', centerCoordinates[3]);
+    data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addproject', {
     method: 'POST',
     body: data,
@@ -87,7 +89,8 @@ class ChooseImage extends React.Component {
           var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
           const data = new FormData();
           data.append('file', file);
-          data.append('p_id', this.state.p_id)
+          data.append('p_id', this.state.p_id);
+          data.append('u_id', this.state.u_id);
           fetch(window.backend_url + 'upload', {
             method: 'POST',
             body: data,
@@ -104,7 +107,7 @@ class ChooseImage extends React.Component {
       },
     });
   }
-
+  
   componentDidMount() {
     this.map.setTarget("choose-image-map");
     this.map.on("moveend", () => {

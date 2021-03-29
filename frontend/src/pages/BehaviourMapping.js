@@ -32,6 +32,7 @@ class BehaviourMapping extends React.Component {
         eightOfCoords: 0,
         interviews: [],
         i_ids: [],
+        u_id: window.sessionStorage.getItem('uID'),
       };
       this.canvas = React.createRef();
       this.myImage = React.createRef();
@@ -67,6 +68,7 @@ class BehaviourMapping extends React.Component {
     // change this
     data.append('f_id', this.state.f_id);
     data.append('icon_src', this.state.iconSRC);
+    data.append('u_id', this.state.u_id);
 
     fetch(window.backend_url +'addevent', {
     method: 'POST',
@@ -284,6 +286,7 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
+    data.append('u_id', this.state.u_id);
     fetch(window.backend_url +'createarcgis', {
       method: 'POST',
       body: data,
@@ -340,6 +343,7 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('interview', interview);
     data.append('p_id', p_id);
+    data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterview', {
       method: 'POST',
       body: data,
@@ -418,17 +422,17 @@ class BehaviourMapping extends React.Component {
 
 
   componentDidMount() {
-    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}`)
+    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
     .then(data => {
       this.setState({projdata: data});
     });
-    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}`).then(res => res.blob())
+    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}&u_id=${this.state.u_id}`).then(res => res.blob())
       .then(images => {
         let image = URL.createObjectURL(images);
         this.setState({mapblob: image});
     });
-    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}`)
+    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
     .then(data => {
       this.setState({formerEvents: data});

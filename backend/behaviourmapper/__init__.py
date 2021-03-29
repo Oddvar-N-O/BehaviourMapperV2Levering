@@ -26,7 +26,8 @@ def create_app(test_config=None):
         app.config.from_mapping(
         OIDC_CLIENT_SECRETS=os.path.join(Config.STATIC_URL_PATH, 'client_secrets.json'),
         OIDC_COOKIE_SECURE=False,
-        OIDC_CALLBACK_ROUTE= '/',
+        OIDC_CALLBACK_ROUTE= '/behaviourmapper',
+        # OIDC_CALLBACK_ROUTE= '/',
         )
         oidc.init_app(app)
     else:

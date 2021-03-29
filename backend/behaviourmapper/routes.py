@@ -17,6 +17,7 @@ from .db import init_db, query_db, select_db
 from .errorhandlers import InvalidUsage
 
 bp = Blueprint('behaviourmapper', __name__, url_prefix="/behaviourmapper")
+# bp = Blueprint('behaviourmapper', __name__)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,33 +26,27 @@ logger = logging.getLogger('')
 # Add possibility to be rerouted to frontend loginsite.
 @bp.route('/logout')
 def logout():
-    localhost:5000/behaviourmapper/login
     oidc.logout()
-    return redirect("https://auth.dataporten.no/openid/endsession")
-
-@bp.route('/print')
-def printroute():
-    print(current_app.config)
-    return "HEI"
+    clearSession()
+    return redirect("https://auth.dataporten.no/openid/endsession", )
 
 @bp.route('/login')
 @oidc.require_login
 def login():
-    print(current_app.config)
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
         openid = oidc.user_getfield('sub')
         if not userInDB(openid):
             addUser(openid, email)
-        return "ehs"
-        # return redirect('http://localhost:3000/behaviourmapper/startpage')
+        setSession(openid)
+        return redirect('http://localhost:3000/behaviourmapper/startpage')
     else:
         return {"ERROR": "Please log in."}
 
 # add this to all functions as a security measure
 def authenticateUser(u_id):
-    if oidc.user_loggedin:
-        if oidc.user_getfield('sub') == u_id:
+    if getSession(u_id) != 0:
+        if getSession(u_id) == u_id:
             return True
         else:
             return False
@@ -70,6 +65,20 @@ def addUser(openid, email):
                "VALUES (?,?)")
     query_db(add_user, (openid, email))
 
+def setSession(openid):
+    add_session = ("INSERT INTO Session (openid)"
+               "VALUES (?)")
+    query_db(add_session, (openid,))
+
+def getSession(openid):
+    add_session = ("SELECT * FROM Session WHERE openid=?")
+    res = query_db(add_session, (openid,), True)
+    return res[0]
+
+def clearSession():
+    clear_session = ("DELETE FROM Session ")
+    select_db(clear_session)
+
 @bp.route('/getuseremail', methods=['GET'])
 def getUserEmail():
     if authenticateUser(request.args.get('u_id')):
@@ -77,31 +86,41 @@ def getUserEmail():
         values = (request.args.get('u_id'),)
         res = query_db(get_user_email, values, True)
         return json.dumps(res[0])
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 # Set allowed filenames
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
-# Not all done, must add link to map
 @bp.route('/addproject', methods=['POST'])
 def addProject():
-    add_small_project = ("INSERT INTO Project "
-        "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY)"
-        "VALUES (?,?,?,?,?,?,?,?)")
-    small_project_values = (request.form.get('name'), request.form.get('description'), 
-                        request.form.get('startdate'), request.form.get('zoom'),
-                        request.form.get('leftX'), request.form.get('lowerY'),
-                        request.form.get('rightX'), request.form.get('upperY'))
-    p_id = query_db(add_small_project, small_project_values)
-    return {"p_id": p_id}
-    # Add a new project and link a map
+    if authenticateUser(request.form.get('u_id')):
+        add_small_project = ("INSERT INTO Project "
+            "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY, u_id)"
+            "VALUES (?,?,?,?,?,?,?,?,?)")
+        small_project_values = (request.form.get('name'), request.form.get('description'), 
+                            request.form.get('startdate'), request.form.get('zoom'),
+                            request.form.get('leftX'), request.form.get('lowerY'),
+                            request.form.get('rightX'), request.form.get('upperY'),
+                            request.form.get('u_id'))
+        p_id = query_db(add_small_project, small_project_values)
+        return {"p_id": p_id}
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 @bp.route('/addinterview', methods=['POST'])
 def addInterview():
-    add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
-    args = (request.form.get('interview'), request.form.get('p_id'))
-    i_id = query_db(add_interview, args)
-    return {"i_id": i_id}
+    if authenticateUser(request.form.get('u_id')):
+        add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
+        args = (request.form.get('interview'), request.form.get('p_id'))
+        i_id = query_db(add_interview, args)
+        return {"i_id": i_id}
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 
 
@@ -109,43 +128,50 @@ def addInterview():
 # Need to add that you first get all projects, then get all info on a project.
 @bp.route('/getproject', methods=['GET'])
 def getProject():
-    print(oidc.user_loggedin, authenticateUser(request.args.get('u_id')))
-    # if oidc.user_loggedin and authenticateUser(request.args.get('u_id')):
-    get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
-    proj_values = (request.args.get('u_id'), request.args.get('name'))
-    if proj_values[1] == None:
-        get_proj_sql = ("SELECT id, name, description, map FROM Project WHERE u_id=?")
-        projects = query_db(get_proj_sql, (proj_values[0],))
-        projects = projects[:-1]
-    else:
-        projects = query_db(get_proj_sql, proj_values, True)
-    result = []
-    for project in projects:
-        new_project = []
+    if authenticateUser(request.args.get('u_id')):
+        get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
+        proj_values = (request.args.get('u_id'), request.args.get('name'))
         if proj_values[1] == None:
-            result.append((project[0], project[1], project[2], project[3]))
+            get_proj_sql = ("SELECT id, name, description, map FROM Project WHERE u_id=?")
+            projects = query_db(get_proj_sql, (proj_values[0],))
+            projects = projects[:-1]
         else:
-            result.append(project)
-    return json.dumps(result)
-    # else:
-    #     logger.info("Not logged in.")
-    #     return {"ERROR": "ERROR"}
+            projects = query_db(get_proj_sql, proj_values, True)
+        result = []
+        for project in projects:
+            new_project = []
+            if proj_values[1] == None:
+                result.append((project[0], project[1], project[2], project[3]))
+            else:
+                result.append(project)
+        return json.dumps(result)
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
         
 
 @bp.route('/getprojectmapping', methods=['GET'])
 def getProjectMapping():
-    get_proj_sql = ("SELECT * FROM Project WHERE id=?")
-    proj_values = (request.args.get('p_id'),)
-    project = query_db(get_proj_sql, proj_values, True)
-    result = []
-    for data in project:
-         result.append(data)
-    return json.dumps(result)
+    if authenticateUser(request.args.get('u_id')):
+        get_proj_sql = ("SELECT * FROM Project WHERE id=?")
+        proj_values = (request.args.get('p_id'),)
+        project = query_db(get_proj_sql, proj_values, True)
+        result = []
+        for data in project:
+            result.append(data)
+        return json.dumps(result)
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 # Henter alle events knyttet til et prosjekt /getevents?p_id=<p_id>
 @bp.route('/getevents')
 def getEvents():
-    return get_events_func(request.args.get("p_id")) 
+    if authenticateUser(request.args.get('u_id')):
+        return get_events_func(request.args.get("p_id"))
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 def get_events_func(p_id):    
     get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")    
@@ -172,43 +198,57 @@ def get_events_func(p_id):
 # Usage /getfigure?description=<desc>&color=<color>
 @bp.route('/getfigure')
 def getFigure():
-    get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
-    description = request.args.get('description', None)
-    color = request.args.get('color', None)
-    result = query_db(get_figure_image_sql, (description, color), True)
-    image = {"image": ""}
-    if result != 0:
-        for res in result:
-            image["image"] = res
+    if authenticateUser(request.args.get('u_id')):  
+        get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
+        description = request.args.get('description', None)
+        color = request.args.get('color', None)
+        result = query_db(get_figure_image_sql, (description, color), True)
+        image = {"image": ""}
+        if result != 0:
+            for res in result:
+                image["image"] = res
+        else:
+            raise InvalidUsage("Bad request", status_code=400)
+        try:
+            return send_from_directory(Config.STATIC_URL_PATH, image["image"])
+        except FileNotFoundError:
+            abort(404)
     else:
-        raise InvalidUsage("Bad request", status_code=400)
-    try:
-        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
-    except FileNotFoundError:
-        abort(404)
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 @bp.route('/getfiguredata')
 def getFigureData():
-    get_figure_data_sql =("SELECT description, color, id FROM Figures")
-    result = select_db(get_figure_data_sql)
-    result = result[:-1]
-    data = []
-    for res in result:
-        data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
-    return json.dumps(data)
+    if authenticateUser(request.args.get('u_id')):
+        get_figure_data_sql =("SELECT description, color, id FROM Figures")
+        result = select_db(get_figure_data_sql)
+        result = result[:-1]
+        data = []
+        for res in result:
+            data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
+        return json.dumps(data)
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
+    
     
 @bp.route('/getmap')
 def getMap():
-    get_map_sql =('SELECT map FROM Project WHERE id=?')
-    args = (request.args.get('p_id'),)
-    result = query_db(get_map_sql, args, True)
-    image = {"image": ""}
-    for res in result:
-        image["image"] = "./uploads/" + res
-    try:
-        return send_from_directory(Config.STATIC_URL_PATH, image["image"])
-    except FileNotFoundError:
-        abort(404)
+    if authenticateUser(request.args.get('u_id')):
+        get_map_sql =('SELECT map FROM Project WHERE id=?')
+        args = (request.args.get('p_id'),)
+        result = query_db(get_map_sql, args, True)
+        image = {"image": ""}
+        for res in result:
+            image["image"] = "./uploads/" + res
+        try:
+            return send_from_directory(Config.STATIC_URL_PATH, image["image"])
+        except FileNotFoundError:
+            abort(404)
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
+    
 
 @bp.route('/favicon.ico')
 def favicon():
@@ -217,45 +257,52 @@ def favicon():
     except FileNotFoundError:
         abort(404)
 
-# Not done yet, must be checked with actual data
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
-    project_id = request.form.get('p_id') 
-    # find clever way to get this dynamically
-    d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
-                        request.form.get('created'), request.form.get('f_id'))
-    e_id = query_db(add_event, d_event_values) # Adds to Event table in db
-    query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
-    return {}
+    if authenticateUser(request.form.get('u_id')):
+        project_id = request.form.get('p_id') 
+        d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
+                            request.form.get('created'), request.form.get('f_id'))
+        e_id = query_db(add_event, d_event_values) # Adds to Event table in db
+        query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
+        return {}
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 # add both to event and Project_has_Event
 
 @bp.route('/upload', methods=['POST'])
 def fileUpload():
-    target=os.path.join(Config.UPLOAD_FOLDER)
-    if not os.path.isdir(target):
-        os.mkdir(target)
-    logger.info("welcome to upload`")
-    file = request.files['file']
-    unique = 1
-    if allowed_file(file.filename):
-        filename = secure_filename(file.filename)       
-        destination="/".join([target, filename])
-        while os.path.exists(destination):
-            destination="/".join([target, str(unique) + filename])
-            unique += 1
-        if unique > 2:
-            addMapName(str(unique - 1) + filename, request.form['p_id'])
+    if authenticateUser(request.form.get('u_id')):
+        target=os.path.join(Config.UPLOAD_FOLDER)
+        if not os.path.isdir(target):
+            os.mkdir(target)
+        logger.info("welcome to upload`")
+        file = request.files['file']
+        unique = 1
+        if allowed_file(file.filename):
+            filename = secure_filename(file.filename)       
+            destination="/".join([target, filename])
+            while os.path.exists(destination):
+                destination="/".join([target, str(unique) + filename])
+                unique += 1
+            if unique > 2:
+                addMapName(str(unique - 1) + filename, request.form['p_id'])
+            else:
+                addMapName(filename, request.form['p_id'])
         else:
-            addMapName(filename, request.form['p_id'])
+            raise InvalidUsage("Not allowed file ending", status_code=400)
+        try:
+            logger.info("file uploaded")
+            file.save(destination)
+            return {"file": filename}, 201
+        except:
+            logger.info("Failed to upload image")
+            raise InvalidUsage("Failed to upload image", status_code=500)
     else:
-        raise InvalidUsage("Not allowed file ending", status_code=400)
-    try:
-        logger.info("file uploaded")
-        file.save(destination)
-        return {"file": filename}, 201
-    except:
-        logger.info("Failed to upload image")
-        raise InvalidUsage("Failed to upload image", status_code=500)
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
+    
 
 def getElementXandY(element):
     stringCoord = element.split(",")
@@ -283,58 +330,62 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
 
 @bp.route('/createarcgis', methods=['POST'])
 def createARCGIS():
-    # step 1 create field. Step 2 populate fields
-    # enter folder
-    # shapefile = outline of a building and 
-    target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
-    if not os.path.isdir(target):
-        os.mkdir(target)
+    if authenticateUser(request.form.get('u_id')):
+        # step 1 create field. Step 2 populate fields
+        # enter folder
+        # shapefile = outline of a building and 
+        target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
+        if not os.path.isdir(target):
+            os.mkdir(target)
 
-    eventsJSON = get_events_func(request.form.get('p_id'))
-    events = json.loads(eventsJSON)
-    
-    imageCoord = []
-    for event in events:
-        imageCoord.append(event[2])
+        eventsJSON = get_events_func(request.form.get('p_id'))
+        events = json.loads(eventsJSON)
+        
+        imageCoord = []
+        for event in events:
+            imageCoord.append(event[2])
 
-    get_proj_sql = ("SELECT * FROM Project WHERE id=?")
-    pid = (request.form.get('p_id'))
-    project_values = query_db(get_proj_sql, (str(pid),), True)
-    leftX = float(project_values[8])
-    lowerY = float(project_values[9])
-    rightX = float(project_values[10])
-    upperY = float(project_values[11])
+        get_proj_sql = ("SELECT * FROM Project WHERE id=?")
+        pid = (request.form.get('p_id'))
+        project_values = query_db(get_proj_sql, (str(pid),), True)
+        leftX = float(project_values[8])
+        lowerY = float(project_values[9])
+        rightX = float(project_values[10])
+        upperY = float(project_values[11])
 
-    iconCoord = []
+        iconCoord = []
 
-    for coordSet in imageCoord:
-        iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
+        for coordSet in imageCoord:
+            iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
 
-    
-    w = shp.Writer(os.path.join(target, 'tree'))
-    # clog her
-    w.autoBalance = 1
-    w.field('Background', 'C', '40') # image
+        
+        w = shp.Writer(os.path.join(target, 'tree'))
+        # clog her
+        w.autoBalance = 1
+        w.field('Background', 'C', '40') # image
 
-    point_ID = 1
+        point_ID = 1
 
-    """ w.point(leftX, lowerY)
-    w.record('lower left corner')
-    w.point(leftX, upperY)
-    w.record('upper left corner')
-    w.point(rightX, lowerY)
-    w.record('lower right corner')
-    w.point(rightX, upperY)
-    w.record('upper right corner') """
-    
-    for coordinateSet in iconCoord:
-        x = coordinateSet[0]
-        y = coordinateSet[1]
-        w.point(x, y)
-        w.record(str(point_ID), 'Point')
-        point_ID += 1
+        """ w.point(leftX, lowerY)
+        w.record('lower left corner')
+        w.point(leftX, upperY)
+        w.record('upper left corner')
+        w.point(rightX, lowerY)
+        w.record('lower right corner')
+        w.point(rightX, upperY)
+        w.record('upper right corner') """
+        
+        for coordinateSet in iconCoord:
+            x = coordinateSet[0]
+            y = coordinateSet[1]
+            w.point(x, y)
+            w.record(str(point_ID), 'Point')
+            point_ID += 1
 
-    return {}
+        return {}
+    else:
+        logger.info("Not logged in.")
+        return {"ERROR": "ERROR"}
 
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
 @bp.route('/initdb')

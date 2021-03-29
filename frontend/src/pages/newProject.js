@@ -16,6 +16,7 @@ class NewProject extends React.Component {
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#FDFFFC",
             p_id: "",
+            u_id: window.sessionStorage.getItem('uID'),
         }
         
         this.handleChange = this.handleChange.bind(this);
@@ -56,6 +57,7 @@ class NewProject extends React.Component {
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
         data.append('p_id', p_id);
+        data.append('u_id', this.state.u_id);
     
         fetch(window.backend_url + 'upload', {
           method: 'POST',
@@ -104,6 +106,7 @@ class NewProject extends React.Component {
             data.append('description', this.state.description);
             data.append('startdate', new Date());
             data.append('map', this.uploadInput.files[0].name);
+            data.append('u_id', this.state.u_id);
             
             fetch(window.backend_url + 'addproject', {
             method: 'POST',
@@ -120,6 +123,7 @@ class NewProject extends React.Component {
                 state: {
                     projectName: this.state.projectName,
                     description: this.state.description,
+                    u_id : this.state.u_id,
                 },
             });
         }  

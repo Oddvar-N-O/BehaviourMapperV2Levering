@@ -10,7 +10,8 @@ class UploadMap extends React.Component {
         super(props)
         this.state = {
             iamgeURL: '',
-            buttonText: 'Choose image'
+            buttonText: 'Choose image',
+            u_id: window.sessionStorage.getItem('uID'),
         }
         this.handleUploadImage = this.handleUploadImage.bind(this);
     }
@@ -20,6 +21,7 @@ class UploadMap extends React.Component {
     
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
+        data.append('u_id', this.state.u_id);
         // data.append('filename', this.fileName.value);
     
         fetch(window.backend_url + 'upload', {
