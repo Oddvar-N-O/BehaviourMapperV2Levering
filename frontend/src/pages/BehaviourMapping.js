@@ -106,25 +106,29 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
-    this.setState({ addIcon: true })
+    this.hideAll();
+    this.setState({ addIcon: true });
   }
 
   setInnerHTML(str) {
     if (str != null) {
       let descr = str.split(' ');
       descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
-      for (let i=1; i<descr.length-1; i++) {
+      for (let i=1; i<descr.length-2; i++) {
         descr[0] += " " + descr[i]
       }
-      switch(descr[descr.length-1]) {
+      switch(descr[descr.length-2]) {
         case 'blue':
           descr[1] = "Man";
           break;
         case 'red':
           descr[1] = "Woman";
           break;
-        default:
+        case 'green':
           descr[1] = "Child";
+          break;
+        default:
+          break;
       }
       let innerHTML = descr[0] + ": " + descr[1];
       return innerHTML; 
@@ -140,10 +144,10 @@ class BehaviourMapping extends React.Component {
     });
     li.setAttribute('id', newSrc);
     let textArray = this.setInnerHTML(e.target.getAttribute('id'));
-    let newText = textArray[0] + ": " + textArray[1]
+    let newText = textArray
 
-    this.setState({ // not here
-      f_id: textArray[textArray.length - 1]
+    this.setState({
+      f_id: e.target.getAttribute('id')[e.target.getAttribute('id').length - 1]
     });
     this.setState({
       iconSRC: newSrc
@@ -235,7 +239,7 @@ class BehaviourMapping extends React.Component {
         y: coordinates[1],
       }
     }, function() {});
-    this.addListenerToImage(img);
+    // this.addListenerToImage(img);
     this.findScreenSize();
   }
 
@@ -313,23 +317,23 @@ class BehaviourMapping extends React.Component {
     }  
   }
   
-  addListenerToImage(img) {
-    img.addEventListener('click', function() {
-      if (img.style.border === '4px solid red') {
-        img.style.border = 'none';
-        img.style.borderRadius = '5px';
+  // addListenerToImage(img) {
+  //   img.addEventListener('click', function() {
+  //     if (img.style.border === '4px solid red') {
+  //       img.style.border = 'none';
+  //       img.style.borderRadius = '5px';
         
-        // let iconInfo = this.state.iconObjects[id];
+  //       // let iconInfo = this.state.iconObjects[id];
   
-        // let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-        // icon.style.left = (coords[0] + 200) +'px';
-        // icon.style.top =  (coords[1]) +'px';
-      } else {
-        img.style.border = '4px solid red';
-      }
-    });
-    img.click();
-  }
+  //       // let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+  //       // icon.style.left = (coords[0] + 200) +'px';
+  //       // icon.style.top =  (coords[1]) +'px';
+  //     } else {
+  //       img.style.border = '4px solid red';
+  //     }
+  //   });
+  //   img.click();
+  // }
 
   /* letImgDrop(ev) {
     ev.preventDefault();
@@ -590,14 +594,14 @@ class BehaviourMapping extends React.Component {
 
   placeFormerEvent(f_id, coord, rotation) {
     let src;
-    fetch(`getimagefromID?f_id=${f_id}&u_id=${this.state.u_id}`)
+    fetch(window.backend_url + `getimagefromID?f_id=${f_id}&u_id=${this.state.u_id}`)
     .then(result => result.blob())
     .then(images => {
       src = URL.createObjectURL(images)
 
       let img = document.createElement('img');
       img.setAttribute('id', this.state.newIconID.toString());
-      this.addListenerToImage(img);
+      // this.addListenerToImage(img);
       img.click();
       this.setState({
         newIconID: this.state.newIconID + 1
@@ -620,31 +624,21 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
-    /*
-     fetch(`getevents?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      setTimeout(() => this.loadFormerEvents(data), 500);
-    });
-     */
-    fetch('createarcgis', {
+    data.append('u_id', this.state.u_id)
+    fetch(window.backend_url + 'createarcgis', {
       method: 'POST',
       body: data,
       })
-      .then(response => response.text())
-      .then(textString => {
-        console.log(textString);
-      });
-      /* .then(blob => {
-        console.log(blob);
+      .then(response => response.blob())
+      .then(blob => {
         var url = window.URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
-        a.download = "requirements.txt";
+        a.download = "shapefiles.zip";
         document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
         a.click();    
         a.remove();
-      });*/
+      });
 
     // setTimeout(() => this.downloadArcGIS(), 1500);    
   }
@@ -762,7 +756,7 @@ class BehaviourMapping extends React.Component {
                 <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-                <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
+                <li className="buttonLi" onClick={this.argCIS}>Export shapefiles</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
               </ul>
               <ul className={interviewLiClassList}>

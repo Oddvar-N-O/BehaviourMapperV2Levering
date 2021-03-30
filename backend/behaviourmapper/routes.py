@@ -282,7 +282,7 @@ def addEvent():
     if authenticateUser(request.form.get('u_id')):
         project_id = request.form.get('p_id') 
         d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
-                            request.form.get('created'), request.form.get('f_id'), request.form.get('image_size'))
+                            request.form.get('created'), request.form.get('image_size'), request.form.get('f_id'))
         e_id = query_db(add_event, d_event_values) # Adds to Event table in db
         query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
         return {}
@@ -384,7 +384,7 @@ def createARCGIS():
         # autoincrement
         arcgis_filename = "yote",
         # location = 'behaviormapper/static/shapefiles/tree'
-        w = shp.Writer('behaviormapper/static/shapefiles/test')
+        w = shp.Writer('behaviourmapper/static/shapefiles/test')
 
         
         # w = shp.Writer(os.path.join(target, 'tree'))
@@ -403,7 +403,7 @@ def createARCGIS():
 
         with zipfile.ZipFile('QGIS_SHAPEFILES.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
             absPath = os.path.abspath('shapefiles')
-            filesLocation = 'behaviormapper/static/shapefiles'
+            filesLocation = 'behaviourmapper/static/shapefiles'
             for filename in os.listdir(filesLocation):
                 f = os.path.join(filesLocation, filename)
                 if os.path.isfile(f):
@@ -414,28 +414,12 @@ def createARCGIS():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-@bp.route('/exportarcgis')
 def exportARCGIS(): #path, ziph):
-    if authenticateUser(request.form.get('u_id')):
-        placement = os.path.abspath('requirements.txt')
-        print('PLAC: ' + str(placement))
-        print(app.config['QGISZIP'])
-        p = "C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt"
-        f = open(placement, "r")
-        print(f.read())
-        
-        try:
-            print('rettosender')
-            return send_from_directory(
-                placement,
-                filename='requirements.txt')
-        except FileNotFoundError:
-            print('ABOOORT MISSION')
-            abort(404)
-        return "test"
-    else:
-        logger.info("Not logged in.")
-        raise InvalidUsage("Bad request", status_code=400)
+    placement = os.path.abspath('QGIS_SHAPEFILES.zip')
+    try:
+        return send_file(placement)
+    except FileNotFoundError:
+        abort(404)
 
 #initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
 @bp.route('/initdb')
@@ -476,17 +460,17 @@ def addMapName(mapname, p_id):
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("openid","email@email.com")
 event_values = [45,"12991.29291 2929.21", "12:12:12", "[750, 900]"]
-project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", 1,2,3,4]
+project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), 10,"zoom", 1,2,3,4]
 
 # sql for å bruke alle felt.
 add_user = ("INSERT INTO Users (openid, email)"
                "VALUES (?,?)")
 add_event = ("INSERT INTO Event "
-              "(direction, center_coordinate, created, f_id, image_size_when_created) "
+              "(direction, center_coordinate, created, image_size_when_created, f_id) "
               "VALUES (?,?,?,?,?)")
 add_project = ("INSERT INTO Project "
-              "(name, description, screenshot, map, startdate, enddate, zoom, leftX, lowerY, rightX, upperY, u_id) "
-              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+              "(name, description, screenshot, map, startdate, enddate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id) "
+              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")
 add_figure = ("INSERT INTO Figures "
                 "(description, color, image, other_attributes) "
                 "VALUES (?,?,?,?)")
