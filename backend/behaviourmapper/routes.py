@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import socket
 import zipfile
 from datetime import date, datetime
 from time import time
@@ -108,6 +107,17 @@ def addProject():
                             request.form.get('upperY'), request.form.get('u_id'))
         p_id = query_db(add_small_project, small_project_values)
         return {"p_id": p_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/updateproject')
+def updateProject():
+    if authenticateUser(request.args.get('u_id')):
+        update_sql = "UPDATE Project SET enddate=? WHERE id=? AND u_id=?"
+        values = (request.args.get('enddate'),request.args.get('p_id'),request.args.get('u_id'))
+        query_db(update_sql, values)
+        return {"Status": "Success"}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
