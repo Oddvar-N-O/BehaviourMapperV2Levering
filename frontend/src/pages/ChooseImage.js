@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import * as AiIcons from 'react-icons/ai';
 import * as BiIcons from 'react-icons/bi';
 import {transformExtent} from 'ol/proj';
-import {toSize} from 'ol/size';
 import './ChooseImage.css'
 import { Authenticated } from './auth/AuthContext'
 
@@ -34,10 +33,8 @@ class ChooseImage extends React.Component {
 
   addProject() {
     let centerCoordinates = this.map.getView().calculateExtent(this.map.getSize());
-    console.log('centCord: ' + centerCoordinates)
     centerCoordinates = transformExtent(centerCoordinates, 'EPSG:3857', 'EPSG:4326');
     let size = this.map.getSize();
-    console.log('size: ' + size);
     const data = new FormData();
     const zoom = this.map.getView().getZoom()
     data.append('name', this.state.projectName);

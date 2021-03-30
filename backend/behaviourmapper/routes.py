@@ -1,14 +1,15 @@
 import json
 import logging
 import os
+import socket
+import zipfile
 from datetime import date, datetime
 from time import time
 
 import shapefile as shp
-from flask import (Blueprint, Flask, current_app, flash, g, redirect, request,
-                   send_from_directory, session, url_for)
+from flask import (Blueprint, Flask, abort, current_app, flash, g, redirect,
+                   request, send_file, send_from_directory, session, url_for)
 from flask_cors import CORS, cross_origin
-from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
 from . import oidc
@@ -98,13 +99,13 @@ def allowed_file(filename):
 def addProject():
     if authenticateUser(request.form.get('u_id')):
         add_small_project = ("INSERT INTO Project "
-            "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY, u_id)"
-            "VALUES (?,?,?,?,?,?,?,?,?)")
+            "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id)"
+            "VALUES (?,?,?,?,?,?,?,?,?,?)")
         small_project_values = (request.form.get('name'), request.form.get('description'), 
                             request.form.get('startdate'), request.form.get('zoom'),
-                            request.form.get('leftX'), request.form.get('lowerY'),
-                            request.form.get('rightX'), request.form.get('upperY'),
-                            request.form.get('u_id'))
+                            request.form.get('originalsize'), request.form.get('leftX'), 
+                            request.form.get('lowerY'), request.form.get('rightX'), 
+                            request.form.get('upperY'), request.form.get('u_id'))
         p_id = query_db(add_small_project, small_project_values)
         return {"p_id": p_id}
     else:
@@ -217,6 +218,24 @@ def getFigure():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
+@bp.route('/getimagefromID')
+def getImageFromID():
+    if authenticateUser(request.args.get('u_id')):
+        get_figure_image_sql =('SELECT image FROM Figures WHERE id=?')
+        f_id = request.args.get('f_id', None)
+
+        result = query_db(get_figure_image_sql, (f_id), True)
+        image = {"image": ""}
+        for res in result:
+            image["image"] = res
+        try:
+            return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+        except FileNotFoundError:
+            abort(404)
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
 @bp.route('/getfiguredata')
 def getFigureData():
     if authenticateUser(request.args.get('u_id')):
@@ -239,12 +258,13 @@ def getMap():
         args = (request.args.get('p_id'),)
         result = query_db(get_map_sql, args, True)
         image = {"image": ""}
-        for res in result:
-            image["image"] = "./uploads/" + res
-        try:
-            return send_from_directory(Config.STATIC_URL_PATH, image["image"])
-        except FileNotFoundError:
-            abort(404)
+        if result != 0:
+            for res in result:
+                image["image"] = "./uploads/" + res
+            try:
+                return send_from_directory(Config.STATIC_URL_PATH, image["image"])
+            except FileNotFoundError:
+                abort(404)
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
@@ -262,7 +282,7 @@ def addEvent():
     if authenticateUser(request.form.get('u_id')):
         project_id = request.form.get('p_id') 
         d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
-                            request.form.get('created'), request.form.get('f_id'))
+                            request.form.get('created'), request.form.get('f_id'), request.form.get('image_size'))
         e_id = query_db(add_event, d_event_values) # Adds to Event table in db
         query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
         return {}
@@ -309,14 +329,15 @@ def getElementXandY(element):
     intCoord = list(map(float, stringCoord))
     return intCoord
 
-def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
+def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates, screenSize):
     imgCoordinates = getElementXandY(imgCoordinates)
+    screenSize = getElementXandY(screenSize)
     startPoint = [leftX, upperY] 
 
     lengthMapX = rightX - leftX
     lenghtMapY = upperY - lowerY
-    onePixelX = lengthMapX / 615
-    onePixelY = lenghtMapY / 684
+    onePixelX = lengthMapX / screenSize[0]
+    onePixelY = lenghtMapY / screenSize[1]
 
     pixelsFromStartX = imgCoordinates[0]
     distanceFromX = pixelsFromStartX * onePixelX
@@ -342,38 +363,36 @@ def createARCGIS():
         events = json.loads(eventsJSON)
         
         imageCoord = []
+        screenSize = []
         for event in events:
-            imageCoord.append(event[2])
+            if type(event) == list:
+                imageCoord.append(event[2])
+                screenSize.append(event[3])
 
         get_proj_sql = ("SELECT * FROM Project WHERE id=?")
         pid = (request.form.get('p_id'))
         project_values = query_db(get_proj_sql, (str(pid),), True)
-        leftX = float(project_values[8])
-        lowerY = float(project_values[9])
-        rightX = float(project_values[10])
-        upperY = float(project_values[11])
+        leftX = float(project_values[9])
+        lowerY = float(project_values[10])
+        rightX = float(project_values[11])
+        upperY = float(project_values[12])
 
         iconCoord = []
 
-        for coordSet in imageCoord:
-            iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
+        for i in range(len(imageCoord)):
+            iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, imageCoord[i], screenSize[i]))
+        # autoincrement
+        arcgis_filename = "yote",
+        # location = 'behaviormapper/static/shapefiles/tree'
+        w = shp.Writer('behaviormapper/static/shapefiles/test')
 
         
-        w = shp.Writer(os.path.join(target, 'tree'))
+        # w = shp.Writer(os.path.join(target, 'tree'))
         # clog her
         w.autoBalance = 1
         w.field('Background', 'C', '40') # image
 
         point_ID = 1
-
-        """ w.point(leftX, lowerY)
-        w.record('lower left corner')
-        w.point(leftX, upperY)
-        w.record('upper left corner')
-        w.point(rightX, lowerY)
-        w.record('lower right corner')
-        w.point(rightX, upperY)
-        w.record('upper right corner') """
         
         for coordinateSet in iconCoord:
             x = coordinateSet[0]
@@ -382,7 +401,38 @@ def createARCGIS():
             w.record(str(point_ID), 'Point')
             point_ID += 1
 
-        return {}
+        with zipfile.ZipFile('QGIS_SHAPEFILES.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
+            absPath = os.path.abspath('shapefiles')
+            filesLocation = 'behaviormapper/static/shapefiles'
+            for filename in os.listdir(filesLocation):
+                f = os.path.join(filesLocation, filename)
+                if os.path.isfile(f):
+                    my_zip.write(f)
+    
+        return exportARCGIS()
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/exportarcgis')
+def exportARCGIS(): #path, ziph):
+    if authenticateUser(request.form.get('u_id')):
+        placement = os.path.abspath('requirements.txt')
+        print('PLAC: ' + str(placement))
+        print(app.config['QGISZIP'])
+        p = "C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt"
+        f = open(placement, "r")
+        print(f.read())
+        
+        try:
+            print('rettosender')
+            return send_from_directory(
+                placement,
+                filename='requirements.txt')
+        except FileNotFoundError:
+            print('ABOOORT MISSION')
+            abort(404)
+        return "test"
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
@@ -425,15 +475,15 @@ def addMapName(mapname, p_id):
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("openid","email@email.com")
-event_values = [45,"12991.29291 2929.21", "12:12:12"]
+event_values = [45,"12991.29291 2929.21", "12:12:12", "[750, 900]"]
 project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", 1,2,3,4]
 
 # sql for å bruke alle felt.
 add_user = ("INSERT INTO Users (openid, email)"
                "VALUES (?,?)")
 add_event = ("INSERT INTO Event "
-              "(direction, center_coordinate, created, f_id) "
-              "VALUES (?,?,?,?)")
+              "(direction, center_coordinate, created, f_id, image_size_when_created) "
+              "VALUES (?,?,?,?,?)")
 add_project = ("INSERT INTO Project "
               "(name, description, screenshot, map, startdate, enddate, zoom, leftX, lowerY, rightX, upperY, u_id) "
               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")

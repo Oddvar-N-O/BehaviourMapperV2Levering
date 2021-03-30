@@ -80,7 +80,6 @@ class BehaviourMapping extends React.Component {
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
-    console.log('SDB');
     // this.createIconObject(coordinates, currentSize)
     data.append('p_id', this.state.p_id);
     data.append('direction', this.state.ourIconCoord.degree);
@@ -216,7 +215,7 @@ class BehaviourMapping extends React.Component {
     this.setState({
       newIconID: this.state.newIconID + 1
     }, function() {} );
-    document.getElementById('iconContainer').appendChild(img);
+    document.getElementById('icon-container').appendChild(img);
     let coordinates = [event.clientX - 225, event.clientY - 20];
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
@@ -276,7 +275,7 @@ class BehaviourMapping extends React.Component {
       actionID: 0,
     });
     if (this.state.sendNewIconToBD) {
-      this.sendEventToDatabase();
+      this.sendDatabaseEvent();
       this.setState({sendNewIconToBD: false}, function() {});
     }
   }
@@ -315,13 +314,10 @@ class BehaviourMapping extends React.Component {
   }
   
   addListenerToImage(img) {
-    console.log('start');
     img.addEventListener('click', function() {
       if (img.style.border === '4px solid red') {
         img.style.border = 'none';
         img.style.borderRadius = '5px';
-        let id = img.getAttribute('id');
-        console.log(id);
         
         // let iconInfo = this.state.iconObjects[id];
   
@@ -594,7 +590,7 @@ class BehaviourMapping extends React.Component {
 
   placeFormerEvent(f_id, coord, rotation) {
     let src;
-    fetch(`getimagefromID?f_id=${f_id}`)
+    fetch(`getimagefromID?f_id=${f_id}&u_id=${this.state.u_id}`)
     .then(result => result.blob())
     .then(images => {
       src = URL.createObjectURL(images)
@@ -608,7 +604,7 @@ class BehaviourMapping extends React.Component {
       }, function() {});   
       img.classList.add('icon');
       img.src = src;
-      document.getElementById('iconContainer').appendChild(img);
+      document.getElementById('icon-container').appendChild(img);
       img.style.top =  (coord[1])+'px';
       img.style.left = (coord[0]+200) +'px';
       if (rotation != null) {

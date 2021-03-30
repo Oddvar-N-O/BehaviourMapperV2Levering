@@ -74,14 +74,14 @@ function LoadProject() {
           "zoom": allProjects[i][7],
           "u_id": allProjects[i][8]});      
       }
-      makeImage()
-      clearFormerEvents()
-      placeAllFormerEvents()
     }
+    makeImage()
+    clearFormerEvents()
+    placeAllFormerEvents()
   }
 
   const makeImage = () => {
-      var fetchstring = `getmap?p_id=${currProj['id']}`
+      var fetchstring = `getmap?p_id=${currProj['id']}&u_id=${u_id}`
       fetch(fetchstring)
         .then(res => res.blob())
         .then(data => {
@@ -148,7 +148,7 @@ function LoadProject() {
 
   const placeEvent = (f_id, coord, rotation, i) => {
     let src;
-    fetch(`getimagefromID?f_id=${f_id}`)
+    fetch(`getimagefromID?f_id=${f_id}&u_id=${u_id}`)
     .then(result => result.blob())
     .then(images => {
       src = URL.createObjectURL(images)
@@ -207,7 +207,7 @@ function LoadProject() {
       // console.log('i: ' + i);
       icon = document.getElementById(0);
       console.log(icon);
-      let iconInfoObject = iconInfoObjects[0];
+      // let iconInfoObject = iconInfoObjects[0];
       // console.log(iconInfoObject.originalCoord);
       // console.log(iconInfoObject.originalSize);
       // coords = findNewCoord(iconInfoObject.originalSize, iconInfoObject.originalCoord);
@@ -228,8 +228,8 @@ function LoadProject() {
           <SidebarLP  getCurrProj={getCurrProj} projects={allProjects} />
           <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
             <h1>Description: {currProj["description"]}</h1>
-            <p>Project id: {currProj["id"]} Name: {currProj["name"]} Screenshot: {currProj["screenshot"]} Events: {allEvents}</p>
-            <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} id='opplastetKart' />
+            <p>Project id: {currProj["id"]} Name: {currProj["name"]} {iconInfoObjects} Screenshot: {currProj["screenshot"]} Events: {allEvents}</p>
+            <img alt={'Screenshot av kartet til '+ currImage + '.'} id='opplastetKart' src={currImage}/>
             <button>
               <Link to={{
                       pathname: "/mapping",
