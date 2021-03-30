@@ -334,7 +334,7 @@ def createARCGIS():
     
     return exportARCGIS()
 
-app.config['QGISZIP'] = 'C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt'
+app.config['QGISZIP'] = 'C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/QGIS_SHAPEFILES.zip'
 
 @app.route('/exportarcgis')
 @cross_origin()
