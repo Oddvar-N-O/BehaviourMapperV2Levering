@@ -144,10 +144,8 @@ class BehaviourMapping extends React.Component {
       });
       this.closeIconSelect()
     } else if (alreadyExists === false && foundObject === false) {
-      alert('Error Loading from DB, please try again!');
       this.closeIconSelect();
     } else {
-      alert('This icon already exists in the list!');
       this.closeIconSelect();
     }
   }
@@ -389,10 +387,7 @@ class BehaviourMapping extends React.Component {
       icon.style.left = (coords[0] + 200) +'px';
       icon.style.top =  (coords[1]) +'px';
     }
-    
   }
-
-
   
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
@@ -522,28 +517,53 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
+    /*
+     fetch(`getevents?p_id=${this.state.p_id}`)
+    .then(res => res.json())
+    .then(data => {
+      setTimeout(() => this.loadFormerEvents(data), 500);
+    });
+     */
     fetch('createarcgis', {
       method: 'POST',
       body: data,
-      }).then((response) => {
-    });
-    // this.downloadArcGIS()
+      })
+      .then(response => response.text())
+      .then(textString => {
+        console.log(textString);
+      });
+      /* .then(blob => {
+        console.log(blob);
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = "requirements.txt";
+        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+        a.click();    
+        a.remove();
+      });*/
+
+    // setTimeout(() => this.downloadArcGIS(), 1500);    
   }
 
-  downloadArcGIS() {
+  /* downloadArcGIS() {
     fetch('exportarcgis')
     .then(res => res.blob())
-    .then(data => {
-      // for å gjøre bolbben til en fil
-      /* blob.lastModifiedDate = new Date();
-      blob.name = 'yeet';
-      var a = document.getElementById("download");
-      let url = window.URL.createObjectURL(blob);
+    .then(blob => {
+      var url = window.URL.createObjectURL(blob);
+      var a = document.createElement('a');
       a.href = url;
-      a.click();
-      window.URL.revokeObjectURL(url);*/
-    });
-  }
+      a.download = "filename.txt";
+      document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+      a.click();    
+      a.remove();
+      // alert('your file has downloaded!');
+      /* blob.lastModifiedDate = new Date();
+      blob.name = this.state.projectName + ".png";
+      var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
+      console.log(file);*/
+  //  })
+  //} 
 
   hideOrShow() {
     let liElementHideOrShow = document.getElementById('hide-or-show');

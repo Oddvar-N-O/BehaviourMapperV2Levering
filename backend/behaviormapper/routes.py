@@ -1,7 +1,8 @@
 from behaviormapper import app, query_db, init_db, select_db
 from behaviormapper.errorhandlers import InvalidUsage
 from datetime import datetime, date
-from flask import Flask, send_file, redirect, url_for, flash, request, session, send_from_directory
+from flask import Flask, redirect, url_for, flash, request, session, send_from_directory
+from flask import send_file, send_from_directory, abort
 from time import time
 import json
 import logging
@@ -14,6 +15,8 @@ import shapefile as shp
 from flask.helpers import send_file
 # import io
 import socket
+import zipfile
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -63,7 +66,6 @@ def getProject():
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
-    print('PID: ' + str(proj_values))
     project = query_db(get_proj_sql, proj_values, True)
     result = []
     for data in project:
@@ -91,7 +93,6 @@ def getFigure():
 def getImageFromID():
     get_figure_image_sql =('SELECT image FROM Figures WHERE id=?')
     f_id = request.args.get('f_id', None)
-    print('f_id' + str(f_id))
 
     result = query_db(get_figure_image_sql, (f_id), True)
     image = {"image": ""}
@@ -170,7 +171,6 @@ def get_events_func(p_id):
         query_event = query_db(get_event_sql, (str(e_id),), True)
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4], query_event[5]))
         get_src_sql = ("SELECT image FROM Figures WHERE id=?")
-        print('f_id: ' + str(query_event[5]))
         query_src = query_db(get_src_sql, str(query_event[5]), True)
         for res in query_src:
             events.append(res)
@@ -301,7 +301,7 @@ def createARCGIS():
 
     # autoincrement
     arcgis_filename = "yote",
-    location = 'behaviormapper/static/shapefiles/tree'
+    # location = 'behaviormapper/static/shapefiles/tree'
     w = shp.Writer('behaviormapper/static/shapefiles/test')
 
     w.autoBalance = 1
@@ -323,26 +323,38 @@ def createARCGIS():
         w.point(x, y)
         w.record(str(point_ID), 'Point')
         point_ID += 1
+
+    with zipfile.ZipFile('QGIS_SHAPEFILES.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
+        absPath = os.path.abspath('shapefiles')
+        filesLocation = 'behaviormapper/static/shapefiles'
+        for filename in os.listdir(filesLocation):
+            f = os.path.join(filesLocation, filename)
+            if os.path.isfile(f):
+                my_zip.write(f)
     
-    # exportARCGIS(arcgis_filename)
+    return exportARCGIS()
 
-    return {}
+app.config['QGISZIP'] = 'C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt'
 
-@app.route('/exportarcgis', methods=['POST'])
+@app.route('/exportarcgis')
 @cross_origin()
-def exportARCGIS(filename):
-    # test = open("behaviormapper/static/shapefiles/mytext.txt", "rb")
+def exportARCGIS(): #path, ziph):
+    placement = os.path.abspath('requirements.txt')
+    print('PLAC: ' + str(placement))
+    print(app.config['QGISZIP'])
+    p = "C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt"
+    f = open(placement, "r")
+    print(f.read())
     
-    """ s = socket.socket()
-    host = s.hostname()
-    port = 3000
-    s.bind((host, port))
-    s.listen(1)
-    print('Waiting for connection')
-    conn, addr = conn.accept()
-    print(addr, "Has connected to the server") """
-    test = 'C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt'
-    return send_file(test, attachement_filename="text")
+    try:
+        print('rettosender')
+        return send_from_directory(
+            placement,
+            filename='requirements.txt')
+    except FileNotFoundError:
+        print('ABOOORT MISSION')
+        abort(404)
+    return "test"
 
 @app.route('/hello')
 def say_hello_world():
