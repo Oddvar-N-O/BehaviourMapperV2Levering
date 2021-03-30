@@ -27,7 +27,7 @@ def test_getfigure_err(client):
 
 def test_getevents(client):
     rv = client.get(('/behaviourmapper/getevents?p_id=1&u_id=openid'))
-    defaultEvent = b'[[1, 45, "12991.29291 2929.21", "12:12:12", 20]]'
+    defaultEvent = b'[[1, 45, "12991.29291 2929.21", "[750, 900]", "12:12:12"]]'
     assert rv.status_code == 200
     assert rv.data == defaultEvent
 

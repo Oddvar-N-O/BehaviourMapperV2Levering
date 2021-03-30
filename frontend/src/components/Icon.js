@@ -17,7 +17,7 @@ function Icon(props) {
     
     return (
         <>  
-            <img id={props.description + " " + props.color} className="single-icon" alt="icon" src={icon}></img>
+            <img id={props.description + " " + props.color + " " + props.f_id} className="single-icon" alt="icon" src={icon}></img>
         </>
     );    
 }

@@ -33,13 +33,14 @@ class ChooseImage extends React.Component {
 
   addProject() {
     let centerCoordinates = this.map.getView().calculateExtent(this.map.getSize());
-    console.log('centCord: ' + centerCoordinates)
     centerCoordinates = transformExtent(centerCoordinates, 'EPSG:3857', 'EPSG:4326');
+    let size = this.map.getSize();
     const data = new FormData();
     const zoom = this.map.getView().getZoom()
     data.append('name', this.state.projectName);
     data.append('description', this.state.description);
     data.append('startdate', new Date());
+    data.append('originalsize', size);
     data.append('zoom', zoom);
     data.append('leftX', centerCoordinates[0]);
     data.append('lowerY', centerCoordinates[1]);
@@ -95,7 +96,7 @@ class ChooseImage extends React.Component {
             method: 'POST',
             body: data,
           }).then(setTimeout(
-            () => this.pauseBeforeRedirect(), 1500));
+            () => this.pauseBeforeRedirect(), 200));
       }); 
   }
 
