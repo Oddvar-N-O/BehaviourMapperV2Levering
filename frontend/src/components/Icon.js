@@ -3,20 +3,19 @@ import React, { useEffect, useState } from 'react'
 function Icon(props) {
 
     const [icon, setIcon] = useState("")
+    const u_id = window.sessionStorage.getItem('uID');
+    
     useEffect(() => {
-        fetch(`getfigure?description=${props.description}&color=${props.color}`)
-        .then(result => result.blob())
+        fetch(window.backend_url + `getfigure?description=${props.description}&color=${props.color}&u_id=${u_id}`)
+        .then(result => result.blob()) 
         .then(images => {
-            // console.log('imS: ' + images)
             var image = URL.createObjectURL(images)
-            // console.log('created IMAGE: ' + image)
-            // image er det samme her som hos oss "./icons/man/bike.png"
             setIcon(image)
         })
     },
-    [props.description, props.color, props.f_id]); 
+    [props.description, props.color, u_id]); 
     
-    return ( // dette funker ikke
+    return (
         <>  
             <img id={props.description + " " + props.color + " " + props.f_id} className="single-icon" alt="icon" src={icon}></img>
         </>

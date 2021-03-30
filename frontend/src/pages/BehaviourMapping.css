@@ -1,8 +1,14 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 .behaviour-mapping{
     display: flex;
     flex-direction: row;
     font-size: xx-large;
     height: 100%;
+    width: 100%;
 }
 
 .ol-attribution {
@@ -58,8 +64,10 @@
     margin-right: 10px;
 }
 
-#iconList {
+#icon-list {
     width: 200px;
+    height: 100vh;
+    overflow: auto;
 }
 
 .map{   
@@ -67,6 +75,24 @@
     width: 100%;
     height: 100vh;
     order: 2;
+}
+
+.visible {
+    display: block;
+}
+
+.invisible {
+    display: none; 
+}
+
+.interview {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    flex-wrap: wrap;
+    font-size: 48%;
+    text-align: center;
 }
 
 /*ModImg*/

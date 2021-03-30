@@ -13,12 +13,13 @@ class AllIcons extends React.Component {
             redData: [],
             blueData: [],
             greenData: [],
+            u_id: window.sessionStorage.getItem('uID'),
 
         };
     };
 
     componentDidMount() {
-        fetch(`getfiguredata`)
+        fetch(window.backend_url + `getfiguredata?u_id=${this.state.u_id}`)
         .then(response => response.json()) 
         .then(data => {
             // console.log('DATA: ' + data[1].id)

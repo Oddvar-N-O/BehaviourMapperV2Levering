@@ -1,13 +1,13 @@
-import Corner from 'ol/extent/Corner';
 import React from 'react';
 import AllIcons from '../components/AllIcons';
-import './BehaviourMapping.css'
+import Interview from '../components/interview';
+import './BehaviourMapping.css';
+import classNames from 'classnames';
+import { Authenticated } from './auth/AuthContext'
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
       super(props)
-
-
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         iconSRCs: [],
@@ -32,16 +32,36 @@ class BehaviourMapping extends React.Component {
         hideOrShow: "hide",
         arcGISfilename: "",
         scrollHorizontal: 0,
-        scrollVertical: 0
+        scrollVertical: 0,
+        onlyObservation: true,
+        drawLine: false,
+        addInterview: false,
+        coords: [],
+        eightOfCoords: 0,
+        interviews: [],
+        i_ids: [],
+        u_id: window.sessionStorage.getItem('uID'),
       };
-      this.canvasRef = React.createRef();
+      this.canvas = React.createRef();
+      this.myImage = React.createRef();
+      this.interviewElement = React.createRef();
+
       this.handleScroll = this.handleScroll.bind(this)
       // this.moveIcon = this.moveIcon.bind(this)
       this.handleResize = this.handleResize.bind(this);
-
-      this.selectIcon = this.addIconToList.bind(this)
-      this.closeIconSelect = this.closeIconSelect.bind(this)
       this.writeFilename = this.writeFilename.bind(this);
+      this.selectIcon = this.addIconToList.bind(this);
+      this.closeIconSelect = this.closeIconSelect.bind(this);
+      this.newIcon = this.newIcon.bind(this);
+      this.showAll = this.showAll.bind(this);
+      this.hideAll = this.hideAll.bind(this);
+      this.argCIS = this.argCIS.bind(this);
+      this.changeMode = this.changeMode.bind(this);
+      this.drawLine = this.drawLine.bind(this);
+      this.addToDrawList = this.addToDrawList.bind(this);
+      this.drawFunction = this.drawFunction.bind(this);
+      this.addInterview = this.addInterview.bind(this);
+      this.saveInterview = this.saveInterview.bind(this);
   }
 
   createIconObject(coordinates, currentSize) {
@@ -52,7 +72,8 @@ class BehaviourMapping extends React.Component {
     this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {});
   }
 
-  sendEventToDatabase() {
+  sendDatabaseEvent() {
+    // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
@@ -68,12 +89,12 @@ class BehaviourMapping extends React.Component {
     data.append('f_id', this.state.f_id);
     data.append('icon_src', this.state.iconSRC);
     data.append('image_size', currentSize);
+    data.append('u_id', this.state.u_id);
 
-    fetch('addevent', {
+    fetch(window.backend_url +'addevent', {
     method: 'POST',
     body: data,
-    }).then((response) => {
-    });
+    })
   }
 
   updateCoord(event) {
@@ -92,8 +113,11 @@ class BehaviourMapping extends React.Component {
   setInnerHTML(str) {
     if (str != null) {
       let descr = str.split(' ');
-     //  descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
-      switch(descr[1]) {
+      descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
+      for (let i=1; i<descr.length-1; i++) {
+        descr[0] += " " + descr[i]
+      }
+      switch(descr[descr.length-1]) {
         case 'blue':
           descr[1] = "Man";
           break;
@@ -103,12 +127,13 @@ class BehaviourMapping extends React.Component {
         default:
           descr[1] = "Child";
       }
-      return descr;
+      let innerHTML = descr[0] + ": " + descr[1];
+      return innerHTML; 
     }
   }
 
   addIconToList(e) {
-    let list = document.getElementById('iconList');
+    let list = document.getElementById('icon-list');
     let li = document.createElement('li');
 
     let newSrc = e.target.src;
@@ -177,6 +202,42 @@ class BehaviourMapping extends React.Component {
         this.pointIcon();
       }
     }
+  }
+
+  placeIcon(event) {
+    this.findScreenSize()
+    var img = document.createElement('img');
+    img.src = this.state.ourSRC;
+    img.classList.add('icon');
+    img.setAttribute('id', this.state.newIconID.toString());
+    this.setState({
+      ourIconID: this.state.newIconID
+    }, function() {});
+    this.setState({
+      newIconID: this.state.newIconID + 1
+    }, function() {} );
+    document.getElementById('iconContainer').appendChild(img);
+    let coordinates = [event.clientX - 225, event.clientY - 20];
+    let scrollHorizontal = this.state.scrollHorizontal;
+    let scrollVertical = this.state.scrollVertical;
+    if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
+      coordinates[0] = coordinates[0] + scrollHorizontal;
+    }
+    if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
+      coordinates[1] = coordinates[1] + scrollVertical;
+    }
+    img.style.left = coordinates[0] + 200 +'px';
+    img.style.top =  coordinates[1] +'px';
+    let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
+    this.createIconObject(coordinates, imageSizeOnCreation);
+    this.setState({
+      ourIconCoord: {
+        x: coordinates[0],
+        y: coordinates[1],
+      }
+    }, function() {});
+    this.addListenerToImage(img);
+    this.findScreenSize();
   }
 
  pointIcon() {
@@ -284,42 +345,6 @@ class BehaviourMapping extends React.Component {
     console.log(this.state.ourMouseCoord);
     document.getElementById()
   }*/
-
-  placeIcon(event) {
-    this.findScreenSize()
-    var img = document.createElement('img');
-    img.src = this.state.ourSRC;
-    img.classList.add('icon');
-    img.setAttribute('id', this.state.newIconID.toString());
-    this.setState({
-      ourIconID: this.state.newIconID
-    }, function() {});
-    this.setState({
-      newIconID: this.state.newIconID + 1
-    }, function() {} );
-    document.getElementById('iconContainer').appendChild(img);
-    let coordinates = [event.clientX - 225, event.clientY - 20];
-    let scrollHorizontal = this.state.scrollHorizontal;
-    let scrollVertical = this.state.scrollVertical;
-    if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
-      coordinates[0] = coordinates[0] + scrollHorizontal;
-    }
-    if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
-      coordinates[1] = coordinates[1] + scrollVertical;
-    }
-    img.style.left = coordinates[0] + 200 +'px';
-    img.style.top =  coordinates[1] +'px';
-    let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
-    this.createIconObject(coordinates, imageSizeOnCreation);
-    this.setState({
-      ourIconCoord: {
-        x: coordinates[0],
-        y: coordinates[1],
-      }
-    }, function() {});
-    this.addListenerToImage(img);
-    this.findScreenSize();
-  }
   
 
   setScreenSize() {
@@ -389,41 +414,131 @@ class BehaviourMapping extends React.Component {
       icon.style.top =  (coords[1]) +'px';
     }
   }
-  
-  componentDidMount() {
-    window.addEventListener('scroll', this.handleScroll);
-    this.findScreenSize(); // currentScreenSize.x and .y
-    this.initiateFormerScreenSize();
-    window.addEventListener('resize', this.handleResize);
-    // const canvas = this.canvasRef.current;
-    // const ctx = canvas.getContext('2d')
 
-    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projdata: data});
-      let os = this.findIntegerCoordinates(data[8])
-      this.setState({originalScreenSize: {
-        x: os[0],
-        y: os[1],
-      }});
-    });
-    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
-      .then(images => {
-        let image = URL.createObjectURL(images);
-        this.setState({mapblob: image});
-        /* var background = new Image();
-        background.src = "http://www.samskirrow.com/background.png";
-        background.onload = function(){
-            ctx.drawImage(background,0,0);   
-        }*/
+  changeMode() {
+    this.setState({onlyObservation: !this.state.onlyObservation});
+    this.setState({addIcon: false});
+    this.setState({addInterview: false});
+  }
 
-    });
-    fetch(`getevents?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      setTimeout(() => this.loadFormerEvents(data), 500);
-    });
+  addInterview(whichInterview=0) {
+    if (whichInterview > 0) {
+      this.interviewElement.current.setState({alreadySaved: true});
+      this.interviewElement.current.setInterview(this.state.interviews[whichInterview-1])
+      if (!this.state.addInterview) {
+        this.setState({addInterview: !this.state.addInterview});
+      }
+    } else {
+      this.interviewElement.current.clearInterview();
+      this.interviewElement.current.setState({alreadySaved: false})
+      this.setState({addInterview: !this.state.addInterview});
+    }
+    
+  }
+
+  saveInterview(e) {
+    e.preventDefault();
+    let list = document.getElementsByClassName('interview-sidebar-li')[0];
+    let li = document.createElement('li');
+
+    let interviewNumber = this.state.interviews.length + 1;
+    let newText = "Interview number: " + interviewNumber;
+    
+    if (this.objectExists(newText) === true) {
+      this.setState({interviews: [...this.state.interviews, e.target.form.childNodes[1].value]});
+      this.interviewElement.current.clearInterview();
+      this.sendInterviewToDb(this.interviewElement.current.state.interview);
+      
+      li.innerHTML = newText;
+      li.addEventListener('click', (e) => {
+        this.addInterview(e.target.innerText[e.target.innerText.length - 1]);
+      });
+      list.appendChild(li);
+
+      this.addInterview();
+    }
+  }
+
+  sendInterviewToDb(interviewData) {
+    const data = new FormData();
+    const interview = interviewData;
+    const p_id = this.state.p_id;
+    data.append('interview', interview);
+    data.append('p_id', p_id);
+    data.append('u_id', this.state.u_id);
+    fetch(window.backend_url + 'addinterview', {
+      method: 'POST',
+      body: data,
+      })
+    //   .then((res) => {
+    //     res.json().then((data) => {
+    //       // most likely not needed, can just use interviewnumber to get the correct text.
+    //      this.setState({i_ids: [...this.state.i_ids, data.i_id[0]]});
+    //     });
+    // });
+  }
+
+  drawLine() {
+    this.setState({drawLine: true});
+  }
+
+  addToDrawList(e) {
+    // kjører hver gang en flytter på touchen. 
+    if (this.state.eightOfCoords === 0) {
+      let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
+      this.setState({coords: [...this.state.coords, currCoords]});
+    }
+    this.oneEigthOfCoords();
+  }
+
+  oneEigthOfCoords() {
+    if (this.state.eightOfCoords === 7 ) {
+      this.setState({eightOfCoords: 0})
+    } else {
+      this.setState({eightOfCoords: this.state.eightOfCoords + 1})
+    }
+  }
+
+  drawFunction(){
+    if (this.state.coords.length <= 3 ) {
+      return
+    }
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    let lastTwoCoords = [this.state.coords[this.state.coords.length - 1][0], 
+      this.state.coords[this.state.coords.length - 1][1],
+      this.state.coords[this.state.coords.length - 3][0], 
+      this.state.coords[this.state.coords.length - 3][1]];
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.moveTo(this.state.coords[0][0], this.state.coords[0][1]);
+    for (let coord of this.state.coords) {
+      ctx.lineTo(coord[0], coord[1]);
+    }
+    this.drawArrow(ctx, lastTwoCoords);
+    ctx.stroke();
+    this.setState({drawLine: false});
+    this.setState({coords: []});
+    
+    // bruke litt samme metoder som gjort i mappingen for å få en ny linje hver gang og kunne vise alle og skjule alle linjer.
+  }
+
+  drawArrow(ctx, lastTwoCoords) {
+    let degreerot = Math.atan2(
+      lastTwoCoords[0] - lastTwoCoords[2],
+      -(lastTwoCoords[1] - lastTwoCoords[3]),
+    );
+    let degrees = degreerot*180/Math.PI + 90;
+    let angle1 = (degrees + 25) * (Math.PI / 180);
+    let angle2 = (degrees - 25) * (Math.PI / 180);
+    let bottomX = 15 * Math.cos(angle1);
+    let bottomY = 15 * Math.sin(angle1);
+    let topX = 15 * Math.cos(angle2);
+    let topY = 15 * Math.sin(angle2);
+    ctx.moveTo(lastTwoCoords[0] + bottomX, lastTwoCoords[1] + bottomY);
+    ctx.lineTo(lastTwoCoords[0], lastTwoCoords[1]);
+    ctx.lineTo(lastTwoCoords[0] + topX, lastTwoCoords[1] + topY);
   }
 
   handleScroll() {
@@ -440,14 +555,6 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-
-
-  fillSquare() {
-    var canvas = document.querySelector('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'green';
-    ctx.fillRect(10, 10, canvas.width, canvas.height);
-  }
 
   loadFormerEvents(data) {
     let formerEvents = [];
@@ -477,7 +584,6 @@ class BehaviourMapping extends React.Component {
       this.placeFormerEvent(f_id, coord, rotation);
     }
   }
-
 
   findIntegerCoordinates(coord) {
     coord = coord.split(",");
@@ -512,7 +618,7 @@ class BehaviourMapping extends React.Component {
     return null;
   }
 
-  createArgCIS() {
+  argCIS() {
     const data = new FormData();
     const name = [this.state.name];
     const p_id = this.state.p_id;
@@ -547,25 +653,6 @@ class BehaviourMapping extends React.Component {
     // setTimeout(() => this.downloadArcGIS(), 1500);    
   }
 
-  /* downloadArcGIS() {
-    fetch('exportarcgis')
-    .then(res => res.blob())
-    .then(blob => {
-      var url = window.URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = "filename.txt";
-      document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-      a.click();    
-      a.remove();
-      // alert('your file has downloaded!');
-      /* blob.lastModifiedDate = new Date();
-      blob.name = this.state.projectName + ".png";
-      var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
-      console.log(file);*/
-  //  })
-  //} 
-
   hideOrShow() {
     let liElementHideOrShow = document.getElementById('hide-or-show');
     if (this.state.hideOrShow === 'hide') {
@@ -586,66 +673,130 @@ class BehaviourMapping extends React.Component {
     }, function() {})
   }
 
-  imgCanvas() {
-    var canvas = document.getElementById('viewport'),
-    context = canvas.getContext('2d');
 
-    var base_image = new Image();
-    base_image.src = 'img/base.png';
-    context.drawImage(base_image, 100, 100);
-  }
 
-  changeThing() {
-    // let dis = document.getElementById('map-image').style.display;
-    if (document.getElementById('map-image').style.display !== 'none') {
-      document.getElementById('map-image').style.display = 'none';
-      document.getElementById('iconContainer').style.display = 'none';
-      document.getElementById('canvas').style.display = 'inline-block';
-    } else {
-      document.getElementById('map-image').style.display = 'inline-block';
-      document.getElementById('iconContainer').style.display = 'inline-block';
-      document.getElementById('canvas').style.display = 'none';
-    }
+  componentDidMount() {
+    window.addEventListener('scroll', this.handleScroll);
+    this.findScreenSize();
+    this.initiateFormerScreenSize();
+    window.addEventListener('resize', this.handleResize);
+
+    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({projdata: data});
+      let os = this.findIntegerCoordinates(data[8])
+      this.setState({originalScreenSize: {
+        x: os[0],
+        y: os[1],
+      }});
+    });
+    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}&u_id=${this.state.u_id}`).then(res => res.blob())
+      .then(images => {
+        let image = URL.createObjectURL(images);
+        this.setState({mapblob: image});
+
+    });
+    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      setTimeout(() => this.loadFormerEvents(data), 500);
+    });
+
+    // resize the canvas to fill map part of window dynamically
+    var firstTime = 0;
+    (function(canvas, image) {
+      window.addEventListener('resize', resizeCanvas, false);
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth - 200;
+        canvas.height = window.innerHeight;
+        drawStuff(); 
+      }
+      resizeCanvas();
+  
+      function drawStuff() {
+        let ctx = canvas.getContext("2d");
+        if (firstTime === 0) {
+          image.onload = () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          }
+          firstTime++;
+        } else {
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+              // draw all lines again.
+      }
+    })(this.canvas.current, this.myImage.current);
   }
 
 
   render() {
+    let imageClassList = classNames({
+      'map-image': true,
+      'visible': this.state.onlyObservation,
+      'invisible': !this.state.onlyObservation
+    });
+    let canvasClassList = classNames({
+      'map-image': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
+    let interviewLiClassList = classNames({
+      'interview-sidebar-li': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
     return (
-      <div id='maincont'>
-        <div className="sidebar">
-          <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
-              <AllIcons selectIcon = {this.selectIcon} 
-              close={() => this.closeIconSelect()}/>
-            </div>  
-              <ul id="iconList">
-                <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
-                <li id="hide-or-show" className="buttonLi" onClick={() => this.hideOrShow()}>Hide Icons</li>
-                <li className="buttonLi" onClick={() => this.createArgCIS()}>Export to ArcGIS</li>
-                <li className="buttonLi" onClick={() => this.findScreenSize()}>Sjekk SkjermStørrelse</li>
-                <li className="buttonLi" onClick={() => this.changeThing()}>Change</li>
-                <li className="buttonLi" onClick={() => this.manuallyResize()}>Manually Resize</li>
-                <li id="input-li">
-                  <textarea 
-                    id="arcis-filename"
-                    name="arcis-filename" 
-                    value={this.state.arcGISfilename} 
-                    placeholder="shapefile" 
-                    onChange={this.writeFilename}
-                  />
-                </li>
+      <Authenticated>
+        <div id='maincont'>
+          <div className="sidebar">
+            <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
+                <AllIcons selectIcon = {this.selectIcon} 
+                close={() => this.closeIconSelect()}/>
+            </div> 
+            <div className={this.state.addInterview ? "interview" : "invisible"}> 
+              <Interview 
+                close={this.addInterview}
+                save={this.saveInterview}
+                ref={this.interviewElement}
+              /> 
+            </div> 
+              <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
+                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
+                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+                <li className="buttonLi" onClick={this.argCIS}>ArcGIS</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
               </ul>
-        </div>
-        <img alt="" onMouseMove={e => this.updateCoord(e)}
+              <ul className={interviewLiClassList}>
+                <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
+                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+              </ul>
+          </div>
+          
+          <canvas 
+            onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+            onTouchEnd={this.drawFunction}
+            className={canvasClassList}
+            ref={this.canvas}
+          />
+          <img alt="" onMouseMove={e => this.updateCoord(e)}
             id='map-image' 
-            onClick={e => this.takeAction(e)}
-            className='map-image' 
-            src={this.state.mapblob} />
-        <div id="iconContainer" />
-        <canvas id="canvas" ref={this.canvasRef} onClick={(e) => this.fillSquare(e)}></canvas>
-        <a id="download" alt="Downloadbutton" href="www.nrk.no">tilf</a>
-      </div>
+            onClick={e => this.takeAction(e)} 
+            className={imageClassList}
+            src={this.state.mapblob}
+            ref={this.myImage}
+            
+          />
+          <div id="icon-container" />
+          
+
+        </div>
+      </Authenticated>
     );
   }
-}// <AllIcons closeIconSelect = {this.closeIconSelect} />
+}
 
 export default BehaviourMapping;

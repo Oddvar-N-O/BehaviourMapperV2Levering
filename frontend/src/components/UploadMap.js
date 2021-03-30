@@ -10,26 +10,30 @@ class UploadMap extends React.Component {
         super(props)
         this.state = {
             iamgeURL: '',
-            buttonText: 'Choose image'
+            buttonText: 'Choose image',
+            u_id: window.sessionStorage.getItem('uID'),
         }
         this.handleUploadImage = this.handleUploadImage.bind(this);
     }
 
     handleUploadImage(ev) {
+        alert("upload start")
         ev.preventDefault();
     
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
+        data.append('u_id', this.state.u_id);
         // data.append('filename', this.fileName.value);
     
-        fetch('http://localhost:5000/upload', {
+        fetch(window.backend_url + 'upload', {
           method: 'POST',
           body: data,
         }).then((response) => {
           response.json().then((body) => {
-            this.setState({ imageURL: `http://localhost:5000/${body.file}` });
+            this.setState({ imageURL: window.backend_url + `${body.file}` });
           });
         });
+        alert("upload finished")
     }
 
     render() {

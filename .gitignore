@@ -130,3 +130,6 @@ dmypy.json
 
 # npm
 .eslintcache
+
+# For development ignore database changes
+*.db

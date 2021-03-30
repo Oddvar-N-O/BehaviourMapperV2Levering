@@ -2,6 +2,7 @@ import React from 'react';
 import './newProject.css'
 import { Link } from 'react-router-dom';
 import * as AiIcons from 'react-icons/ai';
+import { Authenticated } from './auth/AuthContext'
 
 class NewProject extends React.Component {
     constructor(props) {
@@ -15,6 +16,8 @@ class NewProject extends React.Component {
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#FDFFFC",
             p_id: "",
+            u_id: window.sessionStorage.getItem('uID'),
+            loading: false,
         }
         
         this.handleChange = this.handleChange.bind(this);
@@ -22,6 +25,7 @@ class NewProject extends React.Component {
         this.setRedirect = this.setRedirect.bind(this);
         this.imageChosen = this.imageChosen.bind(this);
         this.redirectToMapping = this.redirectToMapping.bind(this);
+        this.Loading = this.Loading.bind(this)
     }
 
     handleChange(event) { 
@@ -52,15 +56,18 @@ class NewProject extends React.Component {
     }
 
     handleUploadImage(p_id) {
+        this.setState({ loading: true })
         const data = new FormData();
         data.append('file', this.uploadInput.files[0]);
         data.append('p_id', p_id);
+        data.append('u_id', this.state.u_id);
     
-        fetch('http://localhost:5000/upload', {
+        fetch(window.backend_url + 'upload', {
           method: 'POST',
           body: data,
         }).then(setTimeout(
-            () => this.redirectToMapping(), 1000));
+            () => this.redirectToMapping(), 3000));
+        console.log('upload done')
     }
 
     redirectToMapping() {
@@ -103,8 +110,9 @@ class NewProject extends React.Component {
             data.append('description', this.state.description);
             data.append('startdate', new Date());
             data.append('map', this.uploadInput.files[0].name);
+            data.append('u_id', this.state.u_id);
             
-            fetch('addproject', {
+            fetch(window.backend_url + 'addproject', {
             method: 'POST',
             body: data,
             }).then((response) => {
@@ -119,91 +127,73 @@ class NewProject extends React.Component {
                 state: {
                     projectName: this.state.projectName,
                     description: this.state.description,
+                    u_id : this.state.u_id,
                 },
             });
         }  
     }
 
+    Loading() {
+        if (this.this.state.loading) {
+            return <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
+        }
+        return <div>hei</div>
+    }
+
     render() {
+        let loadingGif
+        if (this.state.loading) {
+            loadingGif = <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
+        }
         return (
-            <div id="new-project">
-                <div className={ this.state.fromLoadMap ? 'new-project-box-upload' : 'new-project-box'}>
-                    <Link to="/startpage" className="close-icon">
-                        <AiIcons.AiOutlineClose />
-                    </Link>
-                    <div id="heading-and-form">
-                        <h2>New Project {this.state.fromLoadMpap}</h2>
-                        <form>
-                            <legend>{this.state.projectNameLegend}</legend> 
+            <Authenticated>
+                <div className="new-project">
+                    {loadingGif}
+                    <div className={ this.state.fromLoadMap ? 'new-project-box-upload' : 'new-project-box'}>
+                        <Link to="/startpage" className="close-icon">
+                            <AiIcons.AiOutlineClose />
+                        </Link>
+                        <div id="heading-and-form">
+                            <h2>New Project {this.state.fromLoadMpap}</h2>
+                            <form>
+                                <legend>{this.state.projectNameLegend}</legend> 
+                                <input 
+                                    id="project-name"
+                                    type="text" 
+                                    name="projectName" 
+                                    value={this.state.projectName}
+                                    onChange={this.handleChange} 
+                                /> 
+                                <br/>
+                                <legend>Description</legend>
+                                <textarea 
+                                    id="description"
+                                    name="description" 
+                                    value={this.state.description} 
+                                    placeholder="E.g. time of day, wheather conditions, special events etc." 
+                                    onChange={this.handleChange}
+                                />
+                            </form>
+                        </div>
+                        <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
+                            <legend>{this.state.projectImageLegend}</legend>
                             <input 
-                                id="project-name"
-                                type="text" 
-                                name="projectName" 
-                                value={this.state.projectName}
-                                onChange={this.handleChange} 
-                            /> 
-                            <br/>
-                            <legend>Description</legend>
-                            <textarea 
-                                id="description"
-                                name="description" 
-                                value={this.state.description} 
-                                placeholder="E.g. time of day, wheather conditions, special events etc." 
-                                onChange={this.handleChange}
+                                ref={(ref) => { this.uploadInput = ref; }} 
+                                type="file"  
+                                className='file-button' 
+                                onChange={this.imageChosen}
                             />
                         </form>
+                        <ul>
+                            <li onClick={ (e) => {
+                                this.setRedirect(e);     
+                            }} style={{backgroundColor: this.state.liColor}}>Let's go!</li>
+                        </ul>
                     </div>
-                    <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
-                        <legend>{this.state.projectImageLegend}</legend>
-                        <input 
-                            ref={(ref) => { this.uploadInput = ref; }} 
-                            type="file"  
-                            className='file-button' 
-                            onChange={this.imageChosen}
-                        />
-                    </form>
-                    <ul>
-                       <li onClick={ (e) => {
-                            this.setRedirect(e);     
-                        }} style={{backgroundColor: this.state.liColor}}>Let's go!</li>
-                    </ul>
+                    
                 </div>
-                
-            </div>
+            </Authenticated>
         )
     }
 }
 export default NewProject
-
-
-
-
-// handleRedirect() {
-//     const data = new FormData();
-//     data.append('name', this.state.projectName);
-//     data.append('description', this.state.description);
-//     data.append('startdate', new Date());
-//     if (this.state.fromLoadMap){
-//         data.append('map', this.uploadInput.files[0].name);
-//     }
-//     fetch('addproject', {
-//     method: 'POST',
-//     body: data,
-//     }).then((response) => {
-//         response.json().then((data) => {
-//             this.setState({p_id: data.p_id[0]});
-//             if (this.state.fromLoadMap) {
-//                 this.handleUploadImage(data.p_id[0]);
-//             } else {
-//                 this.props.history.push({
-//                     pathname: '/chooseImage',
-//                     state: {
-//                         projectName: this.state.projectName,
-//                         description: this.state.description,
-//                         p_id: data.p_id[0],
-//                     },
-//                 });
-//             }  
-//         });
-//     });
-// }
