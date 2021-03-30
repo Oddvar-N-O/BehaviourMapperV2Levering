@@ -1,0 +1,47 @@
+#load-project {
+    display: flex;
+    align-items: row;
+    justify-content: center;
+}
+
+.load-project-box {
+    width: 80vw;
+    height: 80vh;
+    margin-top: 12vh;
+    background-color: #292828;
+    color: #ece8e8;
+    border-radius: 5px;
+    box-shadow: 2px 2px 4px #161616;
+}
+
+#load-project h1, #load-project p, #load-project img{
+    color: #ece8e8;
+    padding: 1vh;
+}
+
+#load-project .close-icon { 
+    right: 10.7vw;
+}
+
+/*LOADPROJECT 2*/
+
+#content {
+    padding-top: 30px;
+
+}
+
+.buttonLi{
+    margin-top: 0px;
+    color: #ece8e8;
+    background-color: #222020;
+    border-bottom: 2px #58A4B0 solid;
+    min-width: 200px;
+    min-height: 25px;
+    display: inline-block;
+}
+
+#iconList {
+    padding-top: 30px;
+    list-style-type: none;
+    min-width: 200px;
+}

@@ -2,6 +2,7 @@ from behaviormapper import app, query_db, init_db, select_db
 from behaviormapper.errorhandlers import InvalidUsage
 from datetime import datetime, date
 from flask import Flask, redirect, url_for, flash, request, session, send_from_directory
+from flask import send_file, send_from_directory, abort
 from time import time
 import json
 import logging
@@ -11,6 +12,11 @@ from werkzeug.utils import secure_filename
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 import shapefile as shp
+from flask.helpers import send_file
+# import io
+import socket
+import zipfile
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,15 +31,13 @@ def allowed_file(filename):
 @cross_origin()
 def addProject():
     add_small_project = ("INSERT INTO Project "
-              "(name, description, startdate, zoom, leftX, lowerY, rightX, upperY) "
-              "VALUES (?,?,?,?,?,?,?,?)")
+              "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY) "
+              "VALUES (?,?,?,?,?,?,?,?,?)")
     small_project_values = (request.form.get('name'), request.form.get('description'), 
-                        request.form.get('startdate'), request.form.get('zoom'),
+                        request.form.get('startdate'), request.form.get('zoom'), request.form.get('originalsize'),
                         request.form.get('leftX'), request.form.get('lowerY'),
                         request.form.get('rightX'), request.form.get('upperY'))
     p_id = query_db(add_small_project, small_project_values)
-    print("Addproject")
-    print("PID: " + str(p_id))
     return {"p_id": p_id}
     # Add a new project and link a map
 
@@ -62,21 +66,35 @@ def getProject():
 def getProjectMapping():
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     proj_values = (request.args.get('p_id'),)
-    print("GPMP")
-    print("PID: " + str(proj_values))
     project = query_db(get_proj_sql, proj_values, True)
     result = []
     for data in project:
          result.append(data)
     return json.dumps(result)
 
-# Usage /getfigure?description=<desc>&color=<color>
+# Usage /getfigure?description=<desc>&color=<color>&id=<id>
 @app.route('/getfigure')
 def getFigure():
     get_figure_image_sql =('SELECT image FROM Figures WHERE description=? AND color=?')
     description = request.args.get('description', None)
     color = request.args.get('color', None)
+
     result = query_db(get_figure_image_sql, (description, color), True)
+    image = {"image": ""}
+    for res in result:
+        image["image"] = res
+    try:
+        return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+    except FileNotFoundError:
+        abort(404)
+
+# Usage /getfigure?description=<desc>&color=<color>&id=<id>
+@app.route('/getimagefromID')
+def getImageFromID():
+    get_figure_image_sql =('SELECT image FROM Figures WHERE id=?')
+    f_id = request.args.get('f_id', None)
+
+    result = query_db(get_figure_image_sql, (f_id), True)
     image = {"image": ""}
     for res in result:
         image["image"] = res
@@ -119,10 +137,10 @@ def favicon():
 @app.route('/addevent', methods=['POST'])
 def addEvent():
     project_id = request.form.get('p_id') 
-    print("PID ADDEVENT: " + str(project_id))
     # find clever way to get this dynamically
     d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
-                        request.form.get('created'), request.form.get('f_id'))
+                        request.form.get('created'), request.form.get('f_id'), request.form.get('image_size')) #,
+    size = request.form.get('image_size')
     e_id = query_db(add_event, d_event_values) # Adds to Event table in db
     query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
     return {}
@@ -147,16 +165,42 @@ def get_events_func(p_id):
     e_ids = []
     for e_id in query_e_ids:        
         e_ids.append(e_id[0])    
-    # events = []
     events = []
 
     for e_id in e_ids:
-        print("EID: " + str(e_id))
+        query_event = query_db(get_event_sql, (str(e_id),), True)
+        events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4], query_event[5]))
+        get_src_sql = ("SELECT image FROM Figures WHERE id=?")
+        query_src = query_db(get_src_sql, str(query_event[5]), True)
+        for res in query_src:
+            events.append(res)
+    return json.dumps(events)
+
+@app.route('/geteventsforLoad') 
+def getEventsForLoad():
+    get_eventIds_sql = ("SELECT e_id FROM Project_has_Event WHERE p_id=?")    
+    get_event_sql = ("SELECT * FROM Event WHERE id=?")
+    p_id = request.args.get("p_id")     
+    try:         
+        int(p_id)    
+    except:         
+        raise InvalidUsage("Bad arg", status_code=400)
+
+    query_e_ids = query_db(get_eventIds_sql, (p_id,))
+    query_e_ids = query_e_ids[:-1]
+
+    e_ids = []
+    for e_id in query_e_ids:        
+        e_ids.append(e_id[0])    
+    events = []
+
+    for e_id in e_ids:
         query_event = query_db(get_event_sql, (str(e_id),), True)
         events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
-        print("EID: " + str(e_id))
-        print("centCoord: " + str(query_event[2]))
-        print("-----------------------")
+        get_src_sql = ("SELECT image FROM Figures WHERE id=?")
+        query_src = query_db(get_src_sql, str(query_event[4]), True)
+        for res in query_src:
+            events.append(res)
     return json.dumps(events)
 
 @app.route('/adduser', methods=['POST', 'GET'])
@@ -200,14 +244,16 @@ def getElementXandY(element):
     intCoord = list(map(float, stringCoord))
     return intCoord
 
-def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates):
+def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates, screenSize):
+    # corners work fine
     imgCoordinates = getElementXandY(imgCoordinates)
+    screenSize = getElementXandY(screenSize)
     startPoint = [leftX, upperY] 
 
     lengthMapX = rightX - leftX
     lenghtMapY = upperY - lowerY
-    onePixelX = lengthMapX / 615
-    onePixelY = lenghtMapY / 684
+    onePixelX = lengthMapX / screenSize[0]
+    onePixelY = lenghtMapY / screenSize[1]
 
     pixelsFromStartX = imgCoordinates[0]
     distanceFromX = pixelsFromStartX * onePixelX
@@ -233,54 +279,82 @@ def createARCGIS():
     events = json.loads(eventsJSON)
     
     imageCoord = []
+    screenSize = []
     for event in events:
-        print(event)
-        imageCoord.append(event[2])
+        if type(event) == list:
+            imageCoord.append(event[2])
+            screenSize.append(event[3])
 
     get_proj_sql = ("SELECT * FROM Project WHERE id=?")
     pid = (request.form.get('p_id'))
-    print("PID: " + str(pid))
-    print("PID[0]: " + str(pid[0]))
-    print()
     project_values = query_db(get_proj_sql, (str(pid),), True)
-    print(len(project_values))
-    print()
-    leftX = float(project_values[8])
-    lowerY = float(project_values[9])
-    rightX = float(project_values[10])
-    upperY = float(project_values[11])
+    leftX = float(project_values[9])
+    lowerY = float(project_values[10])
+    rightX = float(project_values[11])
+    upperY = float(project_values[12])
 
     iconCoord = []
 
-    for coordSet in imageCoord:
-        iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, coordSet))
+    for i in range(len(imageCoord)):
+        iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, imageCoord[i], screenSize[i]))
+        
 
-    
-    w = shp.Writer('behaviormapper/static/arcGISprojects/modifyThis/tree')
-    # clog her
+    # autoincrement
+    arcgis_filename = "yote",
+    # location = 'behaviormapper/static/shapefiles/tree'
+    w = shp.Writer('behaviormapper/static/shapefiles/test')
+
     w.autoBalance = 1
-    w.field('Background', 'C', '40') # image
-
-    point_ID = 1
+    w.field('Background', 'C', '40')
 
     """ w.point(leftX, lowerY)
-    w.record('lower left corner')
+    w.record('LL')
     w.point(leftX, upperY)
-    w.record('upper left corner')
+    w.record('UL')
     w.point(rightX, lowerY)
-    w.record('lower right corner')
+    w.record('LR')
     w.point(rightX, upperY)
-    w.record('upper right corner') """
-    
+    w.record('UR')"""
+
+    point_ID = 1
     for coordinateSet in iconCoord:
         x = coordinateSet[0]
         y = coordinateSet[1]
         w.point(x, y)
         w.record(str(point_ID), 'Point')
-        print(point_ID)
         point_ID += 1
 
-    return {}
+    with zipfile.ZipFile('QGIS_SHAPEFILES.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
+        absPath = os.path.abspath('shapefiles')
+        filesLocation = 'behaviormapper/static/shapefiles'
+        for filename in os.listdir(filesLocation):
+            f = os.path.join(filesLocation, filename)
+            if os.path.isfile(f):
+                my_zip.write(f)
+    
+    return exportARCGIS()
+
+app.config['QGISZIP'] = 'C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/QGIS_SHAPEFILES.zip'
+
+@app.route('/exportarcgis')
+@cross_origin()
+def exportARCGIS(): #path, ziph):
+    placement = os.path.abspath('requirements.txt')
+    print('PLAC: ' + str(placement))
+    print(app.config['QGISZIP'])
+    p = "C:/Users/torha/shp/behaviourMapperV2/backend/behaviormapper/static/shapefiles/mytext.txt"
+    f = open(placement, "r")
+    print(f.read())
+    
+    try:
+        print('rettosender')
+        return send_from_directory(
+            placement,
+            filename='requirements.txt')
+    except FileNotFoundError:
+        print('ABOOORT MISSION')
+        abort(404)
+    return "test"
 
 @app.route('/hello')
 def say_hello_world():
@@ -300,6 +374,7 @@ def testdb():
     project_values.append(u_id[-1])
     p_id = query_db(add_project, project_values)
     e_id = query_db(add_event, event_values)
+    # shp_id = query_db(add_shapefile, shapefile_values)
     query_db(add_relation, (p_id[-1], e_id[-1]))
     return redirect(url_for("selectdb"))    
 
@@ -324,15 +399,15 @@ def addMapName(mapname, p_id):
 # Eksempler på bruk av alle felter til hver tabell i databasen.
 figure_values = ("beskrivelse","blue", "bilde", "attributter")
 user_values = ("kartet",)
-event_values = [45,"12991.29291 2929.21", "12:12:12"]
+event_values = [45,"12991.29291 2929.21", "12:12:12", "[750, 900]"]
 project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), "zoom", 1,2,3,4]
 
 # sql for å bruke alle felt.
 add_user = ("INSERT INTO Users (feideinfo)"
                "VALUES (?)")
 add_event = ("INSERT INTO Event "
-              "(direction, center_coordinate, created, f_id) "
-              "VALUES (?,?,?,?)")
+              "(direction, center_coordinate, created, f_id, image_size_when_created) "
+              "VALUES (?,?,?,?,?)")
 add_project = ("INSERT INTO Project "
               "(name, description, screenshot, map, startdate, enddate, zoom, leftX, lowerY, rightX, upperY, u_id) "
               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS [Project] (
     screenshot VARCHAR NULL,
     startdate DATETIME NULL,
     enddate DATETIME NULL,
+    originalsize VARCHAR NULL,
     zoom VARCHAR NULL,
     leftX VARCHAR NULL,
     lowerY VARCHAR NULL,
@@ -41,7 +42,8 @@ DROP TABLE IF EXISTS [Event];
 CREATE TABLE IF NOT EXISTS [Event] (
      "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
      "direction" DECIMAL NULL, 
-     "center_coordinate" VARCHAR NULL, 
+     "center_coordinate" VARCHAR NULL,
+     "image_size_when_created" VARCHAR NULL, 
      "created" TIME NULL,  
      "f_id" INTEGER NOT NULL,
      FOREIGN KEY (f_id) REFERENCES [Figures](id)
@@ -55,7 +57,7 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 	PRIMARY KEY ("p_id", "e_id"),
 	FOREIGN KEY("p_id") REFERENCES [Project](id),
 	FOREIGN KEY("e_id") REFERENCES [Event](id)
-);
+); 
 
 INSERT INTO 'Figures' ("description", "color", "image") VALUES 
     ('bike','blue', './icons/man/bike.png'),
