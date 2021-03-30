@@ -256,10 +256,11 @@ class BehaviourMapping extends React.Component {
   addListenerToImage(img) {
     console.log('start');
     img.addEventListener('click', function() {
-      if (img.style.border == '4px solid red') {
+      if (img.style.border === '4px solid red') {
         img.style.border = 'none';
         img.style.borderRadius = '5px';
         let id = img.getAttribute('id');
+        console.log(id);
         
         // let iconInfo = this.state.iconObjects[id];
   
@@ -300,10 +301,10 @@ class BehaviourMapping extends React.Component {
     let coordinates = [event.clientX - 225, event.clientY - 20];
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
-    if (typeof scrollHorizontal == 'number' && scrollHorizontal != 0) {
+    if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
       coordinates[0] = coordinates[0] + scrollHorizontal;
     }
-    if (typeof scrollVertical == 'number' && scrollVertical != 0) {
+    if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
     img.style.left = coordinates[0] + 200 +'px';
@@ -352,8 +353,8 @@ class BehaviourMapping extends React.Component {
   }
 
   handleResize() {
-    if (this.state.formerEvents != []) {
-      if (this.state.currentScreenSize.x != 0) {
+    if (this.state.formerEvents !== []) {
+      if (this.state.currentScreenSize.x !== 0) {
         this.findScreenSize();
         // if (this.state.currentScreenSize.x != this.state.formerScreenSize.x || ) {
         this.placeEventsAfterChange()
@@ -641,7 +642,7 @@ class BehaviourMapping extends React.Component {
             src={this.state.mapblob} />
         <div id="iconContainer" />
         <canvas id="canvas" ref={this.canvasRef} onClick={(e) => this.fillSquare(e)}></canvas>
-        <a id="download" href="" download></a>
+        <a id="download" alt="Downloadbutton" href="www.nrk.no">tilf</a>
       </div>
     );
   }
