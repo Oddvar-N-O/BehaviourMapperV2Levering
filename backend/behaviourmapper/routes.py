@@ -188,9 +188,15 @@ def fileUpload():
             destination="/".join([target, str(unique) + filename])
             unique += 1
         if unique > 2:
-            addMapName(str(unique - 1) + filename, request.form['p_id'])
+            if map:
+                addMapName(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
+            else:
+                screenshot(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
         else:
-            addMapName(filename, request.form['p_id'])
+            if map:
+                addMapName(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
+            else:
+                screenshot(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
     else:
         raise InvalidUsage("Not allowed file ending", status_code=400)
     try:
@@ -198,6 +204,11 @@ def fileUpload():
         return {"file": filename}, 201
     except:
         raise InvalidUsage("Failed to upload image", status_code=500)
+
+def screenshot(image_name, p_id, u_id):
+    screenshot_sql = ("UPDATE Project SET screenshot=? WHERE id=? AND u_id=?")
+    screenshot = (image_name, p_id, u_id)
+    query_db(screenshot_sql, screenshot)
 
 def getElementXandY(element):
     stringCoord = element.split(",")
@@ -315,9 +326,9 @@ def selectdb():
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
-def addMapName(mapname, p_id):
-    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=?")
-    values = (mapname, p_id)
+def addMapName(mapname, p_id, u_id):
+    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
+    values = (mapname, p_id, u_id)
     res = query_db(add_map_name_sql, values, True)
     return {"res": res}
 
