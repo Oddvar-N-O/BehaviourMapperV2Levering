@@ -1,15 +1,17 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
-import './BehaviourMapping.css'
+import Interview from '../components/interview';
+import './BehaviourMapping.css';
+import classNames from 'classnames';
+import { Authenticated } from './auth/AuthContext'
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
       super(props)
-
-
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
-        icons: [],
+        iconSRCs: [],
+        iconObjects: [],
         ourSRC: null,
         sendNewIconToBD: false,
         newIconID: 0,
@@ -23,34 +25,75 @@ class BehaviourMapping extends React.Component {
         iconSRC: "",
         projdata: [],
         formerEvents: [],
+        currentScreenSize: {x: 0, y: 0,},
+        formerScreenSize: {x: 0, y: 0,},
+        originalScreenSize: {x: 0, y: 0},
         mapblob: "",
+        hideOrShow: "hide",
+        arcGISfilename: "",
+        scrollHorizontal: 0,
+        scrollVertical: 0,
+        onlyObservation: true,
+        drawLine: false,
+        addInterview: false,
+        coords: [],
+        eightOfCoords: 0,
+        interviews: [],
+        i_ids: [],
+        u_id: window.sessionStorage.getItem('uID'),
       };
-      this.selectIcon = this.addIconToList.bind(this)
-      this.closeIconSelect = this.closeIconSelect.bind(this)
+      this.canvas = React.createRef();
+      this.myImage = React.createRef();
+      this.interviewElement = React.createRef();
+
+      this.handleScroll = this.handleScroll.bind(this)
+      // this.moveIcon = this.moveIcon.bind(this)
+      this.handleResize = this.handleResize.bind(this);
+      this.writeFilename = this.writeFilename.bind(this);
+      this.selectIcon = this.addIconToList.bind(this);
+      this.closeIconSelect = this.closeIconSelect.bind(this);
+      this.newIcon = this.newIcon.bind(this);
+      this.showAll = this.showAll.bind(this);
+      this.hideAll = this.hideAll.bind(this);
+      this.argCIS = this.argCIS.bind(this);
+      this.changeMode = this.changeMode.bind(this);
+      this.drawLine = this.drawLine.bind(this);
+      this.addToDrawList = this.addToDrawList.bind(this);
+      this.drawFunction = this.drawFunction.bind(this);
+      this.addInterview = this.addInterview.bind(this);
+      this.saveInterview = this.saveInterview.bind(this);
+  }
+
+  createIconObject(coordinates, currentSize) {
+    let icon = {
+      originalCoord: coordinates,
+      originalSize: currentSize,
+    };
+    this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {});
   }
 
   sendDatabaseEvent() {
     // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
+    const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
+    // this.createIconObject(coordinates, currentSize)
     data.append('p_id', this.state.p_id);
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
-    // change this
     data.append('f_id', this.state.f_id);
     data.append('icon_src', this.state.iconSRC);
-    // console.log(data);
+    data.append('image_size', currentSize);
+    data.append('u_id', this.state.u_id);
 
-    fetch('addevent', {
+    fetch(window.backend_url +'addevent', {
     method: 'POST',
     body: data,
-    }).then((response) => {
-      // console.log(response);
-    });
+    })
   }
 
   updateCoord(event) {
@@ -60,47 +103,51 @@ class BehaviourMapping extends React.Component {
         y: event.clientY,
       }
     });
-    // console.log(this.state.ourMouseCoord)
   }
 
   newIcon() {
-    this.hideIcon();
-    this.setState({ addIcon: true })
+    this.hideAll();
+    this.setState({ addIcon: true });
   }
 
   setInnerHTML(str) {
     if (str != null) {
       let descr = str.split(' ');
       descr[0] = descr[0].charAt(0).toUpperCase() + descr[0].slice(1);
-      switch(descr[1]) {
+      for (let i=1; i<descr.length-2; i++) {
+        descr[0] += " " + descr[i]
+      }
+      switch(descr[descr.length-2]) {
         case 'blue':
           descr[1] = "Man";
           break;
         case 'red':
           descr[1] = "Woman";
           break;
-        default:
+        case 'green':
           descr[1] = "Child";
+          break;
+        default:
+          break;
       }
-      // console.log(descr);
       let innerHTML = descr[0] + ": " + descr[1];
-      // console.log(innerHTML);
       return innerHTML; 
     }
-    return console.error("Prøv på Nytt");
   }
 
   addIconToList(e) {
-    let list = document.getElementById('iconList');
+    let list = document.getElementById('icon-list');
     let li = document.createElement('li');
 
     let newSrc = e.target.src;
-    this.setState({icons: [...this.state.icons, newSrc]}, function() {
+    this.setState({iconSRCs: [...this.state.iconSRCs, newSrc]}, function() {
     });
     li.setAttribute('id', newSrc);
-    let newText = this.setInnerHTML(e.target.getAttribute('id'));
+    let textArray = this.setInnerHTML(e.target.getAttribute('id'));
+    let newText = textArray
+
     this.setState({
-      f_id: newText
+      f_id: e.target.getAttribute('id')[e.target.getAttribute('id').length - 1]
     });
     this.setState({
       iconSRC: newSrc
@@ -125,17 +172,14 @@ class BehaviourMapping extends React.Component {
       });
       this.closeIconSelect()
     } else if (alreadyExists === false && foundObject === false) {
-      alert('Error Loading from DB, please try again!');
       this.closeIconSelect();
     } else {
-      alert('This icon already exists in the list!');
       this.closeIconSelect();
     }
   }
 
   objectExists(newText) {
     if (newText === undefined) {
-      console.log("undefined!")
       return false;
     }
     return true;
@@ -143,9 +187,7 @@ class BehaviourMapping extends React.Component {
 
   alreadyInList(newText, list) {
     let ele = list.getElementsByTagName('li')
-    // console.log(ele);
     for (let i = 0; i < ele.length; i ++) {
-      // console.log(ele[i])
       if (ele[i].innerHTML === newText) {
         return true;
       }
@@ -166,28 +208,39 @@ class BehaviourMapping extends React.Component {
   }
 
   placeIcon(event) {
+    this.findScreenSize()
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
     img.setAttribute('id', this.state.newIconID.toString());
     this.setState({
       ourIconID: this.state.newIconID
-    });
+    }, function() {});
     this.setState({
       newIconID: this.state.newIconID + 1
-    });
-    document.getElementById('iconContainer').appendChild(img);
-    img.style.top =  (event.clientY-20)+'px';
-    img.style.left = (event.clientX-25) +'px';
-    var x = event.clientX - 200;
-    var y = event.clientY;
+    }, function() {} );
+    document.getElementById('icon-container').appendChild(img);
+    let coordinates = [event.clientX - 225, event.clientY - 20];
+    let scrollHorizontal = this.state.scrollHorizontal;
+    let scrollVertical = this.state.scrollVertical;
+    if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
+      coordinates[0] = coordinates[0] + scrollHorizontal;
+    }
+    if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
+      coordinates[1] = coordinates[1] + scrollVertical;
+    }
+    img.style.left = coordinates[0] + 200 +'px';
+    img.style.top =  coordinates[1] +'px';
+    let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
+    this.createIconObject(coordinates, imageSizeOnCreation);
     this.setState({
       ourIconCoord: {
-        x: x-20,
-        y: y-25,
+        x: coordinates[0],
+        y: coordinates[1],
       }
     }, function() {});
-    // this.getScreenSize();
+    // this.addListenerToImage(img);
+    this.findScreenSize();
   }
 
  pointIcon() {
@@ -243,7 +296,6 @@ class BehaviourMapping extends React.Component {
     this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
-      // console.log('id ' + i);
       icon = document.getElementById(i.toString());
       icon.style.display = 'block';
     }
@@ -259,41 +311,311 @@ class BehaviourMapping extends React.Component {
   }
 
   closeIconSelect() {
+    //this.hideAll()
     if (this.state.addIcon) {
       this.setState({ addIcon: false});
     }  
   }
   
-  loadExistingIcons() {
-    console.log('Former Events: ' + this.state.formerEvents)
-
-  }
-
-  setScreenSize() { // det funker å kalle denne fra placeIcon, men ikke
-    // coponent did mount
-    console.log(document.querySelector('.map-image').naturalWidth);
-    console.log(document.querySelector('.map-image').naturalHeight);
-    console.log('projdata: ' + this.state.projdata)
-    console.log('mapblob: ' + this.state.formerEvents)
-  }
+  // addListenerToImage(img) {
+  //   img.addEventListener('click', function() {
+  //     if (img.style.border === '4px solid red') {
+  //       img.style.border = 'none';
+  //       img.style.borderRadius = '5px';
+        
+  //       // let iconInfo = this.state.iconObjects[id];
   
-  componentDidMount() {
-    fetch(`getprojectmapping?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projdata: data});
+  //       // let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+  //       // icon.style.left = (coords[0] + 200) +'px';
+  //       // icon.style.top =  (coords[1]) +'px';
+  //     } else {
+  //       img.style.border = '4px solid red';
+  //     }
+  //   });
+  //   img.click();
+  // }
+
+  /* letImgDrop(ev) {
+    ev.preventDefault();
+  }*/
+  
+  
+  /*dropImg(ev) {
+    // console.log(ev.target.getAttribute('id'));
+    console.log(this.state.ourMouseCoord);
+    document.getElementById()
+  }*/
+  
+
+  setScreenSize() {
+    let nw = document.querySelector('.map-image').naturalWidth;
+    let nh = document.querySelector('.map-image').naturalHeight;
+    let mapImage = document.querySelector('.map-image');
+    mapImage.height = nh;
+    mapImage.width = nw;
+  }
+
+  findScreenSize() {
+    this.stopPointing()
+    let mapImage = document.querySelector('.map-image');
+    this.setState({
+      currentScreenSize: {
+        x: mapImage.width,
+        y: mapImage.height,
+      }
+    }, function() {});
+  }
+
+  initiateFormerScreenSize() {
+    this.stopPointing()
+    let mapImage = document.querySelector('.map-image');
+    this.setState({
+      formerScreenSize: {
+        x: mapImage.width,
+        y: mapImage.height,
+      }
+    }, function() {});
+  }
+
+  handleResize() {
+    if (this.state.formerEvents !== []) {
+      if (this.state.currentScreenSize.x !== 0) {
+        this.findScreenSize();
+        // if (this.state.currentScreenSize.x != this.state.formerScreenSize.x || ) {
+        this.placeEventsAfterChange()
+        // }
+        this.setState({formerScreenSize: this.state.currentScreenSize});
+      }
+    }
+  }
+
+  findNewCoordinates(oldSize, coords) {
+    let percentx = coords[0] / oldSize[0];
+    let percenty = coords[1] / oldSize[1];
+    let mapImage = document.querySelector('.map-image');
+    let newXsize = mapImage.width;
+    let newYsize = mapImage.height;
+    let newXcoord = newXsize * percentx;
+    let newYcoord = newYsize * percenty;
+    let newccords = [];
+    newccords[0] = newXcoord;
+    newccords[1] = newYcoord;
+    return newccords;
+  }
+
+  placeEventsAfterChange() {
+    let icon;
+    for (var i=0; i<this.state.newIconID; i++) {
+      icon = document.getElementById(i.toString());
+      let iconInfo = this.state.iconObjects[i];
+
+      let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+      icon.style.left = (coords[0] + 200) +'px';
+      icon.style.top =  (coords[1]) +'px';
+    }
+  }
+
+  changeMode() {
+    this.setState({onlyObservation: !this.state.onlyObservation});
+    this.setState({addIcon: false});
+    this.setState({addInterview: false});
+  }
+
+  addInterview(whichInterview=0) {
+    if (whichInterview > 0) {
+      this.interviewElement.current.setState({alreadySaved: true});
+      this.interviewElement.current.setInterview(this.state.interviews[whichInterview-1])
+      if (!this.state.addInterview) {
+        this.setState({addInterview: !this.state.addInterview});
+      }
+    } else {
+      this.interviewElement.current.clearInterview();
+      this.interviewElement.current.setState({alreadySaved: false})
+      this.setState({addInterview: !this.state.addInterview});
+    }
+    
+  }
+
+  saveInterview(e) {
+    e.preventDefault();
+    let list = document.getElementsByClassName('interview-sidebar-li')[0];
+    let li = document.createElement('li');
+
+    let interviewNumber = this.state.interviews.length + 1;
+    let newText = "Interview number: " + interviewNumber;
+    
+    if (this.objectExists(newText) === true) {
+      this.setState({interviews: [...this.state.interviews, e.target.form.childNodes[1].value]});
+      this.interviewElement.current.clearInterview();
+      this.sendInterviewToDb(this.interviewElement.current.state.interview);
+      
+      li.innerHTML = newText;
+      li.addEventListener('click', (e) => {
+        this.addInterview(e.target.innerText[e.target.innerText.length - 1]);
+      });
+      list.appendChild(li);
+
+      this.addInterview();
+    }
+  }
+
+  sendInterviewToDb(interviewData) {
+    const data = new FormData();
+    const interview = interviewData;
+    const p_id = this.state.p_id;
+    data.append('interview', interview);
+    data.append('p_id', p_id);
+    data.append('u_id', this.state.u_id);
+    fetch(window.backend_url + 'addinterview', {
+      method: 'POST',
+      body: data,
+      })
+    //   .then((res) => {
+    //     res.json().then((data) => {
+    //       // most likely not needed, can just use interviewnumber to get the correct text.
+    //      this.setState({i_ids: [...this.state.i_ids, data.i_id[0]]});
+    //     });
+    // });
+  }
+
+  drawLine() {
+    this.setState({drawLine: true});
+  }
+
+  addToDrawList(e) {
+    // kjører hver gang en flytter på touchen. 
+    if (this.state.eightOfCoords === 0) {
+      let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
+      this.setState({coords: [...this.state.coords, currCoords]});
+    }
+    this.oneEigthOfCoords();
+  }
+
+  oneEigthOfCoords() {
+    if (this.state.eightOfCoords === 7 ) {
+      this.setState({eightOfCoords: 0})
+    } else {
+      this.setState({eightOfCoords: this.state.eightOfCoords + 1})
+    }
+  }
+
+  drawFunction(){
+    if (this.state.coords.length <= 3 ) {
+      return
+    }
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    let lastTwoCoords = [this.state.coords[this.state.coords.length - 1][0], 
+      this.state.coords[this.state.coords.length - 1][1],
+      this.state.coords[this.state.coords.length - 3][0], 
+      this.state.coords[this.state.coords.length - 3][1]];
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.moveTo(this.state.coords[0][0], this.state.coords[0][1]);
+    for (let coord of this.state.coords) {
+      ctx.lineTo(coord[0], coord[1]);
+    }
+    this.drawArrow(ctx, lastTwoCoords);
+    ctx.stroke();
+    this.setState({drawLine: false});
+    this.setState({coords: []});
+    
+    // bruke litt samme metoder som gjort i mappingen for å få en ny linje hver gang og kunne vise alle og skjule alle linjer.
+  }
+
+  drawArrow(ctx, lastTwoCoords) {
+    let degreerot = Math.atan2(
+      lastTwoCoords[0] - lastTwoCoords[2],
+      -(lastTwoCoords[1] - lastTwoCoords[3]),
+    );
+    let degrees = degreerot*180/Math.PI + 90;
+    let angle1 = (degrees + 25) * (Math.PI / 180);
+    let angle2 = (degrees - 25) * (Math.PI / 180);
+    let bottomX = 15 * Math.cos(angle1);
+    let bottomY = 15 * Math.sin(angle1);
+    let topX = 15 * Math.cos(angle2);
+    let topY = 15 * Math.sin(angle2);
+    ctx.moveTo(lastTwoCoords[0] + bottomX, lastTwoCoords[1] + bottomY);
+    ctx.lineTo(lastTwoCoords[0], lastTwoCoords[1]);
+    ctx.lineTo(lastTwoCoords[0] + topX, lastTwoCoords[1] + topY);
+  }
+
+  handleScroll() {
+    let scrollY = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop
+    let scrollX = window.pageXOffset || (document.documentElement || document.body.parentNode || document.body).scroll;
+    if (typeof scrollY == 'number') {
+      this.setState({scrollVertical: scrollY,
+        // horizontal: this.state.scroll.horizontal,
+      }, function() {});
+    }
+    if (typeof scrollX == 'number') {
+      this.setState({scrollHorizontal: scrollX,
+      }, function() {});
+    }
+  }
+
+
+  loadFormerEvents(data) {
+    let formerEvents = [];
+    let i;
+    for (i=0; i<data.length; i=i+2) {
+      let currentevent = data[i];
+      let img = data[i+1]
+      let eventset = []
+      eventset.push(currentevent)
+      eventset.push(img)
+      formerEvents.push(eventset)
+    }
+    this.setState({formerEvents: formerEvents}, function() {});
+    this.iterateThroughFormerEvents()
+  }
+
+  iterateThroughFormerEvents() { // tried async + await
+    for (let i=0; i<this.state.formerEvents.length; i++) {
+
+      let eventset = this.state.formerEvents[i];
+      let imageSizeOnCreation = this.findIntegerCoordinates(eventset[0][3]);
+      var coord = this.findIntegerCoordinates(eventset[0][2])
+      this.createIconObject(coord, imageSizeOnCreation);
+      let rotation = eventset[0][1]
+      let f_id = eventset[0][5]
+      coord = this.findNewCoordinates(imageSizeOnCreation, coord);
+      this.placeFormerEvent(f_id, coord, rotation);
+    }
+  }
+
+  findIntegerCoordinates(coord) {
+    coord = coord.split(",");
+    coord[0] = parseInt(coord[0], 10);
+    coord[1] = parseInt(coord[1], 10);
+    return coord;
+  }
+
+  placeFormerEvent(f_id, coord, rotation) {
+    let src;
+    fetch(window.backend_url + `getimagefromID?f_id=${f_id}&u_id=${this.state.u_id}`)
+    .then(result => result.blob())
+    .then(images => {
+      src = URL.createObjectURL(images)
+
+      let img = document.createElement('img');
+      img.setAttribute('id', this.state.newIconID.toString());
+      // this.addListenerToImage(img);
+      img.click();
+      this.setState({
+        newIconID: this.state.newIconID + 1
+      }, function() {});   
+      img.classList.add('icon');
+      img.src = src;
+      document.getElementById('icon-container').appendChild(img);
+      img.style.top =  (coord[1])+'px';
+      img.style.left = (coord[0]+200) +'px';
+      if (rotation != null) {
+        img.style.transform = rotation;
+      }
     });
-    fetch(`getmap?p_id=${this.state.p_id}`).then(res => res.blob())
-      .then(images => {
-        let image = URL.createObjectURL(images);
-        this.setState({mapblob: image});
-    });
-    fetch(`getevents?p_id=${this.state.p_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({formerEvents: data});
-    });
-    setTimeout(() => this.loadExistingIcons(), 500);
+    return null;
   }
 
   argCIS() {
@@ -302,43 +624,169 @@ class BehaviourMapping extends React.Component {
     const p_id = this.state.p_id;
     data.append('name', name);
     data.append('p_id', p_id);
-    fetch('http://localhost:5000/createarcgis', {
+    data.append('u_id', this.state.u_id)
+    fetch(window.backend_url + 'createarcgis', {
       method: 'POST',
       body: data,
-      }).then((response) => {
+      })
+      .then(response => response.blob())
+      .then(blob => {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = "shapefiles.zip";
+        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+        a.click();    
+        a.remove();
       });
+
+    // setTimeout(() => this.downloadArcGIS(), 1500);    
   }
+
+  hideOrShow() {
+    let liElementHideOrShow = document.getElementById('hide-or-show');
+    if (this.state.hideOrShow === 'hide') {
+      this.setState({hideOrShow: 'show'});
+      this.hideAll();
+      liElementHideOrShow.innerHTML = "Show Icons"
+    } else {
+      this.setState({hideOrShow: 'hide'});
+      this.showAll();
+      liElementHideOrShow.innerHTML = "Hide Icons"
+    }
+  }
+
+  writeFilename(event) { 
+    const {value} = event.target;
+    this.setState({
+        arcGISfilename: value
+    }, function() {})
+  }
+
+
+
+  componentDidMount() {
+    window.addEventListener('scroll', this.handleScroll);
+    this.findScreenSize();
+    this.initiateFormerScreenSize();
+    window.addEventListener('resize', this.handleResize);
+
+    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({projdata: data});
+      let os = this.findIntegerCoordinates(data[8])
+      this.setState({originalScreenSize: {
+        x: os[0],
+        y: os[1],
+      }});
+    });
+    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}&u_id=${this.state.u_id}`).then(res => res.blob())
+      .then(images => {
+        let image = URL.createObjectURL(images);
+        this.setState({mapblob: image});
+
+    });
+    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      setTimeout(() => this.loadFormerEvents(data), 500);
+    });
+
+    // resize the canvas to fill map part of window dynamically
+    var firstTime = 0;
+    (function(canvas, image) {
+      window.addEventListener('resize', resizeCanvas, false);
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth - 200;
+        canvas.height = window.innerHeight;
+        drawStuff(); 
+      }
+      resizeCanvas();
+  
+      function drawStuff() {
+        let ctx = canvas.getContext("2d");
+        if (firstTime === 0) {
+          image.onload = () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          }
+          firstTime++;
+        } else {
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+              // draw all lines again.
+      }
+    })(this.canvas.current, this.myImage.current);
+  }
+
 
   render() {
+    let imageClassList = classNames({
+      'map-image': true,
+      'visible': this.state.onlyObservation,
+      'invisible': !this.state.onlyObservation
+    });
+    let canvasClassList = classNames({
+      'map-image': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
+    let interviewLiClassList = classNames({
+      'interview-sidebar-li': true,
+      'invisible': this.state.onlyObservation,
+      'visible': !this.state.onlyObservation
+    });
     return (
-      <div id='maincont'>
-        <div className="sidebar">
-          <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
-              <AllIcons selectIcon = {this.selectIcon} 
-              close={() => this.closeIconSelect()}/>
-            </div>  
-              <ul id="iconList">
-                <li className="buttonLi" onClick={() => this.newIcon()}>Add Event</li>
-                <li className="buttonLi" onClick={() => this.showAll()}>Show icons</li>
-                <li className="buttonLi" onClick={() => this.hideAll()}>Hide icons</li>
-                <li className="buttonLi" onClick={() => this.argCIS()}>ArcGIS</li>
-                <li className="buttonLi">
-                  <button className="zoom-button">+</button>
-                  <button className="zoom-button">-</button>
-                </li>
+      <Authenticated>
+        <div id='maincont'>
+          <div className="sidebar">
+            <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
+                <AllIcons selectIcon = {this.selectIcon} 
+                close={() => this.closeIconSelect()}/>
+            </div> 
+            <div className={this.state.addInterview ? "interview" : "invisible"}> 
+              <Interview 
+                close={this.addInterview}
+                save={this.saveInterview}
+                ref={this.interviewElement}
+              /> 
+            </div> 
+              <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
+                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
+                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+                <li className="buttonLi" onClick={this.argCIS}>Export shapefiles</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
               </ul>
-        </div>
-        
-        <img alt="" onMouseMove={e => this.updateCoord(e)}
+              <ul className={interviewLiClassList}>
+                <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
+                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+              </ul>
+          </div>
+          
+          <canvas 
+            onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+            onTouchEnd={this.drawFunction}
+            className={canvasClassList}
+            ref={this.canvas}
+          />
+          <img alt="" onMouseMove={e => this.updateCoord(e)}
             id='map-image' 
             onClick={e => this.takeAction(e)} 
-            className='map-image' 
-            src={this.state.mapblob} />
-          <div id="iconContainer" />
+            className={imageClassList}
+            src={this.state.mapblob}
+            ref={this.myImage}
+            
+          />
+          <div id="icon-container" />
+          
 
-      </div>
+        </div>
+      </Authenticated>
     );
   }
-} // <AllIcons closeIconSelect = {this.closeIconSelect} />
+}
 
 export default BehaviourMapping;

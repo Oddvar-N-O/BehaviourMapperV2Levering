@@ -1,8 +1,7 @@
 import sqlite3
 
 import click
-from flask import current_app
-from flask import g
+from flask import current_app, g
 from flask.cli import with_appcontext
 
 # https://github.com/pallets/flask/blob/93dd1709d05a1cf0e886df6223377bdab3b077fb/examples/tutorial/flaskr/db.py
