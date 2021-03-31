@@ -39,7 +39,8 @@ def login():
         openid = oidc.user_getfield('sub')
         if not userInDB(openid):
             addUser(openid, email)
-        setSession(openid)
+        if not authenticateUser(openid):
+            setSession(openid)
         return redirect('http://localhost:3000/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
@@ -224,7 +225,7 @@ def getImageFromID():
         get_figure_image_sql =('SELECT image FROM Figures WHERE id=?')
         f_id = request.args.get('f_id', None)
 
-        result = query_db(get_figure_image_sql, (f_id), True)
+        result = query_db(get_figure_image_sql, (f_id,), True)
         image = {"image": ""}
         for res in result:
             image["image"] = res
@@ -258,7 +259,7 @@ def getMap():
         args = (request.args.get('p_id'),)
         result = query_db(get_map_sql, args, True)
         image = {"image": ""}
-        if result != 0:
+        if result != 0 and result[0] != None:
             for res in result:
                 image["image"] = "./uploads/" + res
             try:
@@ -307,15 +308,24 @@ def fileUpload():
                 destination="/".join([target, str(unique) + filename])
                 unique += 1
             if unique > 2:
-                if map:
-                    addMapName(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
-                else:
-                    screenshot(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
+                if request.form.get('map') == "true":
+                    addMapName(str(unique - 1) + filename, request.form.get('p_id'), request.form.get('u_id'))
+                elif request.form.get('map') == "false":
+                    screenshot(str(unique - 1) + filename, request.form.get('p_id'), request.form.get('u_id'))
             else:
-                if map:
-                    addMapName(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
-                else:
-                    screenshot(str(unique - 1) + filename, request.form['p_id'], request.form['u_id'])
+                if request.form.get('map') == "true":
+                    addMapName(filename, request.form.get('p_id'), request.form.get('u_id'))
+                elif request.form.get('map') == "false":
+                    screenshot(filename, request.form.get('p_id'), request.form.get('u_id'))
+        else:
+            raise InvalidUsage("Not allowed file ending", status_code=400)
+        try:
+            logger.info("file uploaded")
+            file.save(destination)
+            return {"file": filename}, 201
+        except:
+            logger.info("Failed to upload image")
+            raise InvalidUsage("Failed to upload image", status_code=500)
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
