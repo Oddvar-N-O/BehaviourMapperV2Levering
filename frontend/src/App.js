@@ -6,7 +6,7 @@ import Startpage from './pages/startpage'
 import ChooseImage from './pages/ChooseImage'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import React from 'react';
-import LoadProject from './pages/loadProject';
+import ManageProject from './pages/manageProject';
 import {AuthContext} from './pages/auth/AuthContext'
 
 
@@ -23,7 +23,7 @@ function App() {
             <Route path='/newproject' component={NewProject} />
             <Route path='/chooseimage' component={ChooseImage} />
             <Route path='/mapping' component={BehaviourMapping} />
-            <Route path='/loadproject' component={LoadProject} />
+            <Route path='/manageProject' component={ManageProject} />
           </Switch>
         </Router>
       </div>

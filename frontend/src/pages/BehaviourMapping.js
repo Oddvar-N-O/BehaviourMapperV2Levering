@@ -1,6 +1,7 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
+import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
 import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
@@ -12,7 +13,7 @@ class BehaviourMapping extends React.Component {
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         iconSRCs: [],
-        iconObjects: [],
+        iconObjects: [], 
         ourSRC: null,
         sendNewIconToBD: false,
         newIconID: 0,
@@ -63,6 +64,7 @@ class BehaviourMapping extends React.Component {
       this.drawFunction = this.drawFunction.bind(this);
       this.addInterview = this.addInterview.bind(this);
       this.saveInterview = this.saveInterview.bind(this);
+      this.finishProject = this.finishProject.bind(this);
       this.takeScreenshot = this.takeScreenshot.bind(this);
   }
 
@@ -678,9 +680,10 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-  takeScreenshot = event => {
+  
+  takeScreenshot() {
     this.stopPointing();
-    event.preventDefault();
+    // event.preventDefault();
     this.showAll();
     this.changePosScreenshot(0);
     var node = document.querySelector('.screenshot-div');
@@ -723,6 +726,16 @@ class BehaviourMapping extends React.Component {
   }
 
   return new Blob([ia], {type:mimeString});
+}
+
+finishProject() {
+  let time = String(new Date());
+  this.takeScreenshot();
+  fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+  setTimeout(() => {
+    window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+    // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+  }, 1500);
 }
 
 
@@ -804,7 +817,7 @@ class BehaviourMapping extends React.Component {
     });
     return (
       <Authenticated>
-        <div id='maincont'>
+        <div id='maincont' >
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
                 <AllIcons selectIcon = {this.selectIcon} 
@@ -821,14 +834,14 @@ class BehaviourMapping extends React.Component {
                 <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-                <li className="buttonLi" onClick={this.takeScreenshot}>Scr</li>
-                <li className="buttonLi" onClick={this.argCIS}>Export shapefiles</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+                <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
                 <li className="buttonLi" onClick={this.drawLine}>Add line</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+                <li className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}>Finish project</Link></li>
               </ul>
           </div>
           <div className={screenshotDivClassList}>
