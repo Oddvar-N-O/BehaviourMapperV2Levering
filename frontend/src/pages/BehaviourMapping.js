@@ -666,13 +666,24 @@ class BehaviourMapping extends React.Component {
         arcGISfilename: value
     }, function() {})
   }
+  changePosScreenshot(change) {
+    let icon;
+    let iconinfo;
+    for (var i=0; i<this.state.newIconID; i++) {
+      icon = document.getElementById(i.toString());
+      iconinfo = this.state.iconObjects[i];
+      let coord = iconinfo.originalCoord;
+      icon.style.left = (coord[0] + change) + 'px'
+      icon.style.top = (coord[1]) + 'px'
+    }
+  }
 
   takeScreenshot = event => {
     this.stopPointing();
     event.preventDefault();
     this.showAll();
+    this.changePosScreenshot(0);
     var node = document.querySelector('.screenshot-div');
-    console.log(node);
     domtoimage.toPng(node).then(dataURI => this.dataURItoBlob(dataURI))
     .then(blob => {
       let name = this.state.projdata[1] + "_ss.png"
@@ -683,6 +694,7 @@ class BehaviourMapping extends React.Component {
       data.append('u_id', window.sessionStorage.getItem('uID'));
       data.append('map', false);
       this.hideAll();
+      this.changePosScreenshot(200);
       fetch(window.backend_url + 'upload', {
         method: 'POST',
         body: data,})
