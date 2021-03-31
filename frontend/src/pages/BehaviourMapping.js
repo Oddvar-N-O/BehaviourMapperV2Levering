@@ -681,9 +681,9 @@ class BehaviourMapping extends React.Component {
   }
 
   
-  takeScreenshot = event => {
+  takeScreenshot() {
     this.stopPointing();
-    event.preventDefault();
+    // event.preventDefault();
     this.showAll();
     this.changePosScreenshot(0);
     var node = document.querySelector('.screenshot-div');
@@ -728,11 +728,14 @@ class BehaviourMapping extends React.Component {
   return new Blob([ia], {type:mimeString});
 }
 
-finishProject(event) {
+finishProject() {
   let time = String(new Date());
-  this.takeScreenshot(event);
+  this.takeScreenshot();
   fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
-  // kjøre screenshotfunksjonen.
+  setTimeout(() => {
+    window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+    // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+  }, 1500);
 }
 
 
@@ -831,9 +834,8 @@ finishProject(event) {
                 <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-                <li className="buttonLi" onClick={this.takeScreenshot}>Scr</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}>Finish project</Link></li>
+                <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
