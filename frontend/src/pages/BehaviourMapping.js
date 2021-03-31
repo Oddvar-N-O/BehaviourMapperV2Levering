@@ -3,7 +3,8 @@ import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
 import './BehaviourMapping.css';
 import classNames from 'classnames';
-import { Authenticated } from './auth/AuthContext'
+import { Authenticated } from './auth/AuthContext';
+import domtoimage from 'dom-to-image';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -62,6 +63,7 @@ class BehaviourMapping extends React.Component {
       this.drawFunction = this.drawFunction.bind(this);
       this.addInterview = this.addInterview.bind(this);
       this.saveInterview = this.saveInterview.bind(this);
+      this.takeScreenshot = this.takeScreenshot.bind(this);
   }
 
   createIconObject(coordinates, currentSize) {
@@ -367,7 +369,7 @@ class BehaviourMapping extends React.Component {
   }
 
   initiateFormerScreenSize() {
-    this.stopPointing()
+    this.stopPointing();
     let mapImage = document.querySelector('.map-image');
     this.setState({
       formerScreenSize: {
@@ -416,6 +418,7 @@ class BehaviourMapping extends React.Component {
   }
 
   changeMode() {
+    this.stopPointing();
     this.setState({onlyObservation: !this.state.onlyObservation});
     this.setState({addIcon: false});
     this.setState({addInterview: false});
@@ -571,7 +574,7 @@ class BehaviourMapping extends React.Component {
     this.iterateThroughFormerEvents()
   }
 
-  iterateThroughFormerEvents() { // tried async + await
+  iterateThroughFormerEvents() {
     for (let i=0; i<this.state.formerEvents.length; i++) {
 
       let eventset = this.state.formerEvents[i];
@@ -619,6 +622,7 @@ class BehaviourMapping extends React.Component {
   }
 
   argCIS() {
+    this.stopPointing();
     const data = new FormData();
     const name = [this.state.name];
     const p_id = this.state.p_id;
@@ -663,6 +667,51 @@ class BehaviourMapping extends React.Component {
     }, function() {})
   }
 
+  takeScreenshot = event => {
+    this.stopPointing();
+    event.preventDefault();
+    this.showAll();
+    var node = document.querySelector('.screenshot-div');
+    console.log(node);
+    domtoimage.toPng(node).then(dataURI => this.dataURItoBlob(dataURI))
+    .then(blob => {
+      let name = this.state.projdata[1] + "_ss.png"
+      let file = new File([blob], name, {lastModified: new Date().getTime(), type: "image/png"})
+      const data = new FormData();
+      data.append('file', file);
+      data.append('p_id', this.state.p_id);
+      data.append('u_id', window.sessionStorage.getItem('uID'));
+      data.append('map', false);
+      this.hideAll();
+      fetch(window.backend_url + 'upload', {
+        method: 'POST',
+        body: data,})
+      }).catch(function (error) {
+          console.error('oops, something went wrong!', error);
+      });
+    
+  }
+
+  // https://stackoverflow.com/questions/4998908/convert-data-uri-to-file-then-append-to-formdata
+  dataURItoBlob(dataURI) {
+  // convert base64/URLEncoded data component to raw binary data held in a string
+  var byteString;
+  if (dataURI.split(',')[0].indexOf('base64') >= 0)
+      byteString = atob(dataURI.split(',')[1]);
+  else
+      byteString = unescape(dataURI.split(',')[1]);
+
+  // separate out the mime component
+  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+  // write the bytes of the string to a typed array
+  var ia = new Uint8Array(byteString.length);
+  for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([ia], {type:mimeString});
+}
 
 
   componentDidMount() {
@@ -737,6 +786,10 @@ class BehaviourMapping extends React.Component {
       'invisible': this.state.onlyObservation,
       'visible': !this.state.onlyObservation
     });
+    let screenshotDivClassList = classNames({
+      'screenshot-div': true,
+      'visible': true
+    });
     return (
       <Authenticated>
         <div id='maincont'>
@@ -756,6 +809,7 @@ class BehaviourMapping extends React.Component {
                 <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+                <li className="buttonLi" onClick={this.takeScreenshot}>Scr</li>
                 <li className="buttonLi" onClick={this.argCIS}>Export shapefiles</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
               </ul>
@@ -765,22 +819,24 @@ class BehaviourMapping extends React.Component {
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
               </ul>
           </div>
-          
-          <canvas 
-            onTouchMove={this.state.drawLine ? this.addToDrawList : null}
-            onTouchEnd={this.drawFunction}
-            className={canvasClassList}
-            ref={this.canvas}
-          />
-          <img alt="" onMouseMove={e => this.updateCoord(e)}
-            id='map-image' 
-            onClick={e => this.takeAction(e)} 
-            className={imageClassList}
-            src={this.state.mapblob}
-            ref={this.myImage}
+          <div className={screenshotDivClassList}>
+            <canvas 
+              onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+              onTouchEnd={this.drawFunction}
+              className={canvasClassList}
+              ref={this.canvas}
+            />
+            <img alt="" onMouseMove={e => this.updateCoord(e)}
+              id='map-image' 
+              onClick={e => this.takeAction(e)} 
+              className={imageClassList}
+              src={this.state.mapblob}
+              ref={this.myImage}
+              
+            />
             
-          />
-          <div id="icon-container" />
+            <div id="icon-container" />
+          </div>
           
 
         </div>

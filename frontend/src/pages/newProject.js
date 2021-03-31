@@ -61,6 +61,7 @@ class NewProject extends React.Component {
         data.append('file', this.uploadInput.files[0]);
         data.append('p_id', p_id);
         data.append('u_id', this.state.u_id);
+        data.append('map', true);
     
         fetch(window.backend_url + 'upload', {
           method: 'POST',

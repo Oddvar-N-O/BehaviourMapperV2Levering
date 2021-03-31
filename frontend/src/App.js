@@ -7,7 +7,6 @@ import ChooseImage from './pages/ChooseImage'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import React from 'react';
 import LoadProject from './pages/loadProject';
-import Screenshot from './pages/Screnshoot';
 import {AuthContext} from './pages/auth/AuthContext'
 
 
@@ -20,7 +19,6 @@ function App() {
         <Router basename="/behaviourmapper">
           <Switch>
             <Route path='/' exact component={Login} />
-            <Route path='/screenshot' component={Screenshot} /> {/*  Foreløpig  */}
             <Route path='/startpage' component={Startpage} />
             <Route path='/newproject' component={NewProject} />
             <Route path='/chooseimage' component={ChooseImage} />

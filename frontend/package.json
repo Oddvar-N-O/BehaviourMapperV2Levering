@@ -9,11 +9,8 @@
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.6.0",
     "axios": "^0.21.1",
-<<<<<<< HEAD
     "dom-to-image": "^2.6.0",
-=======
     "classnames": "^2.2.6",
->>>>>>> 3f2a41675a75feed382652618123a1c8af7fc752
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "express": "^4.17.1",

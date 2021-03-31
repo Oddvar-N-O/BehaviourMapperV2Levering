@@ -92,6 +92,7 @@ class ChooseImage extends React.Component {
           data.append('file', file);
           data.append('p_id', this.state.p_id);
           data.append('u_id', this.state.u_id);
+          data.append('map', true);
           fetch(window.backend_url + 'upload', {
             method: 'POST',
             body: data,
