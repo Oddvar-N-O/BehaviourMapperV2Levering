@@ -100,6 +100,9 @@
 #maincont {
     display: flex;
 }
+.screenshot-div {
+    order: 3;
+}
 .map-image {
     height: 100vh;
     width: calc(100vw - 200px);
