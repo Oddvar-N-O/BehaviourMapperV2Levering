@@ -241,7 +241,7 @@ def getImageFromID():
         for res in result:
             image["image"] = res
         try:
-            return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+            return send_from_directory(current_app.config['STATIC_URL_PATH'], image["image"])
         except FileNotFoundError:
             abort(404)
     else:
