@@ -53,7 +53,8 @@
     height: 80%;
 }
 #load-project .close-icon { 
-    right: 10.7vw;
+    top: 13vh;
+    left: 85vw;
 }
 .sidebarLP {
     display: flex;
