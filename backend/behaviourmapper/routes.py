@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import socket
 import zipfile
 from datetime import date, datetime
 from time import time
@@ -39,7 +38,9 @@ def login():
         openid = oidc.user_getfield('sub')
         if not userInDB(openid):
             addUser(openid, email)
-        setSession(openid)
+            setSession(openid)
+        elif not authenticateUser(openid):
+            setSession(openid)
         return redirect('http://localhost:3000/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
@@ -108,6 +109,17 @@ def addProject():
                             request.form.get('upperY'), request.form.get('u_id'))
         p_id = query_db(add_small_project, small_project_values)
         return {"p_id": p_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/updateproject')
+def updateProject():
+    if authenticateUser(request.args.get('u_id')):
+        update_sql = "UPDATE Project SET enddate=? WHERE id=? AND u_id=?"
+        values = (request.args.get('enddate'),request.args.get('p_id'),request.args.get('u_id'))
+        query_db(update_sql, values)
+        return {"Status": "Success"}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
@@ -224,12 +236,12 @@ def getImageFromID():
         get_figure_image_sql =('SELECT image FROM Figures WHERE id=?')
         f_id = request.args.get('f_id', None)
 
-        result = query_db(get_figure_image_sql, (f_id), True)
+        result = query_db(get_figure_image_sql, (f_id,), True)
         image = {"image": ""}
         for res in result:
             image["image"] = res
         try:
-            return send_from_directory(app.config['STATIC_URL_PATH'], image["image"])
+            return send_from_directory(current_app.config['STATIC_URL_PATH'], image["image"])
         except FileNotFoundError:
             abort(404)
     else:
@@ -258,7 +270,7 @@ def getMap():
         args = (request.args.get('p_id'),)
         result = query_db(get_map_sql, args, True)
         image = {"image": ""}
-        if result != 0:
+        if result != 0 and result[0] != None:
             for res in result:
                 image["image"] = "./uploads/" + res
             try:
@@ -307,9 +319,15 @@ def fileUpload():
                 destination="/".join([target, str(unique) + filename])
                 unique += 1
             if unique > 2:
-                addMapName(str(unique - 1) + filename, request.form['p_id'])
+                if request.form.get('map') == "true":
+                    addMapName(str(unique - 1) + filename, request.form.get('p_id'), request.form.get('u_id'))
+                elif request.form.get('map') == "false":
+                    screenshot(str(unique - 1) + filename, request.form.get('p_id'), request.form.get('u_id'))
             else:
-                addMapName(filename, request.form['p_id'])
+                if request.form.get('map') == "true":
+                    addMapName(filename, request.form.get('p_id'), request.form.get('u_id'))
+                elif request.form.get('map') == "false":
+                    screenshot(filename, request.form.get('p_id'), request.form.get('u_id'))
         else:
             raise InvalidUsage("Not allowed file ending", status_code=400)
         try:
@@ -323,6 +341,30 @@ def fileUpload():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
     
+
+def screenshot(image_name, p_id, u_id):
+    screenshot_sql = ("UPDATE Project SET screenshot=? WHERE id=? AND u_id=?")
+    screenshot = (image_name, p_id, u_id)
+    query_db(screenshot_sql, screenshot)
+
+@bp.route('/getscreenshot')
+def getScreenshot():
+    if authenticateUser(request.args.get('u_id')):
+        get_map_sql =('SELECT screenshot FROM Project WHERE id=? AND u_id=?')
+        args = (request.args.get('p_id'),request.args.get('u_id'))
+        result = query_db(get_map_sql, args, True)
+        image = {"image": ""}
+        if result != 0:
+            for res in result:
+                if type(res) != int:
+                    image["image"] = "./uploads/" + res
+        try:
+            return send_from_directory(current_app.config['STATIC_URL_PATH'], image["image"])
+        except FileNotFoundError:
+            abort(404)
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
 
 def getElementXandY(element):
     stringCoord = element.split(",")
@@ -450,9 +492,9 @@ def selectdb():
         result[x] = temp_result
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
-def addMapName(mapname, p_id):
-    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=?")
-    values = (mapname, p_id)
+def addMapName(mapname, p_id, u_id):
+    add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
+    values = (mapname, p_id, u_id)
     res = query_db(add_map_name_sql, values, True)
     return {"res": res}
 

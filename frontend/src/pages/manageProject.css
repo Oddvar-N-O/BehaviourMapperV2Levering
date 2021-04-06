@@ -9,6 +9,8 @@
     align-items: center;
     width: 80vw;
     height: 80vh;
+    min-width: 600px;
+    min-height: 600px;
     margin-top: 12vh;
     background-color: #292828;
     color: #ece8e8;
@@ -51,7 +53,8 @@
     height: 80%;
 }
 #load-project .close-icon { 
-    right: 10.7vw;
+    top: 13vh;
+    left: 85vw;
 }
 .sidebarLP {
     display: flex;

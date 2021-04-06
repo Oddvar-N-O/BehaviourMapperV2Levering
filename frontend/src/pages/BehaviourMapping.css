@@ -49,6 +49,9 @@
     border-bottom: 2px #58A4B0 solid;
     min-width: 200px;
 }
+.sidebar a {
+    color: #ece8e8;
+}
 
 #input-li {
     display: 'none';
@@ -99,6 +102,9 @@
 
 #maincont {
     display: flex;
+}
+.screenshot-div {
+    order: 3;
 }
 .map-image {
     height: 100vh;
