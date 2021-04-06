@@ -749,11 +749,13 @@ finishProject() {
     .then(res => res.json())
     .then(data => {
       this.setState({projdata: data});
-      let os = this.findIntegerCoordinates(data[8])
-      this.setState({originalScreenSize: {
-        x: os[0],
-        y: os[1],
-      }});
+      if (data[8] !== null) {
+        let os = this.findIntegerCoordinates(data[8])
+        this.setState({originalScreenSize: {
+          x: os[0],
+          y: os[1],
+        }});
+      }
     });
     fetch(window.backend_url + `getmap?p_id=${this.state.p_id}&u_id=${this.state.u_id}`).then(res => res.blob())
       .then(images => {

@@ -15,7 +15,7 @@ function ManageProject() {
     if (u_id === null) {
       return
     }
-    var fetchstring = `getproject?u_id=${u_id}`
+    var fetchstring = window.backend_url + `getproject?u_id=${u_id}`
     fetch(fetchstring).then(res => res.json())
     .then(data => {
       setAllProjects(data);
@@ -43,7 +43,7 @@ function ManageProject() {
     if (currProj['id'] === null) {
       return
     }
-    var fetchstring = `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
+    var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
     fetch(fetchstring)
       .then(res => res.blob())
       .then(data => {
@@ -57,7 +57,7 @@ function ManageProject() {
     const data = new FormData();
     data.append('p_id', currProj['id']);
     data.append('u_id', u_id);
-    fetch('createarcgis', {
+    fetch(window.backend_url + 'createarcgis', {
       method: 'POST',
       body: data,
       })
