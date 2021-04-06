@@ -16,8 +16,8 @@ from .config import Config
 from .db import init_db, query_db, select_db
 from .errorhandlers import InvalidUsage
 
-# bp = Blueprint('behaviourmapper', __name__, url_prefix="/behaviourmapper")
-bp = Blueprint('behaviourmapper', __name__)
+bp = Blueprint('behaviourmapper', __name__, url_prefix="/behaviourmapper")
+# bp = Blueprint('behaviourmapper', __name__)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -42,8 +42,8 @@ def login():
             setSession(openid)
         elif not authenticateUser(openid):
             setSession(openid)
-        # return redirect('http://localhost:3000/behaviourmapper/startpage')
-        return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
+        return redirect('http://localhost:3000/behaviourmapper/startpage')
+        # return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
 
