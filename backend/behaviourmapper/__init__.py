@@ -13,8 +13,8 @@ oidc = OpenIDConnect()
 def create_app(test_config=None):
     # Create and configure app
     app = Flask(__name__, instance_relative_config=True)
-    app.secret_key = "heisann"
-    # app.secret_key = get_random_bytes(32)
+    # app.secret_key = "heisann"
+    app.secret_key = get_random_bytes(32)
     # CORS implemented so that we don't get errors when trying to access the server from a different server location
     CORS(app)
     
@@ -24,7 +24,7 @@ def create_app(test_config=None):
         app.config["DATABASE"] = os.path.join(app.instance_path, "behaviourmapper.db")
         app.config.from_mapping(
         OIDC_CLIENT_SECRETS=os.path.join(Config.STATIC_URL_PATH, 'client_secrets.json'),
-        OIDC_COOKIE_SECURE=False,
+        # OIDC_COOKIE_SECURE=False,
         OIDC_CALLBACK_ROUTE= '/behaviourmapper',
         # OIDC_CALLBACK_ROUTE= '/',
         )

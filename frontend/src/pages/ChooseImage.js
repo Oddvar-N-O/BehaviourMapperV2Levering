@@ -28,7 +28,7 @@ class ChooseImage extends React.Component {
         controls: [new Zoom()]
       });
       this.addProject = this.addProject.bind(this);
-      this.pauseBeforeRedirect = this.pauseBeforeRedirect.bind(this);
+      this.redirectToMapping = this.redirectToMapping.bind(this);
   }
 
   addProject() {
@@ -97,11 +97,11 @@ class ChooseImage extends React.Component {
             method: 'POST',
             body: data,
           }).then(setTimeout(
-            () => this.pauseBeforeRedirect(), 200));
+            () => this.redirectToMapping(), 2000));
       }); 
   }
 
-  pauseBeforeRedirect() {
+  redirectToMapping() {
     this.props.history.push({
       pathname: '/mapping',
       state: {

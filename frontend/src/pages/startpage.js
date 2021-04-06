@@ -48,7 +48,7 @@ function Startpage() {
   // Add a cleanup for session in logoutfunction.
   function logout() {
     window.sessionStorage.clear()
-    window.location.href = window.backend_url + "/logout";
+    window.location.href = window.backend_url + "logout";
   }
   // const logout = () => window.location.href = window.backend_url + "/logout";
   // State for User Profile

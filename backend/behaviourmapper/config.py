@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # contains application-wide configuration, and is loaded in __init__.py
 
 class Config(object):
-    APPLICATION_ROOT = '/behaviourmapper'
+    APPLICATION_ROOT = '/'
     UPLOAD_FOLDER = os.path.join(basedir, 'static/uploads')
     STATIC_URL_PATH = os.path.join(basedir, "static")
     ALLOWED_EXTENSIONS = {"jpg", "png", "jpeg", "pdf", "gif"}
