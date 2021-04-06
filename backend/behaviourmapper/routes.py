@@ -25,9 +25,10 @@ logger = logging.getLogger('')
 
 # Add possibility to be rerouted to frontend loginsite.
 @bp.route('/logout')
+@oidc.require_login
 def logout():
+    clearSession(oidc.user_getfield('sub'))
     oidc.logout()
-    clearSession()
     return redirect("https://auth.dataporten.no/openid/endsession", )
 
 @bp.route('/login')
@@ -42,6 +43,7 @@ def login():
         elif not authenticateUser(openid):
             setSession(openid)
         return redirect('http://localhost:3000/behaviourmapper/startpage')
+        # return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
 
@@ -77,9 +79,10 @@ def getSession(openid):
     res = query_db(add_session, (openid,), True)
     return res
 
-def clearSession():
-    clear_session = ("DELETE FROM Session ")
-    select_db(clear_session)
+def clearSession(openid):
+    clear_session = ("DELETE FROM Session WHERE openid=?")
+    res = query_db(clear_session, (openid,), True)
+    return res
 
 @bp.route('/getuseremail', methods=['GET'])
 def getUserEmail():
