@@ -16,6 +16,7 @@ function useSetUserSession() {
           Authorization: `Bearer ${accessToken.access_token}`,
         }
       }).then(res => res.json()).then(data => {
+        console.log(data.sub);
         window.sessionStorage.setItem('uID',data.sub);
       });
     }
