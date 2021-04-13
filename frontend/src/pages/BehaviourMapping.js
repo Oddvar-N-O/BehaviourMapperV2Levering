@@ -12,6 +12,7 @@ class BehaviourMapping extends React.Component {
       super(props)
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
+        
         iconSRCs: [],
         iconObjects: [], 
         ourSRC: null,
@@ -21,6 +22,8 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
+        
+        
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
         f_id: "",
@@ -248,16 +251,14 @@ class BehaviourMapping extends React.Component {
   }
 
  pointIcon() {
-    // Finn grad
     var degreerot = Math.atan2(
         this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
         -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
-    ); // our target is the mouse substracted by iconlocation
-    // the second param is the Y dir
+    ); 
     var degrees = degreerot*180/Math.PI - 90;
     var round_degree = Math.round(degrees);
     var string_degree = 'rotate(' + round_degree.toString() +'deg)';
-    // this.state.ourIconCoord.degree = string_degree;
+   
     this.setState({
       ourIconCoord: {
         x: this.state.ourIconCoord.x,
@@ -265,7 +266,6 @@ class BehaviourMapping extends React.Component {
         degree: string_degree
       }
     });
-    // point icon with css
     var img = document.getElementById(this.state.ourIconID.toString());
     if (string_degree != null) {
       img.style.transform = string_degree;
@@ -360,7 +360,7 @@ class BehaviourMapping extends React.Component {
   }
 
   findScreenSize() {
-    this.stopPointing()
+    // this.stopPointing()
     let mapImage = document.querySelector('.map-image');
     this.setState({
       currentScreenSize: {
@@ -859,9 +859,7 @@ finishProject() {
               className={imageClassList}
               src={this.state.mapblob}
               ref={this.myImage}
-              
             />
-            
             <div id="icon-container" />
           </div>
           

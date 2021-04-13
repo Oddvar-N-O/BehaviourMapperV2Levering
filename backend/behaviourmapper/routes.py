@@ -34,9 +34,12 @@ def logout():
 @bp.route('/login')
 @oidc.require_login
 def login():
+    print('YYEEEEET')
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
+        print(email)
         openid = oidc.user_getfield('sub')
+        print(openid)
         if not userInDB(openid):
             addUser(openid, email)
             setSession(openid)
