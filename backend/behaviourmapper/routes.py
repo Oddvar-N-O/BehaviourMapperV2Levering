@@ -27,7 +27,6 @@ logger = logging.getLogger('')
 @bp.route('/logout')
 @oidc.require_login
 def logout():
-    print("SESSIONLOGOUT", session)
     session.pop('username', None)
     oidc.logout()
     return redirect("https://auth.dataporten.no/openid/endsession", )
@@ -41,7 +40,6 @@ def login():
         if not userInDB(openid):
             addUser(openid, email)
         session['username'] = openid
-        print("!!!!!!!!!!!!", session)
         return redirect('http://localhost:3000/behaviourmapper/startpage')
         # return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
     else:
@@ -49,9 +47,7 @@ def login():
 
 @oidc.require_login
 def authenticateUser(u_id):
-    print("!!!", session)
     if 'username' in session:
-        print("YAY")
         if session['username'] == u_id:
             return True
         else:
