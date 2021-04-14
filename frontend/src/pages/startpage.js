@@ -8,6 +8,7 @@ import { Authenticated, useToken } from './auth/AuthContext'
 function useSetUserSession() {
   let accessToken = useToken()
   useEffect(() => {
+    console.log(accessToken);
     if (accessToken!==null) {
       var fetchstring = `https://auth.dataporten.no/openid/userinfo`;
       fetch(fetchstring, {
@@ -16,12 +17,11 @@ function useSetUserSession() {
           Authorization: `Bearer ${accessToken.access_token}`,
         }
       }).then(res => res.json()).then(data => {
-        console.log(data.sub);
+        console.log(data)
         window.sessionStorage.setItem('uID',data.sub);
       });
     }
   }, [accessToken]);
-  
 }
 
 

@@ -27,33 +27,31 @@ logger = logging.getLogger('')
 @bp.route('/logout')
 @oidc.require_login
 def logout():
-    clearSession(oidc.user_getfield('sub'))
+    session.pop('username', None)
     oidc.logout()
     return redirect("https://auth.dataporten.no/openid/endsession", )
 
 @bp.route('/login')
 @oidc.require_login
 def login():
-    print('YYEEEEET')
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
         print(email)
         openid = oidc.user_getfield('sub')
         print(openid)
         if not userInDB(openid):
+            print('lacking')
             addUser(openid, email)
-            setSession(openid)
-        elif not authenticateUser(openid):
-            setSession(openid)
+        session['username'] = openid
         return redirect('http://localhost:3000/behaviourmapper/startpage')
         # return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
 
-# add this to all functions as a security measure
+@oidc.require_login
 def authenticateUser(u_id):
-    if getSession(u_id) != 0:
-        if getSession(u_id)[0] == u_id:
+    if 'username' in session:
+        if session['username'] == u_id:
             return True
         else:
             return False
@@ -63,24 +61,16 @@ def userInDB(openid):
     find_user = ("SELECT email FROM Users WHERE openid=?")
     res = query_db(find_user, (openid,), True)
     if res == 0:
+        print('GGAGAGGA')
         return False
     elif res != 0:
+        print('YEEEEEEET')
         return True
 
 def addUser(openid, email):
     add_user = ("INSERT INTO Users (openid, email)"
                "VALUES (?,?)")
     query_db(add_user, (openid, email))
-
-def setSession(openid):
-    add_session = ("INSERT INTO Session (openid)"
-               "VALUES (?)")
-    query_db(add_session, (openid,))
-
-def getSession(openid):
-    add_session = ("SELECT * FROM Session WHERE openid=?")
-    res = query_db(add_session, (openid,), True)
-    return res
 
 def clearSession(openid):
     clear_session = ("DELETE FROM Session WHERE openid=?")
@@ -118,6 +108,32 @@ def addProject():
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/deleteproject', methods=['POST'])
+def deleteProject():
+    if authenticateUser(request.form.get('u_id')):
+        p_id = request.form.get('p_id')
+        deleteImage(p_id)
+        delete_project = ("DELETE FROM Project WHERE id=?")
+        res = query_db(delete_project, (p_id,), True)
+        print(res)
+        return "deleted"
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+def deleteImage(p_id):
+    find_image_name = ("SELECT map, screenshot FROM Project WHERE id=?") 
+    image_names = query_db(find_image_name, (p_id,), True)
+    target=os.path.join(Config.UPLOAD_FOLDER)
+    for filename in os.listdir(target):
+        if filename == image_names[0] or filename == image_names[1]:
+            location = os.path.join(target, filename)
+            if os.path.isfile(location):
+                os.remove(location)
+            else:
+                print('notnPATH')
+
 
 @bp.route('/updateproject')
 def updateProject():
@@ -298,10 +314,16 @@ def favicon():
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
     if authenticateUser(request.form.get('u_id')):
+        add_event = ("INSERT INTO Event "
+              "(direction, center_coordinate, created, image_size_when_created, f_id) "
+              "VALUES (?,?,?,?,?)")
         project_id = request.form.get('p_id') 
         d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
                             request.form.get('created'), request.form.get('image_size'), request.form.get('f_id'))
         e_id = query_db(add_event, d_event_values) # Adds to Event table in db
+        add_relation = ("INSERT INTO Project_has_Event "
+              "(p_id, e_id) "
+              "VALUES (?,?)")
         query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
         return {}
     else:
@@ -469,59 +491,8 @@ def exportARCGIS(): #path, ziph):
     except FileNotFoundError:
         abort(404)
 
-#initdb, testdb og selectdb er kun til bruk for utvikling, må fjernes når det skal tas i bruk
-@bp.route('/initdb')
-def initdb():
-    init_db()
-    return redirect(url_for("behaviourmapper.testdb"))
-
-@bp.route('/testdb')
-def testdb():
-    u_id = query_db(add_user, user_values)
-    f_id = query_db(add_figure, figure_values)
-    event_values.append(f_id[-1])
-    project_values.append(u_id[-1])
-    p_id = query_db(add_project, project_values)
-    e_id = query_db(add_event, event_values)
-    query_db(add_relation, (p_id[-1], e_id[-1]))
-    return redirect(url_for('behaviourmapper.selectdb'))    
-
-@bp.route('/selectdb')
-def selectdb():
-    result = {"Figures": "", "Users": "", "Project": "", "Project_has_Event": "", "Event": ""}
-    table_names = ("Figures", "Users", "Project", "Project_has_Event", "Event")
-    for x in table_names:
-        query_result = select_db(("SELECT * FROM {}".format(x)), True)
-        temp_result = []
-        for query in query_result:
-            temp_result.append(query)
-        result[x] = temp_result
-    return json.dumps(result, indent=4, sort_keys=True, default=str)
-
 def addMapName(mapname, p_id, u_id):
     add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
     values = (mapname, p_id, u_id)
     res = query_db(add_map_name_sql, values, True)
     return {"res": res}
-
-# Eksempler på bruk av alle felter til hver tabell i databasen.
-figure_values = ("beskrivelse","blue", "bilde", "attributter")
-user_values = ("openid","email@email.com")
-event_values = [45,"12991.29291 2929.21", "12:12:12", "[750, 900]"]
-project_values = ["prosjektnamn", "beskrivelse", "screenshot", "kartet", datetime(1998,1,30,12,23,43),datetime(1998,1,30,12,23,43), 10,"zoom", 1,2,3,4]
-
-# sql for å bruke alle felt.
-add_user = ("INSERT INTO Users (openid, email)"
-               "VALUES (?,?)")
-add_event = ("INSERT INTO Event "
-              "(direction, center_coordinate, created, image_size_when_created, f_id) "
-              "VALUES (?,?,?,?,?)")
-add_project = ("INSERT INTO Project "
-              "(name, description, screenshot, map, startdate, enddate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id) "
-              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")
-add_figure = ("INSERT INTO Figures "
-                "(description, color, image, other_attributes) "
-                "VALUES (?,?,?,?)")
-add_relation = ("INSERT INTO Project_has_Event "
-              "(p_id, e_id) "
-              "VALUES (?,?)")

@@ -19,12 +19,12 @@ jobs:
         - npm run build
         - npm test
 
-    - language: python
-      python:
-        - "3.8"
-      before_install:
-        - cd backend
-      install:
-        - pip install -r requirements.txt
-      script:
-        - pytest
+    # - language: python
+    #   python:
+    #     - "3.8"
+    #   before_install:
+    #     - cd backend
+    #   install:
+    #     - pip install -r requirements.txt
+    #   script:
+    #     - pytest

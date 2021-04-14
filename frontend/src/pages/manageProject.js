@@ -13,11 +13,14 @@ function ManageProject() {
 
   useEffect(() => {
     if (u_id === null) {
-      return
+      // return
     }
-    var fetchstring = window.backend_url + `getproject?u_id=${u_id}`
+    console.log(u_id);
+    let newID = 627178461;
+    var fetchstring = window.backend_url + `getproject?u_id=${newID}`
     fetch(fetchstring).then(res => res.json())
     .then(data => {
+      console.log(data);
       setAllProjects(data);
     });
   }, [u_id]);
@@ -43,7 +46,8 @@ function ManageProject() {
     if (currProj['id'] === null) {
       return
     }
-    var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
+    // u_id=u_id
+    var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${627178461}`
     fetch(fetchstring)
       .then(res => res.blob())
       .then(data => {
@@ -73,6 +77,20 @@ function ManageProject() {
       });
     }
 
+  const checkIfDeletionIsDesired = () => {
+    if (window.confirm("Do you want to delete this project?")) {
+      if (window.confirm("Are you sure you want to delete this project?")) {
+        const data = new FormData();
+        data.append('p_id', currProj['id']);
+        fetch(window.backend_url + 'deleteproject', {
+          method: 'POST',
+          body: data,
+          });
+        setTimeout(() => window.location.reload(), 500)
+      }
+    }
+  }
+
   return ( // id="container"
         <div id="load-project">
           <div className="load-project-box">
@@ -86,6 +104,9 @@ function ManageProject() {
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} src={currImage} id='opplastetKart' />
               <button onClick={() => shapefile()}>
                 Export Shapefiles
+              </button>
+              <button onClick={() => checkIfDeletionIsDesired()}>
+                Delete this project
               </button>
             </div>
           </div>
