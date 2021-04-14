@@ -13,14 +13,12 @@ function ManageProject() {
 
   useEffect(() => {
     if (u_id === null) {
-      // return
+      return
     }
-    console.log(u_id);
-    let newID = 627178461;
-    var fetchstring = window.backend_url + `getproject?u_id=${newID}`
+    var fetchstring = window.backend_url + `getproject?u_id=${u_id}`
     fetch(fetchstring).then(res => res.json())
     .then(data => {
-      console.log(data);
+      console.log('YEE: ' + data);
       setAllProjects(data);
     });
   }, [u_id]);
@@ -47,7 +45,7 @@ function ManageProject() {
       return
     }
     // u_id=u_id
-    var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${627178461}`
+    var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
     fetch(fetchstring)
       .then(res => res.blob())
       .then(data => {
@@ -102,12 +100,14 @@ function ManageProject() {
               <h1>{currProj["name"]}</h1>
               <p>Description: {currProj["description"]}</p>
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} src={currImage} id='opplastetKart' />
+              <div id="manage-buttons">
               <button onClick={() => shapefile()}>
                 Export Shapefiles
               </button>
               <button onClick={() => checkIfDeletionIsDesired()}>
                 Delete this project
               </button>
+              </div>
             </div>
           </div>
         </div>
