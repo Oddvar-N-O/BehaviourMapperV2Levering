@@ -36,8 +36,11 @@ def logout():
 def login():
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
+        print(email)
         openid = oidc.user_getfield('sub')
+        print(openid)
         if not userInDB(openid):
+            print('lacking')
             addUser(openid, email)
         session['username'] = openid
         return redirect('http://localhost:3000/behaviourmapper/startpage')
@@ -58,8 +61,10 @@ def userInDB(openid):
     find_user = ("SELECT email FROM Users WHERE openid=?")
     res = query_db(find_user, (openid,), True)
     if res == 0:
+        print('GGAGAGGA')
         return False
     elif res != 0:
+        print('YEEEEEEET')
         return True
 
 def addUser(openid, email):
@@ -103,6 +108,32 @@ def addProject():
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/deleteproject', methods=['POST'])
+def deleteProject():
+    if authenticateUser(request.form.get('u_id')):
+        p_id = request.form.get('p_id')
+        deleteImage(p_id)
+        delete_project = ("DELETE FROM Project WHERE id=?")
+        res = query_db(delete_project, (p_id,), True)
+        print(res)
+        return "deleted"
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+def deleteImage(p_id):
+    find_image_name = ("SELECT map, screenshot FROM Project WHERE id=?") 
+    image_names = query_db(find_image_name, (p_id,), True)
+    target=os.path.join(Config.UPLOAD_FOLDER)
+    for filename in os.listdir(target):
+        if filename == image_names[0] or filename == image_names[1]:
+            location = os.path.join(target, filename)
+            if os.path.isfile(location):
+                os.remove(location)
+            else:
+                print('notnPATH')
+
 
 @bp.route('/updateproject')
 def updateProject():
