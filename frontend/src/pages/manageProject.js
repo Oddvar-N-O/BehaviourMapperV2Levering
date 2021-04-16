@@ -18,7 +18,6 @@ function ManageProject() {
     var fetchstring = window.backend_url + `getproject?u_id=${u_id}`
     fetch(fetchstring).then(res => res.json())
     .then(data => {
-      console.log('YEE: ' + data);
       setAllProjects(data);
     });
   }, [u_id]);
@@ -42,6 +41,12 @@ function ManageProject() {
 
   useEffect(() => {
     if (currProj['id'] === null) {
+      setCurrImage(null);
+      setshowProjInfo(false);
+      return
+    } else if (currProj['screenshot'] === undefined) {
+      setCurrImage(null);
+      setshowProjInfo(true);
       return
     }
     // u_id=u_id
@@ -77,15 +82,13 @@ function ManageProject() {
 
   const checkIfDeletionIsDesired = () => {
     if (window.confirm("Do you want to delete this project?")) {
-      if (window.confirm("Are you sure you want to delete this project?")) {
-        const data = new FormData();
-        data.append('p_id', currProj['id']);
-        fetch(window.backend_url + 'deleteproject', {
-          method: 'POST',
-          body: data,
-          });
-        setTimeout(() => window.location.reload(), 500)
-      }
+      const data = new FormData();
+      data.append('p_id', currProj['id']);
+      fetch(window.backend_url + 'deleteproject', {
+        method: 'POST',
+        body: data,
+        });
+      setTimeout(() => window.location.reload(), 500)
     }
   }
 
