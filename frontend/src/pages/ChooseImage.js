@@ -107,7 +107,8 @@ class ChooseImage extends React.Component {
     this.props.history.push({
       pathname: '/mapping',
       state: {
-          p_id: this.state.p_id
+          p_id: this.state.p_id,
+          imageUploaded: false,
       },
     });
   }
