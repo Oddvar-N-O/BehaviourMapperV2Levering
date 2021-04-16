@@ -12,6 +12,7 @@ class BehaviourMapping extends React.Component {
       super(props)
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
+        imageUploaded: props.location.state.imageUploaded,
         
         iconSRCs: [],
         iconObjects: [], 
@@ -833,7 +834,8 @@ changeSizeOfIcons(event) {
 
   render() {
     let imageClassList = classNames({
-      'map-image': true,
+      'map-image': !this.state.imageUploaded,
+      'uploaded-map-image': this.state.imageUploaded,
       'visible': this.state.onlyObservation,
       'invisible': !this.state.onlyObservation
     });
