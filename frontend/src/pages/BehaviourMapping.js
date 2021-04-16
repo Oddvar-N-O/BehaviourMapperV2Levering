@@ -69,6 +69,9 @@ class BehaviourMapping extends React.Component {
       this.saveInterview = this.saveInterview.bind(this);
       this.finishProject = this.finishProject.bind(this);
       this.takeScreenshot = this.takeScreenshot.bind(this);
+      this.removeIcon = this.removeIcon.bind(this);
+      this.addListenerToImage = this.addListenerToImage.bind(this);
+      this.interactWithEvent = this.interactWithEvent.bind(this);
   }
 
   createIconObject(coordinates, currentSize) {
@@ -213,10 +216,28 @@ class BehaviourMapping extends React.Component {
       }
     }
   }
+  /*
+  a docoment objeckt model:
+  html is instruction tat the browser uses to construct. The html elemt becomes a DOM element wge the browser loads html
+  and render the user interface, so html creas document oject elements
+  <h1></h1> = document.createlement('h1').
+
+  With react we do not interact with the dom api but with the virtual dom, which is made up of JSX elements.
+  React dom er laget av rea elementer. RE er beskrivelser av hvordan browser domen skal bli laget.
+
+  React.createElement('h1', null, 'First React Element').
+  1 argument: elementypen
+  2 argument: elementets property {id: 'heading1'}
+  3 argument: children or innerHTML.
+  let h1 = React.createElement('h1', {id: 'heading1'}, 'First React Element');
+  ReactDOM.render(h1, document.getelementByID('container));
+  
+  */
 
   placeIcon(event) {
     this.findScreenSize()
-    var img = document.createElement('img');
+    var img = document.createElement('img'); // React.createElement('h1', {id: this.state.newIconID.toString()},
+    this.addListenerToImage(img);
     img.src = this.state.ourSRC;
     img.classList.add('icon');
     img.setAttribute('id', this.state.newIconID.toString());
@@ -227,7 +248,7 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
-    let coordinates = [event.clientX - 225, event.clientY - 20];
+    let coordinates = [event.clientX - 25, event.clientY - 20];
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
@@ -236,17 +257,16 @@ class BehaviourMapping extends React.Component {
     if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
-    img.style.left = coordinates[0] + 200 +'px';
+    img.style.left = coordinates[0] +'px';
     img.style.top =  coordinates[1] +'px';
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     this.createIconObject(coordinates, imageSizeOnCreation);
     this.setState({
       ourIconCoord: {
-        x: coordinates[0],
+        x: coordinates[0] - 200,
         y: coordinates[1],
       }
     }, function() {});
-    // this.addListenerToImage(img);
     this.findScreenSize();
   }
 
@@ -315,33 +335,31 @@ class BehaviourMapping extends React.Component {
   }
 
   closeIconSelect() {
-    //this.hideAll()
+    // this.hideAll()
     if (this.state.addIcon) {
       this.setState({ addIcon: false});
     }  
   }
-  
-  // addListenerToImage(img) {
-  //   img.addEventListener('click', function() {
-  //     if (img.style.border === '4px solid red') {
-  //       img.style.border = 'none';
-  //       img.style.borderRadius = '5px';
-        
-  //       // let iconInfo = this.state.iconObjects[id];
-  
-  //       // let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-  //       // icon.style.left = (coords[0] + 200) +'px';
-  //       // icon.style.top =  (coords[1]) +'px';
-  //     } else {
-  //       img.style.border = '4px solid red';
-  //     }
-  //   });
-  //   img.click();
-  // }
 
-  /* letImgDrop(ev) {
+  interactWithEvent() {
+    console.log('slhlagilajgizglj')
+    if (img.style.border === '4px solid red') {
+      img.style.border = 'none';
+      img.style.borderRadius = '5px';
+      let iconInfo = this.state.iconObjects[img.getAttribute('id')];
+   } else {
+     img.style.border = '4px solid red';
+    }
+  }
+
+  addListenerToImage(img) {
+    img.addEventListener('click', this.interactWithEvent());
+    img.click();
+  }
+
+  letImgDrop(ev) {
     ev.preventDefault();
-  }*/
+  }
   
   
   /*dropImg(ev) {
@@ -606,7 +624,7 @@ class BehaviourMapping extends React.Component {
 
       let img = document.createElement('img');
       img.setAttribute('id', this.state.newIconID.toString());
-      // this.addListenerToImage(img);
+      this.addListenerToImage(img);
       img.click();
       this.setState({
         newIconID: this.state.newIconID + 1
@@ -644,9 +662,7 @@ class BehaviourMapping extends React.Component {
         document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
         a.click();    
         a.remove();
-      });
-
-    // setTimeout(() => this.downloadArcGIS(), 1500);    
+      });   
   }
 
   hideOrShow() {
@@ -796,6 +812,10 @@ finishProject() {
     })(this.canvas.current, this.myImage.current);
   }
 
+  removeIcon() {
+    console.log('remove');
+  }
+
 
   render() {
     let imageClassList = classNames({
@@ -837,7 +857,8 @@ finishProject() {
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+                <li className="buttonLi" onClick={this.removeIcon}>Remove Icon</li>
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
