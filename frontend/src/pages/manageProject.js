@@ -29,12 +29,7 @@ function ManageProject() {
           "id": allProjects[i][0], 
           "name": allProjects[i][1],
           "description": allProjects[i][2],
-          "map": allProjects[i][3],
-          "screenshot": allProjects[i][4],
-          "startdate": allProjects[i][5],
-          "enddate": allProjects[i][6],
-          "zoom": allProjects[i][7],
-          "u_id": allProjects[i][8]});      
+          "screenshot": allProjects[i][3],});      
       }
     }
   }
@@ -44,12 +39,11 @@ function ManageProject() {
       setCurrImage(null);
       setshowProjInfo(false);
       return
-    } else if (currProj['screenshot'] === undefined) {
+    } else if (currProj['screenshot'] === undefined || currProj['screenshot'] === null) {
       setCurrImage(null);
       setshowProjInfo(true);
       return
     }
-    // u_id=u_id
     var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
     fetch(fetchstring)
       .then(res => res.blob())
