@@ -12,6 +12,8 @@ class BehaviourMapping extends React.Component {
       super(props)
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
+        imageUploaded: props.location.state.imageUploaded,
+        
         iconSRCs: [],
         iconObjects: [], 
         ourSRC: null,
@@ -21,8 +23,11 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
+        
+        
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
+        eventSize: 50,
         f_id: "",
         iconSRC: "",
         projdata: [],
@@ -66,6 +71,7 @@ class BehaviourMapping extends React.Component {
       this.saveInterview = this.saveInterview.bind(this);
       this.finishProject = this.finishProject.bind(this);
       this.takeScreenshot = this.takeScreenshot.bind(this);
+      this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
   }
 
   createIconObject(coordinates, currentSize) {
@@ -216,6 +222,8 @@ class BehaviourMapping extends React.Component {
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
+    img.style.height = this.state.eventSize + "px";
+    img.style.width = this.state.eventSize + "px";
     img.setAttribute('id', this.state.newIconID.toString());
     this.setState({
       ourIconID: this.state.newIconID
@@ -224,7 +232,7 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
-    let coordinates = [event.clientX - 225, event.clientY - 20];
+    let coordinates = [event.clientX - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
@@ -233,13 +241,14 @@ class BehaviourMapping extends React.Component {
     if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
-    img.style.left = coordinates[0] + 200 +'px';
+    img.style.left = coordinates[0] +'px';
     img.style.top =  coordinates[1] +'px';
+    console.log(img.style.left)
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     this.createIconObject(coordinates, imageSizeOnCreation);
     this.setState({
       ourIconCoord: {
-        x: coordinates[0],
+        x: coordinates[0] - 200,
         y: coordinates[1],
       }
     }, function() {});
@@ -248,16 +257,14 @@ class BehaviourMapping extends React.Component {
   }
 
  pointIcon() {
-    // Finn grad
     var degreerot = Math.atan2(
         this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
         -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
-    ); // our target is the mouse substracted by iconlocation
-    // the second param is the Y dir
+    ); 
     var degrees = degreerot*180/Math.PI - 90;
     var round_degree = Math.round(degrees);
     var string_degree = 'rotate(' + round_degree.toString() +'deg)';
-    // this.state.ourIconCoord.degree = string_degree;
+   
     this.setState({
       ourIconCoord: {
         x: this.state.ourIconCoord.x,
@@ -265,7 +272,6 @@ class BehaviourMapping extends React.Component {
         degree: string_degree
       }
     });
-    // point icon with css
     var img = document.getElementById(this.state.ourIconID.toString());
     if (string_degree != null) {
       img.style.transform = string_degree;
@@ -360,7 +366,7 @@ class BehaviourMapping extends React.Component {
   }
 
   findScreenSize() {
-    this.stopPointing()
+    // this.stopPointing()
     let mapImage = document.querySelector('.map-image');
     this.setState({
       currentScreenSize: {
@@ -612,6 +618,8 @@ class BehaviourMapping extends React.Component {
         newIconID: this.state.newIconID + 1
       }, function() {});   
       img.classList.add('icon');
+      img.style.height = this.state.eventSize + "px";
+      img.style.width = this.state.eventSize + "px";
       img.src = src;
       document.getElementById('icon-container').appendChild(img);
       img.style.top =  (coord[1])+'px';
@@ -738,6 +746,33 @@ finishProject() {
   }, 1500);
 }
 
+changeSizeOfIcons(event) {
+  if (event.target.textContent === "+") {
+    this.setState({eventSize: this.state.eventSize + 5}, function () {
+      for (var i=0; i<this.state.newIconID; i++) {
+        let event = document.getElementById(i.toString());
+        event.style.height = this.state.eventSize + "px";
+        event.style.width = this.state.eventSize + "px";
+        event.style.left = (parseFloat(event.style.left) -2.5) +'px';
+        event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+      }
+    })
+  } else if (event.target.textContent === "-") {
+    if (this.state.eventSize > 0 ) {
+      this.setState({eventSize: this.state.eventSize - 5}, function () {
+        for (var j=0; j<this.state.newIconID; j++) {
+          let event = document.getElementById(j.toString());
+          event.style.height = this.state.eventSize + "px";
+          event.style.width = this.state.eventSize + "px";
+          event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
+          event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+        }
+    })
+      
+    }
+  }
+}
+
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
@@ -799,7 +834,8 @@ finishProject() {
 
   render() {
     let imageClassList = classNames({
-      'map-image': true,
+      'map-image': !this.state.imageUploaded,
+      'uploaded-map-image': this.state.imageUploaded,
       'visible': this.state.onlyObservation,
       'invisible': !this.state.onlyObservation
     });
@@ -834,6 +870,14 @@ finishProject() {
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
                 <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li className="bigButtonLi">
+                  <div>Change size of events</div>
+                  <div className="changeSizeContainer">
+                    <p className="changeSize" onClick={this.changeSizeOfIcons}>+</p>
+                    <p className="changeSize" onClick={this.changeSizeOfIcons}>-</p>
+                  </div>
+                </li>
+
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
@@ -859,9 +903,7 @@ finishProject() {
               className={imageClassList}
               src={this.state.mapblob}
               ref={this.myImage}
-              
             />
-            
             <div id="icon-container" />
           </div>
           

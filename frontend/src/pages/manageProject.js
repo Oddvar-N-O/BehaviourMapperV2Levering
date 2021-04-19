@@ -29,18 +29,19 @@ function ManageProject() {
           "id": allProjects[i][0], 
           "name": allProjects[i][1],
           "description": allProjects[i][2],
-          "map": allProjects[i][3],
-          "screenshot": allProjects[i][4],
-          "startdate": allProjects[i][5],
-          "enddate": allProjects[i][6],
-          "zoom": allProjects[i][7],
-          "u_id": allProjects[i][8]});      
+          "screenshot": allProjects[i][3],});      
       }
     }
   }
 
   useEffect(() => {
     if (currProj['id'] === null) {
+      setCurrImage(null);
+      setshowProjInfo(false);
+      return
+    } else if (currProj['screenshot'] === undefined || currProj['screenshot'] === null) {
+      setCurrImage(null);
+      setshowProjInfo(true);
       return
     }
     var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
@@ -73,6 +74,18 @@ function ManageProject() {
       });
     }
 
+  const checkIfDeletionIsDesired = () => {
+    if (window.confirm("Do you want to delete this project?")) {
+      const data = new FormData();
+      data.append('p_id', currProj['id']);
+      fetch(window.backend_url + 'deleteproject', {
+        method: 'POST',
+        body: data,
+        });
+      setTimeout(() => window.location.reload(), 500)
+    }
+  }
+
   return ( // id="container"
         <div id="load-project">
           <div className="load-project-box">
@@ -84,9 +97,14 @@ function ManageProject() {
               <h1>{currProj["name"]}</h1>
               <p>Description: {currProj["description"]}</p>
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} src={currImage} id='opplastetKart' />
+              <div id="manage-buttons">
               <button onClick={() => shapefile()}>
                 Export Shapefiles
               </button>
+              <button onClick={() => checkIfDeletionIsDesired()}>
+                Delete this project
+              </button>
+              </div>
             </div>
           </div>
         </div>

@@ -9,5 +9,5 @@ it('displays the Manageprojectpage', () => {
   );
   const sidebarComponents = testlist.find('div')
 //   console.log(testlist.getElements()[0]['props']);
-  expect(sidebarComponents.length).toEqual(3);
+  expect(sidebarComponents.length).toEqual(4);
 });

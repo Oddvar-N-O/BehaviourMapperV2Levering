@@ -24,7 +24,8 @@ class ChooseImage extends React.Component {
       this.map = new Map({
         target: null,
         layers: [new TileLayer({source: new OSM()})],
-        view: new View({center: transform([5.733107, 58.969975], 'EPSG:4326', 'EPSG:3857'), zoom: 12}),
+        view: new View({center: transform([5.733107, 58.969975],
+          'EPSG:4326', 'EPSG:3857'), zoom: 12}),
         controls: [new Zoom()]
       });
       this.addProject = this.addProject.bind(this);
@@ -87,7 +88,8 @@ class ChooseImage extends React.Component {
         .then(blob => {
           blob.lastModifiedDate = new Date();
           blob.name = this.state.projectName + ".png";
-          var file = new File([blob], blob.name, { lastModified: new Date().getTime(), type: blob.type })
+          var file = new File([blob], blob.name, 
+            { lastModified: new Date().getTime(), type: blob.type })
           const data = new FormData();
           data.append('file', file);
           data.append('p_id', this.state.p_id);
@@ -105,7 +107,8 @@ class ChooseImage extends React.Component {
     this.props.history.push({
       pathname: '/mapping',
       state: {
-          p_id: this.state.p_id
+          p_id: this.state.p_id,
+          imageUploaded: false,
       },
     });
   }
@@ -136,10 +139,9 @@ class ChooseImage extends React.Component {
               </Link> 
               {/* <span className="back-icon-text"> go back </span> */}
               <div className="sidebar-text"> Projectname: <br/> {this.state.projectName}</div>
-              <div className="sidebar-text">Zoom in to choose your location, then click "Use Map" to proceed</div>
-              
+              <div className="sidebar-text">Zoom in to choose your location,
+              then click "Use Map" to proceed</div>
               <button className="choose-image-button" onClick={this.addProject}>Use Map</button>
-
             </div>
               <Link to="/startpage" className="close-icon">
                   <AiIcons.AiOutlineClose />

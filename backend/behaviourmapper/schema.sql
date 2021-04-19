@@ -6,13 +6,6 @@ CREATE TABLE IF NOT EXISTS "Users" (
 	PRIMARY KEY("openid")
 );
 
-DROP TABLE IF EXISTS "Session" ;
-
-CREATE TABLE IF NOT EXISTS "Session" (
-	"openid"    VARCHAR NULL UNIQUE,
-	PRIMARY KEY("openid")
-);
-
 DROP TABLE IF EXISTS [Project];
 
 CREATE TABLE IF NOT EXISTS [Project] (
