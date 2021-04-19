@@ -27,6 +27,7 @@ class AllIcons extends React.Component {
             this.setState({
                 allIconData: data
             })
+            console.log(this.state.allIconData)
             for (let i=0; i<this.state.allIconData.length; i++){
                 if (this.state.allIconData[i].color === "red"){
                     this.state.redData.push(this.state.allIconData[i])
@@ -40,6 +41,7 @@ class AllIcons extends React.Component {
             }            
         })
         this.handleChange = this.handleChange.bind(this)
+        console.log(this.state.yellowData)
     };
 
     handleChange(event) {
@@ -100,7 +102,6 @@ class AllIcons extends React.Component {
 
         return (
             <div className="icon-select">
-                HEEEEEEEEEEEEEEEIIIIIIIIIISSSSSSAAAAAAAANNNNNNNNN!!!!!!!!
                 <ul className="gender-select">
                     <li onClick={() => {
                         this.setState({color: "blue"})}}
@@ -132,6 +133,10 @@ class AllIcons extends React.Component {
 
                 <div className={this.state.color==="green" ? "icons-visible" : "icons-invisible"}>
                     {greenIcons}
+                </div>
+
+                <div className={this.state.color==="yellow" ? "icons-visible" : "icons-invisible"}>
+                    {yellowIcons}
                 </div>
                 
             </div>

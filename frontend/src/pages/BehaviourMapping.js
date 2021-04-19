@@ -137,6 +137,9 @@ class BehaviourMapping extends React.Component {
         case 'green':
           descr[1] = "Child";
           break;
+          case 'yellow':
+          descr[1] = "Group";
+          break;
         default:
           break;
       }

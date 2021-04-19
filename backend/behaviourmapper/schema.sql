@@ -117,5 +117,6 @@ INSERT INTO 'Figures' ("description", "color", "image") VALUES
     ('talking in phone','green', './icons/child/talkPhone.png'),
     ('wheelchair','green', './icons/child/wheelchair.png'),
     ('other','green', './icons/child/other.png'),
-    ('group moving','yellow', './icons/group/groupMoving.png'),
-    ('group standing still','yellow', './icons/group/groupStill.png'),
+    ('moving','yellow', './icons/group/groupMoving.png'),
+    ('standing still','yellow', './icons/group/groupStill.png'),
+    ('standing still','yellow', './icons/group/groupStill.png');
