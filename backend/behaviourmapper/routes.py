@@ -167,7 +167,7 @@ def getProject():
         get_proj_sql = ("SELECT * FROM Project WHERE u_id=? AND name=?")
         proj_values = (request.args.get('u_id'), request.args.get('name'))
         if proj_values[1] == None:
-            get_proj_sql = ("SELECT id, name, description, map FROM Project WHERE u_id=?")
+            get_proj_sql = ("SELECT id, name, description, screenshot FROM Project WHERE u_id=?")
             projects = query_db(get_proj_sql, (proj_values[0],))
             projects = projects[:-1]
         else:
