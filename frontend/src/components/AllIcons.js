@@ -13,6 +13,7 @@ class AllIcons extends React.Component {
             redData: [],
             blueData: [],
             greenData: [],
+            yellowData: [],
             u_id: window.sessionStorage.getItem('uID'),
 
         };
@@ -31,8 +32,10 @@ class AllIcons extends React.Component {
                     this.state.redData.push(this.state.allIconData[i])
                 } else if (this.state.allIconData[i].color === "blue") {
                     this.state.blueData.push(this.state.allIconData[i])
-                } else {
+                } else if (this.state.allIconData[i].color === "green") {
                     this.state.greenData.push(this.state.allIconData[i])
+                } else {
+                    this.state.yellowData.push(this.state.allIconData[i])
                 }
             }            
         })
@@ -83,8 +86,21 @@ class AllIcons extends React.Component {
                 </div>
             </div>)
 
+        const yellowIcons = this.state.yellowData.map(data => 
+            <div key={data.id} className='single-icon'>
+                <div className='single-icon' onClick={this.props.selectIcon}>
+                    <Icon 
+                    description={data.description} 
+                    color={data.color}
+                    f_id={data.id}/>
+                    </div>
+                    <div className="icon-description">{data.description}
+                </div>
+            </div>)
+
         return (
             <div className="icon-select">
+                HEEEEEEEEEEEEEEEIIIIIIIIIISSSSSSAAAAAAAANNNNNNNNN!!!!!!!!
                 <ul className="gender-select">
                     <li onClick={() => {
                         this.setState({color: "blue"})}}
@@ -98,6 +114,10 @@ class AllIcons extends React.Component {
                     <li onClick={() => {this.setState({color: "green"})}}
                         className={ this.state.color === "green" ? "selected" : "not-selected" }
                         >Child
+                    </li>
+                    <li onClick={() => {this.setState({color: "yellow"})}}
+                        className={ this.state.color === "yellow" ? "selected" : "not-selected" }
+                        >Group
                     </li>
                     <div className="x" onClick={this.props.close}><AiIcons.AiOutlineClose /></div>
                 </ul>
