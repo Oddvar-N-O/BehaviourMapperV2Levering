@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import zipfile
+import csv
 from datetime import date, datetime
 from time import time
 
@@ -419,6 +420,61 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates, screenSize
     newCoordinates = [newX, newY]
     return newCoordinates
 
+# When InterviewEvents are added to db, they need to be added here.
+@bp.route('/exporttocsv', methods=['POST'])
+def exportToCsv():
+    if authenticateUser(request.form.get('u_id')):
+        project_fromdb = query_db('SELECT * FROM Project WHERE u_id=? AND id=? ', (request.form.get('u_id'),request.form.get('p_id')), True)
+        all_events_fromdb = query_db('SELECT e_id FROM Project_has_Event WHERE p_id=?', (request.form.get('p_id'),))
+        writeProjectToCSV(project_fromdb)
+        writeEventsToCSV(all_events_fromdb)
+        zip_files('csvfiles')
+        return sendFileToFrontend('csvfiles.zip')
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+def writeProjectToCSV(project_fromdb):
+    project_data = ({
+        'id':project_fromdb[0], 
+        'name':project_fromdb[1],
+        'description':project_fromdb[2],
+        'map':project_fromdb[3],
+        'screenshot':project_fromdb[4],
+        'startdate':project_fromdb[5],
+        'enddate':project_fromdb[6],
+        'originalsize':project_fromdb[7],
+        'zoom':project_fromdb[8],
+        'leftX':project_fromdb[9],
+        'lowerY':project_fromdb[10],
+        'rightX':project_fromdb[11],
+        'upperY':project_fromdb[12]})
+    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','u_id']
+    with open('behaviourmapper\static\csvfiles\project.csv', 'w+') as f:
+        writer = csv.DictWriter(f, proj_fieldnames)
+        writer.writeheader()
+        writer.writerow(project_data)
+
+
+def writeEventsToCSV(all_events_fromdb):
+    event_data, events = [], []
+    for event in all_events_fromdb:
+        if event != 0:
+            events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
+    for data in events:
+        event_data.append({
+            'id':data[0], 
+            'direction':data[1], 
+            'center_coordinate':data[2],
+            'image_size_when_created': data[3],
+            'f_id': data[4]})
+    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'f_id']
+    with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
+        writer = csv.DictWriter(f, event_fieldnames)
+        writer.writeheader()
+        for i in range(len(event_data)):
+            writer.writerow(event_data[i])
+
 @bp.route('/createarcgis', methods=['POST'])
 def createARCGIS():
     if authenticateUser(request.form.get('u_id')):
@@ -471,25 +527,30 @@ def createARCGIS():
             w.record(str(point_ID), 'Point')
             point_ID += 1
 
-        with zipfile.ZipFile('QGIS_SHAPEFILES.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
-            absPath = os.path.abspath('shapefiles')
-            filesLocation = 'behaviourmapper/static/shapefiles'
-            for filename in os.listdir(filesLocation):
-                f = os.path.join(filesLocation, filename)
-                if os.path.isfile(f):
-                    my_zip.write(f)
-    
-        return exportARCGIS()
+        zip_files('shapefiles')
+        return sendFileToFrontend('shapefiles.zip')
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-def exportARCGIS(): #path, ziph):
-    placement = os.path.abspath('QGIS_SHAPEFILES.zip')
+def sendFileToFrontend(file): #path, ziph):
+    placement = os.path.abspath(file)
     try:
         return send_file(placement)
     except FileNotFoundError:
         abort(404)
+
+def zip_files(typeOfFiles):
+    with zipfile.ZipFile(typeOfFiles + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
+            absPath = os.path.abspath(typeOfFiles)
+            filesLocation = 'behaviourmapper/static/' + typeOfFiles
+            for filename in os.listdir(filesLocation):
+                f = os.path.join(filesLocation, filename)
+                arcname = f[len(filesLocation) + 1:]
+                print ('zipping %s as %s' % (os.path.join(filesLocation, filename),
+                                        arcname))
+                if os.path.isfile(f):
+                    my_zip.write(f, arcname=arcname)
 
 def addMapName(mapname, p_id, u_id):
     add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
