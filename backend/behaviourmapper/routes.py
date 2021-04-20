@@ -462,13 +462,18 @@ def writeEventsToCSV(all_events_fromdb):
         if event != 0:
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
-        event_data.append({
-            'id':data[0], 
-            'direction':data[1], 
-            'center_coordinate':data[2],
-            'image_size_when_created': data[3],
-            'f_id': data[4]})
-    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'f_id']
+        if data[5] != 0:
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[5],), True))
+            event_data.append({
+                'id':data[0], 
+                'direction':data[1], 
+                'center_coordinate':data[2],
+                'image_size_when_created': data[3],
+                'created': data[4],
+                'f_id': data[5],
+                'description': figure[0],
+                'color': figure[1]})
+    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
