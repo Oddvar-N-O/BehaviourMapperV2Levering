@@ -80,7 +80,7 @@ function ManageProject() {
       });
     }
 
-  const checkIfDeletionIsDesired = () => {
+  const deleteProject = () => {
     if (window.confirm("Do you want to delete this project?")) {
       const data = new FormData();
       data.append('p_id', currProj['id']);
@@ -107,7 +107,7 @@ function ManageProject() {
               <button onClick={() => shapefile()}>
                 Export Shapefiles
               </button>
-              <button onClick={() => checkIfDeletionIsDesired()}>
+              <button onClick={() => deleteProject()}>
                 Delete this project
               </button>
               </div>

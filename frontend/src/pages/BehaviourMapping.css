@@ -131,6 +131,8 @@
     width: calc(100vw - 200px);
     min-height: 300px;
     min-width: 400px;
+    /* height: 600px;
+    width: 600px;*/
     order: 3;
 }
 .uploaded-map-image {

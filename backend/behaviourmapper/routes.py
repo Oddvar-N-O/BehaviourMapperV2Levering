@@ -61,10 +61,8 @@ def userInDB(openid):
     find_user = ("SELECT email FROM Users WHERE openid=?")
     res = query_db(find_user, (openid,), True)
     if res == 0:
-        print('GGAGAGGA')
         return False
     elif res != 0:
-        print('YEEEEEEET')
         return True
 
 def addUser(openid, email):
@@ -113,14 +111,79 @@ def addProject():
 def deleteProject():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
+        deleteAllEvents(p_id)
         deleteImage(p_id)
+
         delete_project = ("DELETE FROM Project WHERE id=?")
-        res = query_db(delete_project, (p_id,), True)
-        print(res)
+
+        query_db(delete_project, (p_id,), True)
+
         return "deleted"
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+def deleteAllEvents(p_id):
+    delete_event = ("DELETE FROM Event WHERE id=?")
+    eventsJSON = get_events_func(p_id)
+    events = json.loads(eventsJSON)
+    for event in events:
+        e_id = event[0]
+        deleteProjectHasEvent(e_id)
+        res = query_db(delete_event, (e_id,), True)
+        print(str(res))
+    return "deleted all events"
+
+def deleteProjectHasEvent(e_id):
+    delete_project_has_event = ("DELETE FROM Project_has_Event WHERE e_id=?")
+    res = query_db(delete_project_has_event, (e_id,), True)
+    return res
+
+@bp.route('/deleteevent', methods=['POST'])
+def deleteEvent():
+    if authenticateUser(request.form.get('u_id')):
+        p_id = request.form.get('p_id')
+        number = int(request.form.get('number'))
+        print('N: ' + str(number))
+        
+        eventsJSON = get_events_func(p_id)
+        events = json.loads(eventsJSON)
+        
+        print('Length of Array: ' + str(len(events)))
+        
+        event = events[number]
+        e_id = event[0]
+        res = deleteProjectHasEvent(e_id)
+
+        
+        delete_event = ("DELETE FROM Event WHERE id=?")
+        res = query_db(delete_event, (e_id,), True)
+        
+        return 'res'
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/updateevent', methods=['POST'])
+def updateEvent():
+    if authenticateUser(request.form.get('u_id')):
+        p_id = request.form.get('p_id')
+        number = int(request.form.get('number'))
+        newRotation = request.form.get(newRotation)
+        print('NEW ROTATION: ' + str(newRotation))
+        
+        eventsJSON = get_events_func(p_id)
+        events = json.loads(eventsJSON)
+        
+        event = events[number]
+        e_id = event[0]
+        
+        update_event = ("UPDATE Event SET direction =? WHERE id=?")
+        res = query_db(update_event, (newRotation, e_id,), True)
+        
+        return 'res'
+    else:
+        logger.info("Not logged in.")
 
 def deleteImage(p_id):
     find_image_name = ("SELECT map, screenshot FROM Project WHERE id=?") 
@@ -131,9 +194,6 @@ def deleteImage(p_id):
             location = os.path.join(target, filename)
             if os.path.isfile(location):
                 os.remove(location)
-            else:
-                print('notnPATH')
-
 
 @bp.route('/updateproject')
 def updateProject():

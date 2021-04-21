@@ -6,6 +6,7 @@ import './BehaviourMapping.css';
 import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
 import domtoimage from 'dom-to-image';
+// import EventIcon from '../components/EventIcon';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -17,7 +18,7 @@ class BehaviourMapping extends React.Component {
         iconSRCs: [],
         iconObjects: [], 
         ourSRC: null,
-        sendNewIconToBD: false,
+        sendIconToBD: false,
         newIconID: 0,
         actionID: 0,
         ourIconID: 0,
@@ -75,25 +76,28 @@ class BehaviourMapping extends React.Component {
       this.addListenerToImage = this.addListenerToImage.bind(this);
       this.interactWithEvent = this.interactWithEvent.bind(this);
       this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
+      this.showIconObjects = this.showIconObjects.bind(this);
+      this.clearIconObjects = this.clearIconObjects.bind(this);
   }
 
-  createIconObject(coordinates, currentSize) {
+  createIconObject(coordinates, currentSize, id) {
     let icon = {
+      updateCoord: false,
+      id: id,
       originalCoord: coordinates,
       originalSize: currentSize,
     };
     this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {});
   }
 
-  sendDatabaseEvent() {
-    // rettningen, xogykoordinat, tid, icon
+  sendEventToDatabase(iconId) {
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
-    // this.createIconObject(coordinates, currentSize)
+
     data.append('p_id', this.state.p_id);
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
@@ -153,14 +157,13 @@ class BehaviourMapping extends React.Component {
     let li = document.createElement('li');
 
     let newSrc = e.target.src;
-    this.setState({iconSRCs: [...this.state.iconSRCs, newSrc]}, function() {
-    });
+
     li.setAttribute('id', newSrc);
     let textArray = this.setInnerHTML(e.target.getAttribute('id'));
     let newText = textArray
-
+    let f_id = e.target.getAttribute('id')[e.target.getAttribute('id').length - 1];
     this.setState({
-      f_id: e.target.getAttribute('id')[e.target.getAttribute('id').length - 1]
+      f_id: f_id
     });
     this.setState({
       iconSRC: newSrc
@@ -174,6 +177,7 @@ class BehaviourMapping extends React.Component {
       
       li.addEventListener('click', () => {
         this.setState({ourSRC: li.getAttribute('id')}, function() {});
+        this.setState({f_id: f_id})
         this.hideIcon()
       });
       this.setState({ourSRC: newSrc}, function() {});
@@ -212,7 +216,7 @@ class BehaviourMapping extends React.Component {
     if (this.state.ourSRC !== null && this.state.addIcon === false) {
       if (this.state.actionID === 0) {
         this.placeIcon(event);
-        this.setState({sendNewIconToBD: true}, function() {});
+        this.setState({sendIconToBD: true}, function() {});
         this.startPointing();
       } else {
         this.pointIcon();
@@ -234,18 +238,22 @@ class BehaviourMapping extends React.Component {
   3 argument: children or innerHTML.
   let h1 = React.createElement('h1', {id: 'heading1'}, 'First React Element');
   ReactDOM.render(h1, document.getelementByID('container));
-  
   */
 
   placeIcon(event) {
     this.findScreenSize()
-    var img = document.createElement('img'); // React.createElement('h1', {id: this.state.newIconID.toString()},
-    this.addListenerToImage(img);
+    var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
     img.style.height = this.state.eventSize + "px";
     img.style.width = this.state.eventSize + "px";
     img.setAttribute('id', this.state.newIconID.toString());
+
+    img.addEventListener('click', () => {
+      this.setState({ourIconID: img.getAttribute('id')}, function() {console.log('oID: ' + this.state.ourIconID)});
+      this.showChosenIcon(img.getAttribute('id'));
+    });
+    
     this.setState({
       ourIconID: this.state.newIconID
     }, function() {});
@@ -253,7 +261,8 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
-    let coordinates = [event.clientX - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
+    let coordinates = [event.clientX - 200 - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
+
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
@@ -262,39 +271,68 @@ class BehaviourMapping extends React.Component {
     if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
-    img.style.left = coordinates[0] +'px';
+
+    img.style.left = coordinates[0] + 200 +'px';
     img.style.top =  coordinates[1] +'px';
-    console.log(img.style.left)
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
-    this.createIconObject(coordinates, imageSizeOnCreation);
+    this.createIconObject(coordinates, imageSizeOnCreation, img.getAttribute('id'));
     this.setState({
       ourIconCoord: {
-        x: coordinates[0] - 200,
+        x: coordinates[0],
         y: coordinates[1],
       }
     }, function() {});
     this.findScreenSize();
+    setTimeout(() => {
+      this.showChosenIcon(img.getAttribute('id'));
+    }, 50);
+  }
+
+  interactWithEvent(img) {
+    if (img != null) {
+      if (img.style.border === '4px solid red') {
+        img.style.border = 'none';
+        img.style.borderRadius = '5px';
+        this.setState({ourIconID: img.getAttribute('id')})
+      } else {
+        img.style.border = '4px solid red';
+      }
+    }
+  }
+
+  addListenerToImage(img) {
+    img.addEventListener('click', this.interactWithEvent(img));
   }
 
  pointIcon() {
-    var degreerot = Math.atan2(
-        this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
-        -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
-    ); 
-    var degrees = degreerot*180/Math.PI - 90;
-    var round_degree = Math.round(degrees);
-    var string_degree = 'rotate(' + round_degree.toString() +'deg)';
-   
-    this.setState({
-      ourIconCoord: {
-        x: this.state.ourIconCoord.x,
-        y: this.state.ourIconCoord.y,
-        degree: string_degree
+    if (this.state.ourIconID >= 0) {
+      let ourIconInfo;
+      for (let i=0; i<this.state.iconObjects.length ; i++) {
+        if (this.state.iconObjects[i].id === this.state.ourIconID) {
+          ourIconInfo = this.state.iconObjects[i];
+          
+          let degreerot = Math.atan2(
+              this.state.ourMouseCoord.x - ourIconInfo.originalCoord[0],
+              -(this.state.ourMouseCoord.y - ourIconInfo.originalCoord[1]),
+          ); 
+          var degrees = degreerot*180/Math.PI - 90;
+          var round_degree = Math.round(degrees);
+          var string_degree = 'rotate(' + round_degree.toString() +'deg)';
+        
+          this.setState({
+            ourIconCoord: {
+              x: this.state.ourIconCoord.x,
+              y: this.state.ourIconCoord.y,
+              degree: string_degree
+            }
+          });
+          var img = document.getElementById(this.state.ourIconID.toString());
+          if (img != null) {
+            img.style.transform = string_degree;
+          }
+          
+        }
       }
-    });
-    var img = document.getElementById(this.state.ourIconID.toString());
-    if (string_degree != null) {
-      img.style.transform = string_degree;
     }
   }
 
@@ -308,60 +346,52 @@ class BehaviourMapping extends React.Component {
     this.setState({
       actionID: 0,
     });
-    if (this.state.sendNewIconToBD) {
-      this.sendDatabaseEvent();
-      this.setState({sendNewIconToBD: false}, function() {});
+    if (this.state.sendIconToBD) {
+      this.sendEventToDatabase(this.state.ourIconID);
+      this.setState({sendIconToBD: false}, function() {});
     }
   }
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon != null) {
+    if (icon !== null && this.state.hideOrShow !== 'show') {
       icon.style.display = 'none';
     }
     this.stopPointing()
   }
 
   showAll() {
-    this.stopPointing()
+    // this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
-      icon.style.display = 'block';
+      if (icon != null) {
+        icon.style.display = 'block';
+      }
     }
   }
 
   hideAll() {
-    this.stopPointing()
-    var icon;
+    // this.stopPointing()
+    let icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
-      icon.style.display = 'none';
+      if (icon != null) {
+        icon.style.display = 'none';
+      }
     }
   }
 
   closeIconSelect() {
-    // this.hideAll()
     if (this.state.addIcon) {
       this.setState({ addIcon: false});
-    }  
-  }
-
-  interactWithEvent() {
-    console.log('slhlagilajgizglj')
-    if (img.style.border === '4px solid red') {
-      img.style.border = 'none';
-      img.style.borderRadius = '5px';
-      let iconInfo = this.state.iconObjects[img.getAttribute('id')];
-   } else {
-     img.style.border = '4px solid red';
+    }
+    if (this.state.hideOrShow === 'show') {
+      this.showAll();
     }
   }
 
-  addListenerToImage(img) {
-    img.addEventListener('click', this.interactWithEvent());
-    img.click();
-  }
+
 
   letImgDrop(ev) {
     ev.preventDefault();
@@ -409,9 +439,9 @@ class BehaviourMapping extends React.Component {
     if (this.state.formerEvents !== []) {
       if (this.state.currentScreenSize.x !== 0) {
         this.findScreenSize();
-        // if (this.state.currentScreenSize.x != this.state.formerScreenSize.x || ) {
-        this.placeEventsAfterChange()
-        // }
+        if (this.state.currentScreenSize.x !== this.state.formerScreenSize.x || this.state.currentScreenSize.y !== this.state.formerScreenSize.y ) {
+          this.placeEventsAfterChange()
+        }
         this.setState({formerScreenSize: this.state.currentScreenSize});
       }
     }
@@ -435,11 +465,12 @@ class BehaviourMapping extends React.Component {
     let icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
-      let iconInfo = this.state.iconObjects[i];
-
-      let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-      icon.style.left = (coords[0] + 200) +'px';
-      icon.style.top =  (coords[1]) +'px';
+      if (icon != null) {
+        let iconInfo = this.state.iconObjects[i];
+        let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+        icon.style.left = (coords[0] + 200) +'px';
+        icon.style.top =  (coords[1]) +'px';
+      }
     }
   }
 
@@ -606,7 +637,7 @@ class BehaviourMapping extends React.Component {
       let eventset = this.state.formerEvents[i];
       let imageSizeOnCreation = this.findIntegerCoordinates(eventset[0][3]);
       var coord = this.findIntegerCoordinates(eventset[0][2])
-      this.createIconObject(coord, imageSizeOnCreation);
+      this.createIconObject(coord, imageSizeOnCreation, i);
       let rotation = eventset[0][1]
       let f_id = eventset[0][5]
       coord = this.findNewCoordinates(imageSizeOnCreation, coord);
@@ -630,7 +661,7 @@ class BehaviourMapping extends React.Component {
 
       let img = document.createElement('img');
       img.setAttribute('id', this.state.newIconID.toString());
-      this.addListenerToImage(img);
+      // this.addListenerToImage(img);
       img.click();
       this.setState({
         newIconID: this.state.newIconID + 1
@@ -673,16 +704,12 @@ class BehaviourMapping extends React.Component {
       });   
   }
 
-  hideOrShow() {
-    let liElementHideOrShow = document.getElementById('hide-or-show');
+  hideOrShowFunction() {
     if (this.state.hideOrShow === 'hide') {
-      this.setState({hideOrShow: 'show'});
-      this.hideAll();
-      liElementHideOrShow.innerHTML = "Show Icons"
-    } else {
-      this.setState({hideOrShow: 'hide'});
-      this.showAll();
-      liElementHideOrShow.innerHTML = "Hide Icons"
+      this.setState({hideOrShow: 'show'}, function() {this.showAll();});
+      // knappen forandre seg til show
+    } else if (this.state.hideOrShow === 'show') {
+      this.setState({hideOrShow: 'hide'}, function() {this.hideAll();});
     }
   }
 
@@ -842,17 +869,104 @@ changeSizeOfIcons(event) {
         } else {
           ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
         }
-              // draw all lines again.
       }
     })(this.canvas.current, this.myImage.current);
   }
 
+  findIconObjectOfOurID() {
+    let iconObject;
+    for (let i=0; i<this.state.iconObjects.length ;i++) {
+      iconObject = this.state.iconObjects[i];
+      if (iconObject.id === this.state.ourIconID) {
+        return iconObject, i;
+      }
+    }
+    return null;
+  }
+
   removeIcon() {
-    console.log('remove');
+    this.stopPointing();
+    this.setState({actionID: 1}, function() {})
+    var icon = document.getElementById(this.state.ourIconID.toString());
+    if (icon != null && this.state.ourIconID >= 0) {
+      icon.remove();
+      console.log('bef func: ' + this.state.iconObjects.length);
+      let _, i = this.findIconObjectOfOurID();
+
+      this.removeFromIconObjects(i);
+ 
+      console.log('aft func: ' + this.state.iconObjects.length);
+      console.log('-----------------------------------------------')
+      
+      const data = new FormData();
+      data.append('p_id', this.state.p_id);
+      data.append('u_id', this.state.u_id);
+      data.append('number', i);
+  
+      fetch(window.backend_url +'deleteevent', {
+        method: 'POST',
+        body: data,
+      })
+
+      // setTimeout(() => this.showChosenIcon(), 100);
+      this.setState({ourIconID: -1}, function() {});
+      if (this.state.newIconID > 0) {
+        this.setState({newIconID: this.state.newIconID - 1}, function() {});
+      }
+      if (this.state.sendIconToBD === true) {
+        this.setState({sendIconToBD: false}, function() {});
+      }  
+    }
+  }
+
+  removeFromIconObjects(i) {
+    let newIconObjects = [...this.state.iconObjects];
+    if (newIconObjects.length > 1) {
+      newIconObjects.splice(i, 1);
+    } else {
+      this.clearIconObjects();
+    }
+    this.setState({iconObjects: newIconObjects},
+      function() {console.log('we should have 1 less: ' + this.state.iconObjects.length)
+    });
+  }
+
+
+  showChosenIcon(id) {
+    let iconObject;
+    let icon;
+    for (let i=0; i<this.state.iconObjects.length; i++) {
+      
+      iconObject = this.state.iconObjects[i]
+      icon = document.getElementById(iconObject.id);
+      if (icon != null) {
+        if (iconObject.id === this.state.ourIconID) {
+          icon.style.border = '4px solid red';
+          icon.style.border = 'block';
+        } else {
+          icon.style.border = 'none';
+        }
+      } else {
+      }
+    }
+  }
+
+  showIconObjects() {
+    console.log(this.state.iconObjects)
+  }
+
+  clearIconObjects() {
+    this.setState({iconObjects: []}, function() {});
   }
 
 
   render() {
+    /* let items=['Item 1','Item 2','Item 3','Item 4','Item 5'];
+    let itemList=[];
+    items.forEach((item,index)=>{
+      itemList.push( <li key={index}>{item}</li>)
+    });*/
+    // {itemlist}
     let imageClassList = classNames({
       'map-image': !this.state.imageUploaded,
       'uploaded-map-image': this.state.imageUploaded,
@@ -873,9 +987,12 @@ changeSizeOfIcons(event) {
       'screenshot-div': true,
       'visible': true
     });
+    // <li className="buttonLi" onClick={this.showIconObjects}>ShowIconObjects </li>
+    // <li className="buttonLi" onClick={this.clearIconObjects}>ClearIconObjects </li>
     return (
       <Authenticated>
         <div id='maincont' >
+          
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
                 <AllIcons selectIcon = {this.selectIcon} 
@@ -890,6 +1007,8 @@ changeSizeOfIcons(event) {
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
                 <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li className="buttonLi" onClick={this.showIconObjects}>ShowIconObjects </li>
+                <li className="buttonLi" onClick={this.clearIconObjects}>ClearIconObjects </li>
                 <li className="bigButtonLi">
                   <div>Change size of events</div>
                   <div className="changeSizeContainer">
@@ -898,10 +1017,10 @@ changeSizeOfIcons(event) {
                   </div>
                 </li>
 
-                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
-                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
+                <li id="hide-or-show" className="buttonLi" onClick={() => this.hideOrShowFunction()}> {this.state.hideOrShow} Icons</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
                 <li className="buttonLi" onClick={this.removeIcon}>Remove Icon</li>
+                <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
@@ -925,12 +1044,14 @@ changeSizeOfIcons(event) {
               ref={this.myImage}
             />
             <div id="icon-container" />
-          </div>
-          
-
+              
+            </div>
         </div>
       </Authenticated>
     );
+/*
+<EventIcon currentNewID={2} chosenSRC={'./icons/man/bike.png'} />
+<EventIcon currentNewID={3} chosenSRC={'./icons/man/bike.png'} /> */
   }
 }
 
