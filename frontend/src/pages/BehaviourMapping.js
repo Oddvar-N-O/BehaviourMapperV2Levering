@@ -762,31 +762,10 @@ changeShowContextMenu() {
 selectItemForContextMenu(e) {
   let list = document.getElementById('favorite-icon-list');
   let li = document.createElement('li');
-  let newSrc = e.target.src;
-  li.setAttribute('id', newSrc);
-  let newText = this.setInnerHTML(e.target.getAttribute('id'));
-
-  if (e.target.getAttribute('id') !== null) {
-    let imgIdSplit = e.target.getAttribute('id').split(' ')
-    this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
-  } else if (e.target.children[0].getAttribute('id') !== null ) {
-    let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
-    this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
-  }
-
+  let newSrc, newText;
+  ({ newSrc, newText } = this.getNewSrcAndText(e, newSrc, newText, li));
   if (this.alreadyInList(newText, list) === false && this.objectExists(newText) === true) {
-    li.innerHTML = newText;
-    li.addEventListener('click', () => {
-      this.setState({ourSRC: li.getAttribute('id')});
-      this.hideIcon()
-    });
-    this.setState({ourSRC: newSrc}, function() {});
-    this.hideIcon()
-
-    list.appendChild(li);
-    this.setState({
-      imgIcon: li.getAttribute('id')
-    });
+    this.setEventlistenerAndAppendLi(li, newText, newSrc, list);
   } else if (this.alreadyInList(newText, list) === true && this.objectExists(newText) === true) {
     let elementToRemove = document.getElementById(newSrc)
     list.removeChild(elementToRemove);
@@ -794,6 +773,37 @@ selectItemForContextMenu(e) {
   this.setState({addIcon: false});
 }
 
+
+  setEventlistenerAndAppendLi(li, newText, newSrc, list) {
+    li.innerHTML = newText;
+    li.addEventListener('click', () => {
+      this.setState({ ourSRC: li.getAttribute('id') });
+      this.hideIcon();
+    });
+    this.setState({ ourSRC: newSrc }, function () { });
+    this.hideIcon();
+    list.appendChild(li);
+    this.setState({
+      imgIcon: li.getAttribute('id')
+    });
+  }
+
+  getNewSrcAndText(e, newSrc, newText, li) {
+    if (e.target.getAttribute('id') !== null) {
+      let imgIdSplit = e.target.getAttribute('id').split(' ');
+      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newSrc = e.target.src;
+      newText = this.setInnerHTML(e.target.getAttribute('id'));
+      li.setAttribute('id', newSrc);
+    } else if (e.target.children[0].getAttribute('id') !== null) {
+      let imgIdSplit = e.target.children[0].getAttribute('id').split(' ');
+      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newSrc = e.target.children[0].src;
+      newText = this.setInnerHTML(e.target.children[0].getAttribute('id'));
+      li.setAttribute('id', newSrc);
+    }
+    return { newSrc, newText };
+  }
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
