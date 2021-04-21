@@ -29,12 +29,7 @@ function ManageProject() {
           "id": allProjects[i][0], 
           "name": allProjects[i][1],
           "description": allProjects[i][2],
-          "map": allProjects[i][3],
-          "screenshot": allProjects[i][4],
-          "startdate": allProjects[i][5],
-          "enddate": allProjects[i][6],
-          "zoom": allProjects[i][7],
-          "u_id": allProjects[i][8]});      
+          "screenshot": allProjects[i][3],});      
       }
     }
   }
@@ -44,12 +39,11 @@ function ManageProject() {
       setCurrImage(null);
       setshowProjInfo(false);
       return
-    } else if (currProj['screenshot'] === undefined) {
+    } else if (currProj['screenshot'] === undefined || currProj['screenshot'] === null) {
       setCurrImage(null);
       setshowProjInfo(true);
       return
     }
-    // u_id=u_id
     var fetchstring = window.backend_url + `getscreenshot?p_id=${currProj['id']}&u_id=${u_id}`
     fetch(fetchstring)
       .then(res => res.blob())
@@ -59,26 +53,36 @@ function ManageProject() {
         setshowProjInfo(true);
     });
   }, [currProj, u_id]);
+  
 
-  const shapefile = () => {
-    const data = new FormData();
-    data.append('p_id', currProj['id']);
-    data.append('u_id', u_id);
-    fetch(window.backend_url + 'createarcgis', {
-      method: 'POST',
-      body: data,
-      })
-      .then(response => response.blob())
+    function exportZipFiles(e) {
+      e.preventDefault();
+      let backendAPI, filename
+      if (e.target.textContent === "Export to csv") {
+        backendAPI = 'exporttocsv'
+        filename = 'csvfiles'
+      } else if (e.target.textContent === "Export Shapefiles") {
+        backendAPI = 'createarcgis'
+        filename = 'shapefiles'
+      }
+      const data = new FormData();
+      data.append('p_id', currProj['id']);
+      data.append('u_id', u_id);
+      fetch(window.backend_url + backendAPI, {
+        method: 'POST',
+        body: data,
+        })
+        .then(response => response.blob())
       .then(blob => {
         var url = window.URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
-        a.download = "Shapefiles.zip";
+        a.download = filename + ".zip";
         document.body.appendChild(a);
         a.click();    
         a.remove();
       });
-    }
+      }
 
   const deleteProject = () => {
     if (window.confirm("Do you want to delete this project?")) {
@@ -104,10 +108,13 @@ function ManageProject() {
               <p>Description: {currProj["description"]}</p>
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} src={currImage} id='opplastetKart' />
               <div id="manage-buttons">
-              <button onClick={() => shapefile()}>
+              <button onClick={exportZipFiles}>
                 Export Shapefiles
               </button>
-              <button onClick={() => deleteProject()}>
+              <button onClick={exportZipFiles}>
+                Export to csv
+              </button>
+              <button onClick={deleteProject}>
                 Delete this project
               </button>
               </div>

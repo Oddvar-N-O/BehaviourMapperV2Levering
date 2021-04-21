@@ -1,6 +1,7 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
+import ContextMenu from '../components/ContextMenu';
 import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
 import classNames from 'classnames';
@@ -15,7 +16,6 @@ class BehaviourMapping extends React.Component {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         imageUploaded: props.location.state.imageUploaded,
         
-        iconSRCs: [],
         iconObjects: [], 
         ourSRC: null,
         sendIconToBD: false,
@@ -37,13 +37,14 @@ class BehaviourMapping extends React.Component {
         formerScreenSize: {x: 0, y: 0,},
         originalScreenSize: {x: 0, y: 0},
         mapblob: "",
-        hideOrShow: "hide",
+        hideOrShow: "Show",
         arcGISfilename: "",
         scrollHorizontal: 0,
         scrollVertical: 0,
         onlyObservation: true,
         drawLine: false,
         addInterview: false,
+        showContextMenu: false,
         coords: [],
         eightOfCoords: 0,
         interviews: [],
@@ -55,10 +56,9 @@ class BehaviourMapping extends React.Component {
       this.interviewElement = React.createRef();
 
       this.handleScroll = this.handleScroll.bind(this)
-      // this.moveIcon = this.moveIcon.bind(this)
       this.handleResize = this.handleResize.bind(this);
       this.writeFilename = this.writeFilename.bind(this);
-      this.selectIcon = this.addIconToList.bind(this);
+      this.selectIcon = this.selectIcon.bind(this);
       this.closeIconSelect = this.closeIconSelect.bind(this);
       this.newIcon = this.newIcon.bind(this);
       this.showAll = this.showAll.bind(this);
@@ -76,8 +76,8 @@ class BehaviourMapping extends React.Component {
       this.addListenerToImage = this.addListenerToImage.bind(this);
       this.interactWithEvent = this.interactWithEvent.bind(this);
       this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
-      this.showIconObjects = this.showIconObjects.bind(this);
-      this.clearIconObjects = this.clearIconObjects.bind(this);
+      this.changeShowContextMenu = this.changeShowContextMenu.bind(this);
+      this.selectItemForContextMenu = this.selectItemForContextMenu.bind(this);
   }
 
   createIconObject(coordinates, currentSize, id) {
@@ -90,7 +90,8 @@ class BehaviourMapping extends React.Component {
     this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {});
   }
 
-  sendEventToDatabase(iconId) {
+  sendEventToDatabase() {
+    // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
@@ -124,7 +125,8 @@ class BehaviourMapping extends React.Component {
 
   newIcon() {
     this.hideAll();
-    this.setState({ addIcon: true });
+    this.setState({ addIcon: !this.state.addIcon });
+    this.setState({showContextMenu: false});
   }
 
   setInnerHTML(str) {
@@ -144,6 +146,9 @@ class BehaviourMapping extends React.Component {
         case 'green':
           descr[1] = "Child";
           break;
+          case 'yellow':
+          descr[1] = "Group";
+          break;
         default:
           break;
       }
@@ -152,47 +157,19 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-  addIconToList(e) {
-    let list = document.getElementById('icon-list');
-    let li = document.createElement('li');
-
+  selectIcon(e) {
     let newSrc = e.target.src;
-
-    li.setAttribute('id', newSrc);
-    let textArray = this.setInnerHTML(e.target.getAttribute('id'));
-    let newText = textArray
-    let f_id = e.target.getAttribute('id')[e.target.getAttribute('id').length - 1];
-    this.setState({
-      f_id: f_id
-    });
-    this.setState({
-      iconSRC: newSrc
-    });      
-    let foundObject = this.objectExists(newText);
-    let alreadyExists = this.alreadyInList(newText, list)
-
-    if (alreadyExists === false && foundObject === true) {
-      li.innerHTML = newText;
-      // vi bytter og skjuler, og sikrer oss at knappene kan gjøre det
-      
-      li.addEventListener('click', () => {
-        this.setState({ourSRC: li.getAttribute('id')}, function() {});
-        this.setState({f_id: f_id})
-        this.hideIcon()
-      });
-      this.setState({ourSRC: newSrc}, function() {});
-      this.hideIcon()
-  
-      list.appendChild(li);
-      this.setState({
-        imgIcon: li.getAttribute('id')
-      });
-      this.closeIconSelect()
-    } else if (alreadyExists === false && foundObject === false) {
-      this.closeIconSelect();
-    } else {
-      this.closeIconSelect();
+    if (e.target.getAttribute('id') !== null) {
+      let imgIdSplit = e.target.getAttribute('id').split(' ')
+      this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
+    } else if (e.target.children[0].getAttribute('id') !== null ) {
+      let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
+      this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
     }
+    this.setState({iconSRC: newSrc});      
+    this.setState({ourSRC: newSrc});
+    this.hideIcon()
+    this.closeIconSelect()
   }
 
   objectExists(newText) {
@@ -218,27 +195,12 @@ class BehaviourMapping extends React.Component {
         this.placeIcon(event);
         this.setState({sendIconToBD: true}, function() {});
         this.startPointing();
-      } else {
+      } else if (this.state.actionID === 1){
         this.pointIcon();
       }
     }
   }
-  /*
-  a docoment objeckt model:
-  html is instruction tat the browser uses to construct. The html elemt becomes a DOM element wge the browser loads html
-  and render the user interface, so html creas document oject elements
-  <h1></h1> = document.createlement('h1').
 
-  With react we do not interact with the dom api but with the virtual dom, which is made up of JSX elements.
-  React dom er laget av rea elementer. RE er beskrivelser av hvordan browser domen skal bli laget.
-
-  React.createElement('h1', null, 'First React Element').
-  1 argument: elementypen
-  2 argument: elementets property {id: 'heading1'}
-  3 argument: children or innerHTML.
-  let h1 = React.createElement('h1', {id: 'heading1'}, 'First React Element');
-  ReactDOM.render(h1, document.getelementByID('container));
-  */
 
   placeIcon(event) {
     this.findScreenSize()
@@ -250,7 +212,7 @@ class BehaviourMapping extends React.Component {
     img.setAttribute('id', this.state.newIconID.toString());
 
     img.addEventListener('click', () => {
-      this.setState({ourIconID: img.getAttribute('id')}, function() {console.log('oID: ' + this.state.ourIconID)});
+      this.setState({ourIconID: img.getAttribute('id')}, function() {});
       this.showChosenIcon(img.getAttribute('id'));
     });
     
@@ -282,10 +244,6 @@ class BehaviourMapping extends React.Component {
         y: coordinates[1],
       }
     }, function() {});
-    this.findScreenSize();
-    setTimeout(() => {
-      this.showChosenIcon(img.getAttribute('id'));
-    }, 50);
   }
 
   interactWithEvent(img) {
@@ -304,35 +262,25 @@ class BehaviourMapping extends React.Component {
     img.addEventListener('click', this.interactWithEvent(img));
   }
 
- pointIcon() {
-    if (this.state.ourIconID >= 0) {
-      let ourIconInfo;
-      for (let i=0; i<this.state.iconObjects.length ; i++) {
-        if (this.state.iconObjects[i].id === this.state.ourIconID) {
-          ourIconInfo = this.state.iconObjects[i];
-          
-          let degreerot = Math.atan2(
-              this.state.ourMouseCoord.x - ourIconInfo.originalCoord[0],
-              -(this.state.ourMouseCoord.y - ourIconInfo.originalCoord[1]),
-          ); 
-          var degrees = degreerot*180/Math.PI - 90;
-          var round_degree = Math.round(degrees);
-          var string_degree = 'rotate(' + round_degree.toString() +'deg)';
-        
-          this.setState({
-            ourIconCoord: {
-              x: this.state.ourIconCoord.x,
-              y: this.state.ourIconCoord.y,
-              degree: string_degree
-            }
-          });
-          var img = document.getElementById(this.state.ourIconID.toString());
-          if (img != null) {
-            img.style.transform = string_degree;
-          }
-          
-        }
+  pointIcon() {
+    var degreerot = Math.atan2(
+        this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
+        -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
+    ); 
+    var degrees = degreerot*180/Math.PI - 90;
+    var round_degree = Math.round(degrees);
+    var string_degree = 'rotate(' + round_degree.toString() +'deg)';
+
+    this.setState({
+      ourIconCoord: {
+        x: this.state.ourIconCoord.x,
+        y: this.state.ourIconCoord.y,
+        degree: string_degree
       }
+    });
+    var img = document.getElementById(this.state.iconObjects[this.state.iconObjects.length -1].id);
+    if (string_degree != null) {
+      img.style.transform = string_degree;
     }
   }
 
@@ -347,14 +295,14 @@ class BehaviourMapping extends React.Component {
       actionID: 0,
     });
     if (this.state.sendIconToBD) {
-      this.sendEventToDatabase(this.state.ourIconID);
+      this.sendEventToDatabase();
       this.setState({sendIconToBD: false}, function() {});
     }
   }
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon !== null && this.state.hideOrShow !== 'show') {
+    if (icon !== null && this.state.hideOrShow !== 'Hide') {
       icon.style.display = 'none';
     }
     this.stopPointing()
@@ -386,25 +334,14 @@ class BehaviourMapping extends React.Component {
     if (this.state.addIcon) {
       this.setState({ addIcon: false});
     }
-    if (this.state.hideOrShow === 'show') {
+    if (this.state.hideOrShow === 'Hide') {
       this.showAll();
     }
   }
 
 
 
-  letImgDrop(ev) {
-    ev.preventDefault();
-  }
   
-  
-  /*dropImg(ev) {
-    // console.log(ev.target.getAttribute('id'));
-    console.log(this.state.ourMouseCoord);
-    document.getElementById()
-  }*/
-  
-
   setScreenSize() {
     let nw = document.querySelector('.map-image').naturalWidth;
     let nh = document.querySelector('.map-image').naturalHeight;
@@ -530,12 +467,6 @@ class BehaviourMapping extends React.Component {
       method: 'POST',
       body: data,
       })
-    //   .then((res) => {
-    //     res.json().then((data) => {
-    //       // most likely not needed, can just use interviewnumber to get the correct text.
-    //      this.setState({i_ids: [...this.state.i_ids, data.i_id[0]]});
-    //     });
-    // });
   }
 
   drawLine() {
@@ -543,7 +474,6 @@ class BehaviourMapping extends React.Component {
   }
 
   addToDrawList(e) {
-    // kjører hver gang en flytter på touchen. 
     if (this.state.eightOfCoords === 0) {
       let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
       this.setState({coords: [...this.state.coords, currCoords]});
@@ -705,11 +635,11 @@ class BehaviourMapping extends React.Component {
   }
 
   hideOrShowFunction() {
-    if (this.state.hideOrShow === 'hide') {
-      this.setState({hideOrShow: 'show'}, function() {this.showAll();});
+    if (this.state.hideOrShow === 'Show') {
+      this.setState({hideOrShow: 'Hide'}, function() {this.showAll();});
       // knappen forandre seg til show
-    } else if (this.state.hideOrShow === 'show') {
-      this.setState({hideOrShow: 'hide'}, function() {this.hideAll();});
+    } else if (this.state.hideOrShow === 'Hide') {
+      this.setState({hideOrShow: 'Show'}, function() {this.hideAll();});
     }
   }
 
@@ -780,13 +710,15 @@ class BehaviourMapping extends React.Component {
 }
 
 finishProject() {
-  let time = String(new Date());
+  if (window.confirm("This action will end the mapping, and is irreversible. Continue?")) {
+    let time = String(new Date());
   this.takeScreenshot();
   fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
   setTimeout(() => {
     window.location.href = "http://localhost:3000/behaviourmapper/startpage"
     // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
   }, 1500);
+  }
 }
 
 changeSizeOfIcons(event) {
@@ -816,6 +748,57 @@ changeSizeOfIcons(event) {
   }
 }
 
+changeShowContextMenu() {
+  this.closeIconSelect();
+  this.hideAll();
+  this.setState({showContextMenu: !this.state.showContextMenu});
+}
+
+selectItemForContextMenu(e) {
+  let list = document.getElementById('favorite-icon-list');
+  let li = document.createElement('li');
+  let newSrc, newText;
+  ({ newSrc, newText } = this.getNewSrcAndText(e, newSrc, newText, li));
+  if (this.alreadyInList(newText, list) === false && this.objectExists(newText) === true) {
+    this.setEventlistenerAndAppendLi(li, newText, newSrc, list);
+  } else if (this.alreadyInList(newText, list) === true && this.objectExists(newText) === true) {
+    let elementToRemove = document.getElementById(newSrc)
+    list.removeChild(elementToRemove);
+  }
+  this.setState({addIcon: false});
+}
+
+
+  setEventlistenerAndAppendLi(li, newText, newSrc, list) {
+    li.innerHTML = newText;
+    li.addEventListener('click', () => {
+      this.setState({ ourSRC: li.getAttribute('id') });
+      this.hideIcon();
+    });
+    this.setState({ ourSRC: newSrc }, function () { });
+    this.hideIcon();
+    list.appendChild(li);
+    this.setState({
+      imgIcon: li.getAttribute('id')
+    });
+  }
+
+  getNewSrcAndText(e, newSrc, newText, li) {
+    if (e.target.getAttribute('id') !== null) {
+      let imgIdSplit = e.target.getAttribute('id').split(' ');
+      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newSrc = e.target.src;
+      newText = this.setInnerHTML(e.target.getAttribute('id'));
+      li.setAttribute('id', newSrc);
+    } else if (e.target.children[0].getAttribute('id') !== null) {
+      let imgIdSplit = e.target.children[0].getAttribute('id').split(' ');
+      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newSrc = e.target.children[0].src;
+      newText = this.setInnerHTML(e.target.children[0].getAttribute('id'));
+      li.setAttribute('id', newSrc);
+    }
+    return { newSrc, newText };
+  }
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
@@ -847,7 +830,6 @@ changeSizeOfIcons(event) {
       setTimeout(() => this.loadFormerEvents(data), 500);
     });
 
-    // resize the canvas to fill map part of window dynamically
     var firstTime = 0;
     (function(canvas, image) {
       window.addEventListener('resize', resizeCanvas, false);
@@ -878,7 +860,7 @@ changeSizeOfIcons(event) {
     for (let i=0; i<this.state.iconObjects.length ;i++) {
       iconObject = this.state.iconObjects[i];
       if (iconObject.id === this.state.ourIconID) {
-        return iconObject, i;
+        return i;
       }
     }
     return null;
@@ -890,13 +872,9 @@ changeSizeOfIcons(event) {
     var icon = document.getElementById(this.state.ourIconID.toString());
     if (icon != null && this.state.ourIconID >= 0) {
       icon.remove();
-      console.log('bef func: ' + this.state.iconObjects.length);
-      let _, i = this.findIconObjectOfOurID();
+      let i = this.findIconObjectOfOurID();
 
       this.removeFromIconObjects(i);
- 
-      console.log('aft func: ' + this.state.iconObjects.length);
-      console.log('-----------------------------------------------')
       
       const data = new FormData();
       data.append('p_id', this.state.p_id);
@@ -927,12 +905,12 @@ changeSizeOfIcons(event) {
       this.clearIconObjects();
     }
     this.setState({iconObjects: newIconObjects},
-      function() {console.log('we should have 1 less: ' + this.state.iconObjects.length)
-    });
+      function() {});
   }
 
 
   showChosenIcon(id) {
+    this.setState({actionID: null});
     let iconObject;
     let icon;
     for (let i=0; i<this.state.iconObjects.length; i++) {
@@ -951,22 +929,12 @@ changeSizeOfIcons(event) {
     }
   }
 
-  showIconObjects() {
-    console.log(this.state.iconObjects)
-  }
-
   clearIconObjects() {
     this.setState({iconObjects: []}, function() {});
   }
 
 
   render() {
-    /* let items=['Item 1','Item 2','Item 3','Item 4','Item 5'];
-    let itemList=[];
-    items.forEach((item,index)=>{
-      itemList.push( <li key={index}>{item}</li>)
-    });*/
-    // {itemlist}
     let imageClassList = classNames({
       'map-image': !this.state.imageUploaded,
       'uploaded-map-image': this.state.imageUploaded,
@@ -987,28 +955,32 @@ changeSizeOfIcons(event) {
       'screenshot-div': true,
       'visible': true
     });
-    // <li className="buttonLi" onClick={this.showIconObjects}>ShowIconObjects </li>
-    // <li className="buttonLi" onClick={this.clearIconObjects}>ClearIconObjects </li>
     return (
       <Authenticated>
         <div id='maincont' >
           
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
-                <AllIcons selectIcon = {this.selectIcon} 
-                close={() => this.closeIconSelect()}/>
+                <AllIcons 
+                  selectIcon = {this.selectIcon} 
+                  close={this.closeIconSelect}
+                />
             </div> 
             <div className={this.state.addInterview ? "interview" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
                 save={this.saveInterview}
                 ref={this.interviewElement}
-              /> 
+              />  
+            </div>
+            <div className={this.state.showContextMenu ? "icons-visible" : "invisible"}>
+              <ContextMenu
+                selectIcon={this.selectItemForContextMenu}
+                close={this.changeShowContextMenu}
+              />
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
-                <li className="buttonLi" onClick={this.showIconObjects}>ShowIconObjects </li>
-                <li className="buttonLi" onClick={this.clearIconObjects}>ClearIconObjects </li>
+                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add Event</li>               
                 <li className="bigButtonLi">
                   <div>Change size of events</div>
                   <div className="changeSizeContainer">
@@ -1018,16 +990,24 @@ changeSizeOfIcons(event) {
                 </li>
 
                 <li id="hide-or-show" className="buttonLi" onClick={() => this.hideOrShowFunction()}> {this.state.hideOrShow} Icons</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
+                {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
                 <li className="buttonLi" onClick={this.removeIcon}>Remove Icon</li>
                 <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
+                <li className="buttonLi" onClick={this.changeShowContextMenu}>Choose favorite events</li>
+                <ul id="favorite-icon-list">
+                  <li><h2>Favorites</h2></li>
+                </ul>
+                {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>Finish project</p></li>
+                
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
                 <li className="buttonLi" onClick={this.drawLine}>Add line</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}>Finish project</Link></li>
+                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
               </ul>
+              
           </div>
           <div className={screenshotDivClassList}>
             <canvas 
@@ -1049,9 +1029,7 @@ changeSizeOfIcons(event) {
         </div>
       </Authenticated>
     );
-/*
-<EventIcon currentNewID={2} chosenSRC={'./icons/man/bike.png'} />
-<EventIcon currentNewID={3} chosenSRC={'./icons/man/bike.png'} /> */
+
   }
 }
 

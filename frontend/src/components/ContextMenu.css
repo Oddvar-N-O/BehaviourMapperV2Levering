@@ -1,0 +1,16 @@
+.context-menu {
+    position: absolute;
+    left: 27.5vw;
+    top: 13.5vh;
+    background-color: #222020;
+    font-size: 3em;
+    min-width: 500px;
+    border-radius: 5px;
+    color: #ece8e8;
+}
+.context-menu .icon-select {
+    position: static;
+}
+.context-menu h2 {
+    border-bottom: 0.9px #918D8D solid;
+}

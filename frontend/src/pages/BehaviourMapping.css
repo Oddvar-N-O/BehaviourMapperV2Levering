@@ -53,8 +53,22 @@
     height: 60px;
     color: #ece8e8;
     background-color: #222020;
-    border-bottom: 2px #58A4B0 solid;
     min-width: 200px;
+}
+.finishProjectLi {
+    position: absolute;
+    border-top: 2px #58A4B0 solid;
+    bottom: 0;
+}
+.finishProjectLi p {
+    color: #befe9e;
+}
+#addEventLi {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    font-size: 1.4em;
 }
 .changeSizeContainer{
     display: flex;
@@ -88,8 +102,14 @@
 }
 
 #icon-list {
+    position: relative;
     width: 200px;
     height: 100vh;
+    overflow: auto;
+}
+#favorite-icon-list{
+    width: 200px;
+    max-height: 200px;
     overflow: auto;
 }
 
