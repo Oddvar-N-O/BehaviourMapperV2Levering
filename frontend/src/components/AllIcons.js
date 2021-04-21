@@ -23,11 +23,9 @@ class AllIcons extends React.Component {
         fetch(window.backend_url + `getfiguredata?u_id=${this.state.u_id}`)
         .then(response => response.json()) 
         .then(data => {
-            // console.log('DATA: ' + data[1].id)
             this.setState({
                 allIconData: data
             })
-            console.log(this.state.allIconData)
             for (let i=0; i<this.state.allIconData.length; i++){
                 if (this.state.allIconData[i].color === "red"){
                     this.state.redData.push(this.state.allIconData[i])
@@ -41,7 +39,6 @@ class AllIcons extends React.Component {
             }            
         })
         this.handleChange = this.handleChange.bind(this)
-        console.log(this.state.yellowData)
     };
 
     handleChange(event) {

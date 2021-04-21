@@ -1,6 +1,7 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
+import ContextMenu from '../components/ContextMenu';
 import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
 import classNames from 'classnames';
@@ -14,7 +15,6 @@ class BehaviourMapping extends React.Component {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         imageUploaded: props.location.state.imageUploaded,
         
-        iconSRCs: [],
         iconObjects: [], 
         ourSRC: null,
         sendNewIconToBD: false,
@@ -43,6 +43,7 @@ class BehaviourMapping extends React.Component {
         onlyObservation: true,
         drawLine: false,
         addInterview: false,
+        showContextMenu: false,
         coords: [],
         eightOfCoords: 0,
         interviews: [],
@@ -57,7 +58,7 @@ class BehaviourMapping extends React.Component {
       // this.moveIcon = this.moveIcon.bind(this)
       this.handleResize = this.handleResize.bind(this);
       this.writeFilename = this.writeFilename.bind(this);
-      this.selectIcon = this.addIconToList.bind(this);
+      this.selectIcon = this.selectIcon.bind(this);
       this.closeIconSelect = this.closeIconSelect.bind(this);
       this.newIcon = this.newIcon.bind(this);
       this.showAll = this.showAll.bind(this);
@@ -72,6 +73,8 @@ class BehaviourMapping extends React.Component {
       this.finishProject = this.finishProject.bind(this);
       this.takeScreenshot = this.takeScreenshot.bind(this);
       this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
+      this.changeShowContextMenu = this.changeShowContextMenu.bind(this);
+      this.selectItemForContextMenu = this.selectItemForContextMenu.bind(this);
   }
 
   createIconObject(coordinates, currentSize) {
@@ -82,7 +85,7 @@ class BehaviourMapping extends React.Component {
     this.setState({iconObjects: [...this.state.iconObjects, icon]}, function() {});
   }
 
-  sendDatabaseEvent() {
+  sendEventToDatabase() {
     // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
@@ -117,7 +120,8 @@ class BehaviourMapping extends React.Component {
 
   newIcon() {
     this.hideAll();
-    this.setState({ addIcon: true });
+    this.setState({ addIcon: !this.state.addIcon });
+    this.setState({showContextMenu: false});
   }
 
   setInnerHTML(str) {
@@ -148,47 +152,19 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-  addIconToList(e) {
-    let list = document.getElementById('icon-list');
-    let li = document.createElement('li');
-
+  selectIcon(e) {
     let newSrc = e.target.src;
-    this.setState({iconSRCs: [...this.state.iconSRCs, newSrc]}, function() {
-    });
-    li.setAttribute('id', newSrc);
-    let textArray = this.setInnerHTML(e.target.getAttribute('id'));
-    let newText = textArray
-
-    this.setState({
-      f_id: e.target.getAttribute('id')[e.target.getAttribute('id').length - 1]
-    });
-    this.setState({
-      iconSRC: newSrc
-    });      
-    let foundObject = this.objectExists(newText);
-    let alreadyExists = this.alreadyInList(newText, list)
-
-    if (alreadyExists === false && foundObject === true) {
-      li.innerHTML = newText;
-      // vi bytter og skjuler, og sikrer oss at knappene kan gjøre det
-      
-      li.addEventListener('click', () => {
-        this.setState({ourSRC: li.getAttribute('id')}, function() {});
-        this.hideIcon()
-      });
-      this.setState({ourSRC: newSrc}, function() {});
-      this.hideIcon()
-  
-      list.appendChild(li);
-      this.setState({
-        imgIcon: li.getAttribute('id')
-      });
-      this.closeIconSelect()
-    } else if (alreadyExists === false && foundObject === false) {
-      this.closeIconSelect();
-    } else {
-      this.closeIconSelect();
+    if (e.target.getAttribute('id') !== null) {
+      let imgIdSplit = e.target.getAttribute('id').split(' ')
+      this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
+    } else if (e.target.children[0].getAttribute('id') !== null ) {
+      let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
+      this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
     }
+    this.setState({iconSRC: newSrc});      
+    this.setState({ourSRC: newSrc});
+    this.hideIcon()
+    this.closeIconSelect()
   }
 
   objectExists(newText) {
@@ -246,7 +222,6 @@ class BehaviourMapping extends React.Component {
     }
     img.style.left = coordinates[0] +'px';
     img.style.top =  coordinates[1] +'px';
-    console.log(img.style.left)
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     this.createIconObject(coordinates, imageSizeOnCreation);
     this.setState({
@@ -292,7 +267,7 @@ class BehaviourMapping extends React.Component {
       actionID: 0,
     });
     if (this.state.sendNewIconToBD) {
-      this.sendDatabaseEvent();
+      this.sendEventToDatabase();
       this.setState({sendNewIconToBD: false}, function() {});
     }
   }
@@ -740,13 +715,15 @@ class BehaviourMapping extends React.Component {
 }
 
 finishProject() {
-  let time = String(new Date());
+  if (window.confirm("This action will end the mapping, and is irreversible. Continue?")) {
+    let time = String(new Date());
   this.takeScreenshot();
   fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
   setTimeout(() => {
     window.location.href = "http://localhost:3000/behaviourmapper/startpage"
     // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
   }, 1500);
+  }
 }
 
 changeSizeOfIcons(event) {
@@ -774,6 +751,47 @@ changeSizeOfIcons(event) {
       
     }
   }
+}
+
+changeShowContextMenu() {
+  this.closeIconSelect();
+  this.hideAll();
+  this.setState({showContextMenu: !this.state.showContextMenu});
+}
+
+selectItemForContextMenu(e) {
+  let list = document.getElementById('favorite-icon-list');
+  let li = document.createElement('li');
+  let newSrc = e.target.src;
+  li.setAttribute('id', newSrc);
+  let newText = this.setInnerHTML(e.target.getAttribute('id'));
+
+  if (e.target.getAttribute('id') !== null) {
+    let imgIdSplit = e.target.getAttribute('id').split(' ')
+    this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
+  } else if (e.target.children[0].getAttribute('id') !== null ) {
+    let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
+    this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
+  }
+
+  if (this.alreadyInList(newText, list) === false && this.objectExists(newText) === true) {
+    li.innerHTML = newText;
+    li.addEventListener('click', () => {
+      this.setState({ourSRC: li.getAttribute('id')});
+      this.hideIcon()
+    });
+    this.setState({ourSRC: newSrc}, function() {});
+    this.hideIcon()
+
+    list.appendChild(li);
+    this.setState({
+      imgIcon: li.getAttribute('id')
+    });
+  } else if (this.alreadyInList(newText, list) === true && this.objectExists(newText) === true) {
+    let elementToRemove = document.getElementById(newSrc)
+    list.removeChild(elementToRemove);
+  }
+  this.setState({addIcon: false});
 }
 
 
@@ -861,18 +879,26 @@ changeSizeOfIcons(event) {
         <div id='maincont' >
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
-                <AllIcons selectIcon = {this.selectIcon} 
-                close={() => this.closeIconSelect()}/>
+                <AllIcons 
+                  selectIcon = {this.selectIcon} 
+                  close={this.closeIconSelect}
+                />
             </div> 
             <div className={this.state.addInterview ? "interview" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
                 save={this.saveInterview}
                 ref={this.interviewElement}
-              /> 
+              />  
+            </div>
+            <div className={this.state.showContextMenu ? "icons-visible" : "invisible"}>
+              <ContextMenu
+                selectIcon={this.selectItemForContextMenu}
+                close={this.changeShowContextMenu}
+              />
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li className="buttonLi" onClick={this.newIcon}>Add Event</li>
+                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add Event</li>               
                 <li className="bigButtonLi">
                   <div>Change size of events</div>
                   <div className="changeSizeContainer">
@@ -880,18 +906,23 @@ changeSizeOfIcons(event) {
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>-</p>
                   </div>
                 </li>
-
                 <li className="buttonLi" onClick={this.showAll}>Show icons</li>
                 <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
+                <li className="buttonLi" onClick={this.changeShowContextMenu}>Choose favorite events</li>
+                <ul id="favorite-icon-list">
+                  <li><h2>Favorites</h2></li>
+                </ul>
+                {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>Finish project</p></li>
+                
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
                 <li className="buttonLi" onClick={this.drawLine}>Add line</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}>Finish project</Link></li>
+                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
               </ul>
+              
           </div>
           <div className={screenshotDivClassList}>
             <canvas 
