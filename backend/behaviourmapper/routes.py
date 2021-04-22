@@ -147,8 +147,7 @@ def deleteEvent():
         number = int(request.form.get('number'))
         print('N: ' + str(number))
         
-        eventsJSON = get_events_func(p_id)
-        events = json.loads(eventsJSON)
+        eventsJSON = json.loads(get_events_func(p_id))
         
         print('Length of Array: ' + str(len(events)))
         
@@ -160,31 +159,28 @@ def deleteEvent():
         delete_event = ("DELETE FROM Event WHERE id=?")
         res = query_db(delete_event, (e_id,), True)
         
-        return 'res'
+        return {}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-@bp.route('/updateevent', methods=['POST'])
-def updateEvent():
+@bp.route('/updateeventwithcomment', methods=['POST'])
+def updateEventWithComment():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
         number = int(request.form.get('number'))
-        newRotation = request.form.get(newRotation)
-        print('NEW ROTATION: ' + str(newRotation))
         
-        eventsJSON = get_events_func(p_id)
-        events = json.loads(eventsJSON)
+        events = json.loads(get_events_func(p_id))[number][0] 
+        e_id = events[number][0]
+        print("!!!", json.loads(get_events_func(p_id))[number][0], "!!!!", e_id)
         
-        event = events[number]
-        e_id = event[0]
+        update_event = ("UPDATE Event SET comment=? WHERE id=?")
+        query_db(update_event, (request.form.get('comment'), e_id,), True)
         
-        update_event = ("UPDATE Event SET direction =? WHERE id=?")
-        res = query_db(update_event, (newRotation, e_id,), True)
-        
-        return 'res'
+        return {}
     else:
         logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
 
 def deleteImage(p_id):
     find_image_name = ("SELECT map, screenshot FROM Project WHERE id=?") 
@@ -550,8 +546,7 @@ def createARCGIS():
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        eventsJSON = get_events_func(request.form.get('p_id'))
-        events = json.loads(eventsJSON)
+        events = json.loads(get_events_func(request.form.get('p_id')))
         
         imageCoord = []
         screenSize = []

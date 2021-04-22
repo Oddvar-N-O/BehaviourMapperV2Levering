@@ -128,11 +128,10 @@
     display: none; 
 }
 
-.interview {
+.textBox {
     display: flex;
     flex-direction: row;
     height: 100%;
-    width: 100%;
     flex-wrap: wrap;
     font-size: 48%;
     text-align: center;

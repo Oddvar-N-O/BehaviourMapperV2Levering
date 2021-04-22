@@ -1,6 +1,7 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
+import AddComment from '../components/AddComment';
 import ContextMenu from '../components/ContextMenu';
 import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
@@ -44,16 +45,19 @@ class BehaviourMapping extends React.Component {
         onlyObservation: true,
         drawLine: false,
         addInterview: false,
+        addComment: false,
         showContextMenu: false,
         coords: [],
         eightOfCoords: 0,
         interviews: [],
+        comments: [],
         i_ids: [],
         u_id: window.sessionStorage.getItem('uID'),
       };
       this.canvas = React.createRef();
       this.myImage = React.createRef();
       this.interviewElement = React.createRef();
+      this.commentElement = React.createRef();
 
       this.handleScroll = this.handleScroll.bind(this)
       this.handleResize = this.handleResize.bind(this);
@@ -78,11 +82,13 @@ class BehaviourMapping extends React.Component {
       this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
       this.changeShowContextMenu = this.changeShowContextMenu.bind(this);
       this.selectItemForContextMenu = this.selectItemForContextMenu.bind(this);
+      this.addComment = this.addComment.bind(this);
+      this.saveComment = this.saveComment.bind(this);
   }
 
   createIconObject(coordinates, currentSize, id) {
     let icon = {
-      updateCoord: false,
+      updateEvent: false,
       id: id,
       originalCoord: coordinates,
       originalSize: currentSize,
@@ -715,9 +721,9 @@ finishProject() {
   this.takeScreenshot();
   fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
   setTimeout(() => {
-    window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-    // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
-  }, 1500);
+      window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+      // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+    }, 1500);
   }
 }
 
@@ -800,60 +806,7 @@ selectItemForContextMenu(e) {
     return { newSrc, newText };
   }
 
-  componentDidMount() {
-    window.addEventListener('scroll', this.handleScroll);
-    this.findScreenSize();
-    this.initiateFormerScreenSize();
-    window.addEventListener('resize', this.handleResize);
-
-    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projdata: data});
-      if (data[8] !== null) {
-        let os = this.findIntegerCoordinates(data[8])
-        this.setState({originalScreenSize: {
-          x: os[0],
-          y: os[1],
-        }});
-      }
-    });
-    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}&u_id=${this.state.u_id}`).then(res => res.blob())
-      .then(images => {
-        let image = URL.createObjectURL(images);
-        this.setState({mapblob: image});
-
-    });
-    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
-    .then(res => res.json())
-    .then(data => {
-      setTimeout(() => this.loadFormerEvents(data), 500);
-    });
-
-    var firstTime = 0;
-    (function(canvas, image) {
-      window.addEventListener('resize', resizeCanvas, false);
-      
-      function resizeCanvas() {
-        canvas.width = window.innerWidth - 200;
-        canvas.height = window.innerHeight;
-        drawStuff(); 
-      }
-      resizeCanvas();
   
-      function drawStuff() {
-        let ctx = canvas.getContext("2d");
-        if (firstTime === 0) {
-          image.onload = () => {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          }
-          firstTime++;
-        } else {
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        }
-      }
-    })(this.canvas.current, this.myImage.current);
-  }
 
   findIconObjectOfOurID() {
     let iconObject;
@@ -909,7 +862,7 @@ selectItemForContextMenu(e) {
   }
 
 
-  showChosenIcon(id) {
+  showChosenIcon() {
     this.setState({actionID: null});
     let iconObject;
     let icon;
@@ -931,6 +884,101 @@ selectItemForContextMenu(e) {
 
   clearIconObjects() {
     this.setState({iconObjects: []}, function() {});
+  }
+
+
+  // enn så lenge bare kopiert fra addInterview skal ta i bruk en egen komponent
+  addComment(whichComment=0) {
+    if (whichComment > 0) {
+      this.commentElement.current.setState({alreadySaved: true});
+      this.commentElement.current.setInterview(this.state.comments[whichComment-1])
+      if (!this.state.addComment) {
+        this.setState({addComment: !this.state.addComment});
+      }
+    } else {
+      this.commentElement.current.clearComment();
+      this.commentElement.current.setState({alreadySaved: false})
+      this.setState({addComment: !this.state.addComment});
+    }
+  
+  }
+
+  saveComment(e) {
+    e.preventDefault();
+    this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
+    this.commentElement.current.clearComment();
+
+    this.sendCommentToDb(this.commentElement.current.state.interview);
+    this.addComment();
+  }
+
+  sendCommentToDb(comment) {
+    const data = new FormData();
+    data.append('comment', comment);
+    data.append('p_id', this.state.p_id);
+    data.append('u_id', this.state.u_id);
+    data.append('number', 1);
+    fetch(window.backend_url + 'updateeventwithcomment', {
+      method: 'POST',
+      body: data,
+      })
+  }
+
+  componentDidMount() {
+    window.addEventListener('scroll', this.handleScroll);
+    this.findScreenSize();
+    this.initiateFormerScreenSize();
+    window.addEventListener('resize', this.handleResize);
+
+    fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({projdata: data});
+      if (data[8] !== null) {
+        let os = this.findIntegerCoordinates(data[8])
+        this.setState({originalScreenSize: {
+          x: os[0],
+          y: os[1],
+        }});
+      }
+    });
+    fetch(window.backend_url + `getmap?p_id=${this.state.p_id}&u_id=${this.state.u_id}`).then(res => res.blob())
+      .then(images => {
+        let image = URL.createObjectURL(images);
+        this.setState({mapblob: image});
+
+    });
+    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length > 0) {
+        setTimeout(() => this.loadFormerEvents(data), 500);
+      }
+    });
+
+    var firstTime = 0;
+    (function(canvas, image) {
+      window.addEventListener('resize', resizeCanvas, false);
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth - 200;
+        canvas.height = window.innerHeight;
+        drawStuff(); 
+      }
+      resizeCanvas();
+  
+      function drawStuff() {
+        let ctx = canvas.getContext("2d");
+        if (firstTime === 0) {
+          image.onload = () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          }
+          firstTime++;
+        } else {
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+      }
+    })(this.canvas.current, this.myImage.current);
   }
 
 
@@ -966,11 +1014,18 @@ selectItemForContextMenu(e) {
                   close={this.closeIconSelect}
                 />
             </div> 
-            <div className={this.state.addInterview ? "interview" : "invisible"}> 
+            <div className={this.state.addInterview ? "textBox" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
                 save={this.saveInterview}
                 ref={this.interviewElement}
+              />  
+            </div>
+            <div className={this.state.addComment ? "textBox" : "invisible"}> 
+              <AddComment 
+                close={this.addComment}
+                save={this.saveComment}
+                ref={this.commentElement}
               />  
             </div>
             <div className={this.state.showContextMenu ? "icons-visible" : "invisible"}>
@@ -980,7 +1035,7 @@ selectItemForContextMenu(e) {
               />
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add Event</li>               
+                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add event</li>               
                 <li className="bigButtonLi">
                   <div>Change size of events</div>
                   <div className="changeSizeContainer">
@@ -991,8 +1046,8 @@ selectItemForContextMenu(e) {
 
                 <li id="hide-or-show" className="buttonLi" onClick={() => this.hideOrShowFunction()}> {this.state.hideOrShow} Icons</li>
                 {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
-                <li className="buttonLi" onClick={this.removeIcon}>Remove Icon</li>
-                <li className="buttonLi" onClick={this.finishProject}>Finish project</li>
+                <li className="buttonLi" onClick={this.removeIcon}>Remove event</li>
+                <li className="buttonLi" onClick={this.addComment}>Add comment</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>Choose favorite events</li>
                 <ul id="favorite-icon-list">
                   <li><h2>Favorites</h2></li>
@@ -1005,7 +1060,7 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
                 <li className="buttonLi" onClick={this.drawLine}>Add line</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
               </ul>
               
           </div>
