@@ -25,7 +25,7 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
-        
+        iconIDForDeletion: 0,
         
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
@@ -218,7 +218,7 @@ class BehaviourMapping extends React.Component {
     img.setAttribute('id', this.state.newIconID.toString());
 
     img.addEventListener('click', () => {
-      this.setState({ourIconID: img.getAttribute('id')}, function() {});
+      this.setState({iconIDForDeletion: img.getAttribute('id')}, function() {});
       this.showChosenIcon(img.getAttribute('id'));
     });
     
@@ -659,8 +659,8 @@ class BehaviourMapping extends React.Component {
     let icon;
     let iconinfo;
     for (var i=0; i<this.state.newIconID; i++) {
-      icon = document.getElementById(i.toString());
       iconinfo = this.state.iconObjects[i];
+      icon = document.getElementById(iconinfo.id);
       let coord = iconinfo.originalCoord;
       icon.style.left = (coord[0] + change) + 'px'
       icon.style.top = (coord[1]) + 'px'
@@ -822,7 +822,7 @@ selectItemForContextMenu(e) {
   removeIcon() {
     this.stopPointing();
     this.setState({actionID: 1}, function() {})
-    var icon = document.getElementById(this.state.ourIconID.toString());
+    var icon = document.getElementById(this.state.iconIDForDeletion);
     if (icon != null && this.state.ourIconID >= 0) {
       icon.remove();
       let i = this.findIconObjectOfOurID();
@@ -871,7 +871,7 @@ selectItemForContextMenu(e) {
       iconObject = this.state.iconObjects[i]
       icon = document.getElementById(iconObject.id);
       if (icon != null) {
-        if (iconObject.id === this.state.ourIconID) {
+        if (iconObject.id === this.state.iconIDForDeletion) {
           icon.style.border = '4px solid red';
           icon.style.border = 'block';
         } else {
