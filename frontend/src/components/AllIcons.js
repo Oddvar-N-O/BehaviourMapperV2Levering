@@ -58,7 +58,6 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
-                    descriptionNO={data.descriptionNO} 
                     color={data.color}
                     f_id={data.id}/>
                 </div>
@@ -71,7 +70,6 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon
                     description={data.description} 
-                    descriptionNO={data.descriptionNO} 
                     color={data.color}
                     f_id={data.id}/>
                 </div>
@@ -84,7 +82,6 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
-                    descriptionNO={data.descriptionNO} 
                     color={data.color}
                     f_id={data.id}/>
                 </div>
@@ -97,7 +94,6 @@ class AllIcons extends React.Component {
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
-                    descriptionNO={data.descriptionNO} 
                     color={data.color}
                     f_id={data.id}/>
                 </div>

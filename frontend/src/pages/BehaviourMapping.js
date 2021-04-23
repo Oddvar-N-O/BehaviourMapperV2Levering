@@ -1005,7 +1005,6 @@ selectItemForContextMenu(e) {
     })(this.canvas.current, this.myImage.current);
   }
 
-
   render() {
     const { t } = this.props; // used for translation
     let imageClassList = classNames({
@@ -1028,10 +1027,10 @@ selectItemForContextMenu(e) {
       'screenshot-div': true,
       'visible': true
     });
+
     return (
       <Authenticated>
         <div id='maincont' >
-          
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
                 <AllIcons 
@@ -1113,7 +1112,6 @@ selectItemForContextMenu(e) {
         </div>
       </Authenticated>
     );
-
   }
 }
 

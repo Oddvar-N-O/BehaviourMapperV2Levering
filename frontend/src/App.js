@@ -10,20 +10,12 @@ import ManageProject from './pages/manageProject';
 import {AuthContext} from './pages/auth/AuthContext'
 import LanguageSelector from './components/languageSelector'
 import './i18n';
-import {useTranslation} from "react-i18next";
-
-// function HeaderComponent()
-// {
-//     const {t, i18n} = useTranslation('common');
-//     return <h1>{t('new.new')}</h1>
-// }
 
 function App() {
   return (
     <AuthContext>
       <Suspense fallback="loading">
         <div className="App">
-
           <Router basename="/behaviourmapper">
             <LanguageSelector></LanguageSelector>
             <Switch>
