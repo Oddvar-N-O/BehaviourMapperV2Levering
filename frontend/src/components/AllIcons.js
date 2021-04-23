@@ -2,6 +2,9 @@ import React from 'react'
 import Icon from './Icon'
 import './AllIcons.css'
 import * as AiIcons from 'react-icons/ai';
+import { withTranslation } from 'react-i18next';
+import i18next from 'i18next';
+
 
 class AllIcons extends React.Component {
     constructor() {
@@ -26,6 +29,7 @@ class AllIcons extends React.Component {
             this.setState({
                 allIconData: data
             })
+            console.log(this.state.allIconData)
             for (let i=0; i<this.state.allIconData.length; i++){
                 if (this.state.allIconData[i].color === "red"){
                     this.state.redData.push(this.state.allIconData[i])
@@ -48,17 +52,17 @@ class AllIcons extends React.Component {
     }
 
     render () {
+        const { t } = this.props;
         const redIcons = this.state.redData.map(data => 
-            
             <div key={data.id} className='single-icon'>
                 <div className='single-icon' onClick={this.props.selectIcon}>
                     <Icon 
                     description={data.description} 
                     color={data.color}
                     f_id={data.id}/>
-                    </div>
-                    <div className="icon-description">{data.description}
                 </div>
+                <div className={i18next.languages[0] === "en" ? "icon-description" : "invisible"}>{data.description}</div>
+                <div className={i18next.languages[0] === "no" ? "icon-description" : "invisible"}>{data.descriptionNO}</div>
             </div>)
             
         const blueIcons = this.state.blueData.map(data => 
@@ -68,9 +72,9 @@ class AllIcons extends React.Component {
                     description={data.description} 
                     color={data.color}
                     f_id={data.id}/>
-                    </div>
-                    <div className="icon-description">{data.description}
                 </div>
+                <div className={i18next.languages[0] === "en" ? "icon-description" : "invisible"}>{data.description}</div>
+                <div className={i18next.languages[0] === "no" ? "icon-description" : "invisible"}>{data.descriptionNO}</div>
             </div>)
 
         const greenIcons = this.state.greenData.map(data => 
@@ -80,9 +84,9 @@ class AllIcons extends React.Component {
                     description={data.description} 
                     color={data.color}
                     f_id={data.id}/>
-                    </div>
-                    <div className="icon-description">{data.description}
                 </div>
+                <div className={i18next.languages[0] === "en" ? "icon-description" : "invisible"}>{data.description}</div>
+                <div className={i18next.languages[0] === "no" ? "icon-description" : "invisible"}>{data.descriptionNO}</div>
             </div>)
 
         const yellowIcons = this.state.yellowData.map(data => 
@@ -92,9 +96,9 @@ class AllIcons extends React.Component {
                     description={data.description} 
                     color={data.color}
                     f_id={data.id}/>
-                    </div>
-                    <div className="icon-description">{data.description}
                 </div>
+                <div className={i18next.languages[0] === "en" ? "icon-description" : "invisible"}>{data.description}</div>
+                <div className={i18next.languages[0] === "no" ? "icon-description" : "invisible"}>{data.descriptionNO}</div>
             </div>)
 
         return (
@@ -103,19 +107,19 @@ class AllIcons extends React.Component {
                     <li onClick={() => {
                         this.setState({color: "blue"})}}
                         className={ this.state.color === "blue" ? "selected" : "not-selected" }
-                        >Man
+                        >{t('allIcons.man')}
                     </li>
                     <li onClick={() => {this.setState({color: "red"})}}
                         className={ this.state.color === "red" ? "selected" : "not-selected" }
-                        >Woman
+                        >{t('allIcons.woman')}
                     </li>
                     <li onClick={() => {this.setState({color: "green"})}}
                         className={ this.state.color === "green" ? "selected" : "not-selected" }
-                        >Child
+                        >{t('allIcons.child')}
                     </li>
                     <li onClick={() => {this.setState({color: "yellow"})}}
                         className={ this.state.color === "yellow" ? "selected" : "not-selected" }
-                        >Group
+                        >{t('allIcons.group')}
                     </li>
                     <div className="x" onClick={this.props.close}><AiIcons.AiOutlineClose /></div>
                 </ul>
@@ -142,4 +146,4 @@ class AllIcons extends React.Component {
 }
 
 
-export default AllIcons
+export default withTranslation('common')(AllIcons)

@@ -4,6 +4,8 @@ import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import './startpage.css';
 import { Authenticated, useToken } from './auth/AuthContext'
+import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
 
 function useSetUserSession() {
   let accessToken = useToken()
@@ -31,6 +33,7 @@ function Startpage() {
     {useSetUserSession()}
   </Authenticated>
   
+  const {t} = useTranslation('common');
 
   // State for new_project
   const [new_project, setNewProject] = useState(false); // set state for new_project to false
@@ -50,6 +53,10 @@ function Startpage() {
     window.sessionStorage.clear()
     window.location.href = window.backend_url + "logout";
   }
+
+  function test() {
+    console.log(i18next.languages[0])
+  }
   // const logout = () => window.location.href = window.backend_url + "/logout";
   // State for User Profile
   // const [user_profile, setUserProfile] = useState(false)
@@ -63,15 +70,15 @@ function Startpage() {
           <div className="menu">
             <ul id='start-menu'>
               {/* NEW PROJECT */}
-              <li onClick={ () => { hideLoadProject(), changeNewVisibility() }}
+              <li onClick={ () => { hideLoadProject(), changeNewVisibility(), test() }}
                 className={new_project ? 'active' : 'passive'}
-                >New Project</li>
+                >{t('startpage.new')}</li>
               {/* LOAD PROJECT */}
               <li onClick={ () => { hideNewProject(), changeLoadVisibility() }}
                 className={load_project ? 'active' : 'passive'}
-              ><Link to={"/manageProject"}>Manage Project</Link></li>
+              ><Link to={"/manageProject"}>{t('startpage.manage')}</Link></li>
               {/* LOG OUT */}
-              <li onClick={ () => { logout() }}>Log Out</li>
+              <li onClick={ () => { logout() }}>{t('startpage.logout')}</li>
             </ul>
             <ul id={new_project ? 'load-map' : 'invisible'}>
               <Link to={{
@@ -81,7 +88,7 @@ function Startpage() {
                     projectName: "",
                     description: "",
                 }
-                }}><li>Use Web-map</li></Link>
+                }}><li>{t('startpage.web-map')}</li></Link>
                 {/* <li>Use Template??</li> */}
                 <Link to={{
                   pathname: "/newproject",
@@ -90,7 +97,7 @@ function Startpage() {
                     projectName: "",
                     description: "",
                 }
-                }}><li>Load Map From File</li></Link>
+                }}><li>{t('startpage.load')}</li></Link>
             </ul>
           </div>
         </div>

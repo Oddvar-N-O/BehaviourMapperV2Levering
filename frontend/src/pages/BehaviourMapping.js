@@ -8,6 +8,9 @@ import './BehaviourMapping.css';
 import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
 import domtoimage from 'dom-to-image';
+import { withTranslation } from 'react-i18next';
+import * as AiIcons from 'react-icons/ai';
+import helperImage from './images/temp.png'
 // import EventIcon from '../components/EventIcon';
 
 class BehaviourMapping extends React.Component {
@@ -16,7 +19,6 @@ class BehaviourMapping extends React.Component {
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         imageUploaded: props.location.state.imageUploaded,
-        
         iconObjects: [], 
         ourSRC: null,
         sendIconToBD: false,
@@ -38,7 +40,7 @@ class BehaviourMapping extends React.Component {
         formerScreenSize: {x: 0, y: 0,},
         originalScreenSize: {x: 0, y: 0},
         mapblob: "",
-        hideOrShow: "Show",
+        hideOrShow: "mapping.showIcons",
         arcGISfilename: "",
         scrollHorizontal: 0,
         scrollVertical: 0,
@@ -53,7 +55,9 @@ class BehaviourMapping extends React.Component {
         comments: {},
         i_ids: [],
         u_id: window.sessionStorage.getItem('uID'),
+        showHelperImage: false,
       };
+
       this.canvas = React.createRef();
       this.myImage = React.createRef();
       this.interviewElement = React.createRef();
@@ -86,6 +90,7 @@ class BehaviourMapping extends React.Component {
       this.saveComment = this.saveComment.bind(this);
       this.closeAddComment = this.closeAddComment.bind(this);
       this.hideOrShowFunction = this.hideOrShowFunction.bind(this);
+      this.showHelperImage = this.showHelperImage.bind(this);
   }
 
   createIconObject(coordinates, currentSize, id) {
@@ -313,7 +318,7 @@ class BehaviourMapping extends React.Component {
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon !== null && this.state.hideOrShow !== 'Hide') {
+    if (icon !== null && this.state.hideOrShow !== 'Hide Figures') {
       icon.style.display = 'none';
     }
     this.stopPointing()
@@ -345,14 +350,11 @@ class BehaviourMapping extends React.Component {
     if (this.state.addIcon) {
       this.setState({ addIcon: false});
     }
-    if (this.state.hideOrShow === 'Hide') {
+    if (this.state.hideOrShow === 'Hide Figures') {
       this.showAll();
     }
   }
 
-
-
-  
   setScreenSize() {
     let nw = document.querySelector('.map-image').naturalWidth;
     let nh = document.querySelector('.map-image').naturalHeight;
@@ -646,11 +648,11 @@ class BehaviourMapping extends React.Component {
   }
 
   hideOrShowFunction() {
-    if (this.state.hideOrShow === 'Show') {
-      this.setState({hideOrShow: 'Hide'}, function() {this.showAll();});
+    if (this.state.hideOrShow === 'mapping.showIcons') {
+      this.setState({hideOrShow: 'mapping.hideIcons'}, function() {this.showAll();});
       // knappen forandre seg til show
-    } else if (this.state.hideOrShow === 'Hide') {
-      this.setState({hideOrShow: 'Show'}, function() {this.hideAll();});
+    } else if (this.state.hideOrShow === 'mapping.hideIcons') {
+      this.setState({hideOrShow: 'mapping.showIcons'}, function() {this.hideAll();});
     }
   }
 
@@ -934,12 +936,24 @@ selectItemForContextMenu(e) {
       })
   }
 
+  showHelperImage() {
+    if (this.state.showHelperImage) {
+      this.setState({
+        showHelperImage: false
+      })
+    } else {
+      this.setState({
+        showHelperImage: true
+      })
+    }
+    
+  }
+
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
     this.findScreenSize();
     this.initiateFormerScreenSize();
     window.addEventListener('resize', this.handleResize);
-
     fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
     .then(data => {
@@ -991,8 +1005,8 @@ selectItemForContextMenu(e) {
     })(this.canvas.current, this.myImage.current);
   }
 
-
   render() {
+    const { t } = this.props; // used for translation
     let imageClassList = classNames({
       'map-image': !this.state.imageUploaded,
       'uploaded-map-image': this.state.imageUploaded,
@@ -1013,10 +1027,10 @@ selectItemForContextMenu(e) {
       'screenshot-div': true,
       'visible': true
     });
+
     return (
       <Authenticated>
         <div id='maincont' >
-          
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
                 <AllIcons 
@@ -1045,32 +1059,32 @@ selectItemForContextMenu(e) {
               />
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add event</li>               
+                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>{t('mapping.addEvent')}</li>               
                 <li className="bigButtonLi">
-                  <div>Change size of events</div>
+                  <div>{t('mapping.changeSize')}</div>
                   <div className="changeSizeContainer">
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>+</p>
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>-</p>
                   </div>
                 </li>
 
-                <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {this.state.hideOrShow} Icons</li>
+                <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {t(this.state.hideOrShow)}</li>
                 {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
-                <li className="buttonLi" onClick={this.removeIcon}>Remove event</li>
-                <li className="buttonLi" onClick={this.addComment}>Add comment</li>
-                <li className="buttonLi" onClick={this.changeShowContextMenu}>Choose favorite events</li>
+                <li className="buttonLi" onClick={this.removeIcon}>{t('mapping.remove')}</li>
+                <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
+                <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
-                  <li><h2>Favorites</h2></li>
+                  <li><h2>{t('mapping.favorites')}</h2></li>
                 </ul>
                 {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>Finish project</p></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
               <ul className={interviewLiClassList}>
-                <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
-                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
+                <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
+                <li className="buttonLi" onClick={this.drawLine}>{t('mapping.addLine')}</li>
+                <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
               </ul>
               
           </div>
@@ -1091,11 +1105,14 @@ selectItemForContextMenu(e) {
             <div id="icon-container" />
               
             </div>
+            <div className="help" onClick={this.showHelperImage}>
+              <AiIcons.AiOutlineQuestionCircle/>
+            </div>
+            <img onClick={this.showHelperImage} className={this.state.showHelperImage ? "helper-image" : "invisible"} src={helperImage} alt="HelperImage"></img>
         </div>
       </Authenticated>
     );
-
   }
 }
 
-export default BehaviourMapping;
+export default withTranslation('common')(BehaviourMapping);
