@@ -50,7 +50,7 @@ class BehaviourMapping extends React.Component {
         coords: [],
         eightOfCoords: 0,
         interviews: [],
-        comments: [],
+        comments: {},
         i_ids: [],
         u_id: window.sessionStorage.getItem('uID'),
       };
@@ -84,11 +84,12 @@ class BehaviourMapping extends React.Component {
       this.selectItemForContextMenu = this.selectItemForContextMenu.bind(this);
       this.addComment = this.addComment.bind(this);
       this.saveComment = this.saveComment.bind(this);
+      this.closeAddComment = this.closeAddComment.bind(this);
+      this.hideOrShowFunction = this.hideOrShowFunction.bind(this);
   }
 
   createIconObject(coordinates, currentSize, id) {
     let icon = {
-      updateEvent: false,
       id: id,
       originalCoord: coordinates,
       originalSize: currentSize,
@@ -130,7 +131,7 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
-    this.hideAll();
+    this.hideIcon();
     this.setState({ addIcon: !this.state.addIcon });
     this.setState({showContextMenu: false});
   }
@@ -164,13 +165,15 @@ class BehaviourMapping extends React.Component {
   }
 
   selectIcon(e) {
-    let newSrc = e.target.src;
+    let newSrc
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ')
       this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
+      newSrc = e.target.src;
     } else if (e.target.children[0].getAttribute('id') !== null ) {
       let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
       this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
+      newSrc = e.target.children[0].src;
     }
     this.setState({iconSRC: newSrc});      
     this.setState({ourSRC: newSrc});
@@ -269,25 +272,27 @@ class BehaviourMapping extends React.Component {
   }
 
   pointIcon() {
-    var degreerot = Math.atan2(
+    if (this.state.iconObjects.length > 0) {
+      var degreerot = Math.atan2(
         this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
         -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
-    ); 
-    var degrees = degreerot*180/Math.PI - 90;
-    var round_degree = Math.round(degrees);
-    var string_degree = 'rotate(' + round_degree.toString() +'deg)';
+      ); 
+      var degrees = degreerot*180/Math.PI - 90;
+      var round_degree = Math.round(degrees);
+      var string_degree = 'rotate(' + round_degree.toString() +'deg)';
 
-    this.setState({
-      ourIconCoord: {
-        x: this.state.ourIconCoord.x,
-        y: this.state.ourIconCoord.y,
-        degree: string_degree
+      this.setState({
+        ourIconCoord: {
+          x: this.state.ourIconCoord.x,
+          y: this.state.ourIconCoord.y,
+          degree: string_degree
+        }
+      });
+      var img = document.getElementById(this.state.iconObjects[this.state.iconObjects.length -1].id);
+      if (string_degree !== null && img !== null) {
+        img.style.transform = string_degree;
       }
-    });
-    var img = document.getElementById(this.state.iconObjects[this.state.iconObjects.length -1].id);
-    if (string_degree != null) {
-      img.style.transform = string_degree;
-    }
+    } 
   }
 
   startPointing() {
@@ -755,18 +760,19 @@ changeSizeOfIcons(event) {
 }
 
 changeShowContextMenu() {
+  this.hideIcon();
   this.closeIconSelect();
-  this.hideAll();
   this.setState({showContextMenu: !this.state.showContextMenu});
 }
+
 
 selectItemForContextMenu(e) {
   let list = document.getElementById('favorite-icon-list');
   let li = document.createElement('li');
-  let newSrc, newText;
-  ({ newSrc, newText } = this.getNewSrcAndText(e, newSrc, newText, li));
+  let newSrc, newText, newF_id;
+  ({ newSrc, newText, newF_id } = this.getNewSrcAndText(e, newSrc, newText, newF_id, li));
   if (this.alreadyInList(newText, list) === false && this.objectExists(newText) === true) {
-    this.setEventlistenerAndAppendLi(li, newText, newSrc, list);
+    this.setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list);
   } else if (this.alreadyInList(newText, list) === true && this.objectExists(newText) === true) {
     let elementToRemove = document.getElementById(newSrc)
     list.removeChild(elementToRemove);
@@ -775,35 +781,35 @@ selectItemForContextMenu(e) {
 }
 
 
-  setEventlistenerAndAppendLi(li, newText, newSrc, list) {
+  setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list) {
     li.innerHTML = newText;
     li.addEventListener('click', () => {
-      this.setState({ ourSRC: li.getAttribute('id') });
       this.hideIcon();
+      this.setState({ ourSRC: li.getAttribute('id') });
+      this.setState({f_id: newF_id})
     });
-    this.setState({ ourSRC: newSrc }, function () { });
-    this.hideIcon();
+    this.setState({ ourSRC: newSrc });
     list.appendChild(li);
     this.setState({
       imgIcon: li.getAttribute('id')
     });
   }
 
-  getNewSrcAndText(e, newSrc, newText, li) {
+  getNewSrcAndText(e, newSrc, newText, newF_id, li) {
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ');
-      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newF_id = imgIdSplit[imgIdSplit.length - 1];
       newSrc = e.target.src;
       newText = this.setInnerHTML(e.target.getAttribute('id'));
       li.setAttribute('id', newSrc);
     } else if (e.target.children[0].getAttribute('id') !== null) {
       let imgIdSplit = e.target.children[0].getAttribute('id').split(' ');
-      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newF_id = imgIdSplit[imgIdSplit.length - 1];
       newSrc = e.target.children[0].src;
       newText = this.setInnerHTML(e.target.children[0].getAttribute('id'));
       li.setAttribute('id', newSrc);
     }
-    return { newSrc, newText };
+    return { newSrc, newText, newF_id};
   }
 
   
@@ -812,7 +818,8 @@ selectItemForContextMenu(e) {
     let iconObject;
     for (let i=0; i<this.state.iconObjects.length ;i++) {
       iconObject = this.state.iconObjects[i];
-      if (iconObject.id === this.state.ourIconID) {
+      
+      if (iconObject.id === this.state.iconIDForDeletion) {
         return i;
       }
     }
@@ -823,10 +830,10 @@ selectItemForContextMenu(e) {
     this.stopPointing();
     this.setState({actionID: 1}, function() {})
     var icon = document.getElementById(this.state.iconIDForDeletion);
-    if (icon != null && this.state.ourIconID >= 0) {
+    if (icon != null) {
       icon.remove();
       let i = this.findIconObjectOfOurID();
-
+      
       this.removeFromIconObjects(i);
       
       const data = new FormData();
@@ -839,8 +846,6 @@ selectItemForContextMenu(e) {
         body: data,
       })
 
-      // setTimeout(() => this.showChosenIcon(), 100);
-      this.setState({ourIconID: -1}, function() {});
       if (this.state.newIconID > 0) {
         this.setState({newIconID: this.state.newIconID - 1}, function() {});
       }
@@ -886,12 +891,11 @@ selectItemForContextMenu(e) {
     this.setState({iconObjects: []}, function() {});
   }
 
-
-  // enn så lenge bare kopiert fra addInterview skal ta i bruk en egen komponent
-  addComment(whichComment=0) {
-    if (whichComment > 0) {
+  addComment() {
+    let whichComment = this.state.iconIDForDeletion
+    if (this.state.comments[whichComment] !== undefined) {
       this.commentElement.current.setState({alreadySaved: true});
-      this.commentElement.current.setInterview(this.state.comments[whichComment-1])
+      this.commentElement.current.setComment(this.state.comments[whichComment])
       if (!this.state.addComment) {
         this.setState({addComment: !this.state.addComment});
       }
@@ -900,16 +904,22 @@ selectItemForContextMenu(e) {
       this.commentElement.current.setState({alreadySaved: false})
       this.setState({addComment: !this.state.addComment});
     }
-  
+    
+
+  }
+  closeAddComment() {
+    this.setState({addComment: false});
   }
 
   saveComment(e) {
     e.preventDefault();
-    this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
+    let commentsCopy = this.state.comments;
+    commentsCopy[this.state.iconIDForDeletion] = e.target.form.childNodes[1].value;
+    this.setState({comments: commentsCopy});
+    // this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
     this.commentElement.current.clearComment();
-
-    this.sendCommentToDb(this.commentElement.current.state.interview);
-    this.addComment();
+    this.sendCommentToDb(this.commentElement.current.state.comment);
+    this.closeAddComment();
   }
 
   sendCommentToDb(comment) {
@@ -917,7 +927,7 @@ selectItemForContextMenu(e) {
     data.append('comment', comment);
     data.append('p_id', this.state.p_id);
     data.append('u_id', this.state.u_id);
-    data.append('number', 1);
+    data.append('whichEvent', this.state.iconIDForDeletion);
     fetch(window.backend_url + 'updateeventwithcomment', {
       method: 'POST',
       body: data,
@@ -951,9 +961,9 @@ selectItemForContextMenu(e) {
     fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
     .then(data => {
-      if (data.length > 0) {
-        setTimeout(() => this.loadFormerEvents(data), 500);
-      }
+      // if (data.length > 0) {
+      //   setTimeout(() => this.loadFormerEvents(data), 500);
+      // }
     });
 
     var firstTime = 0;
@@ -1023,7 +1033,7 @@ selectItemForContextMenu(e) {
             </div>
             <div className={this.state.addComment ? "textBox" : "invisible"}> 
               <AddComment 
-                close={this.addComment}
+                close={this.closeAddComment}
                 save={this.saveComment}
                 ref={this.commentElement}
               />  
@@ -1044,7 +1054,7 @@ selectItemForContextMenu(e) {
                   </div>
                 </li>
 
-                <li id="hide-or-show" className="buttonLi" onClick={() => this.hideOrShowFunction()}> {this.state.hideOrShow} Icons</li>
+                <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {this.state.hideOrShow} Icons</li>
                 {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
                 <li className="buttonLi" onClick={this.removeIcon}>Remove event</li>
                 <li className="buttonLi" onClick={this.addComment}>Add comment</li>

@@ -144,10 +144,12 @@ def deleteProjectHasEvent(e_id):
 def deleteEvent():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
+        print(request.form.get('number'))
         number = int(request.form.get('number'))
         print('N: ' + str(number))
         
-        eventsJSON = json.loads(get_events_func(p_id))
+        eventsJSON = get_events_func(p_id)
+        events = json.loads(eventsJSON)
         
         print('Length of Array: ' + str(len(events)))
         
@@ -168,11 +170,9 @@ def deleteEvent():
 def updateEventWithComment():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
-        number = int(request.form.get('number'))
+        whichEvent = int(request.form.get('whichEvent'))
         
-        events = json.loads(get_events_func(p_id))[number][0] 
-        e_id = events[number][0]
-        print("!!!", json.loads(get_events_func(p_id))[number][0], "!!!!", e_id)
+        e_id = json.loads(get_events_func(p_id))[whichEvent][0] 
         
         update_event = ("UPDATE Event SET comment=? WHERE id=?")
         query_db(update_event, (request.form.get('comment'), e_id,), True)
@@ -317,8 +317,11 @@ def getImageFromID():
 
         result = query_db(get_figure_image_sql, (f_id,), True)
         image = {"image": ""}
-        for res in result:
-            image["image"] = res
+        if result != 0:
+            for res in result:
+                image["image"] = res
+        else:
+            return {}
         try:
             return send_from_directory(current_app.config['STATIC_URL_PATH'], image["image"])
         except FileNotFoundError:
@@ -518,18 +521,19 @@ def writeEventsToCSV(all_events_fromdb):
         if event != 0:
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
-        if data[5] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[5],), True))
+        if data[6] != 0:
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
             event_data.append({
                 'id':data[0], 
                 'direction':data[1], 
                 'center_coordinate':data[2],
                 'image_size_when_created': data[3],
                 'created': data[4],
-                'f_id': data[5],
+                'comment': data[5],
+                'f_id': data[6],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'f_id', 'description', 'color']
+    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
