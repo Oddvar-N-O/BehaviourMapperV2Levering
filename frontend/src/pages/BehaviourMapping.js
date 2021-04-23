@@ -27,7 +27,7 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
-        iconIDForDeletion: 0,
+        selectedEventID: null,
         
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
@@ -224,9 +224,10 @@ class BehaviourMapping extends React.Component {
     img.style.height = this.state.eventSize + "px";
     img.style.width = this.state.eventSize + "px";
     img.setAttribute('id', this.state.newIconID.toString());
+    this.setState({selectedEventID: null});
 
     img.addEventListener('click', () => {
-      this.setState({iconIDForDeletion: img.getAttribute('id')}, function() {});
+      this.setState({selectedEventID: img.getAttribute('id')}, function() {});
       this.showChosenIcon(img.getAttribute('id'));
     });
     
@@ -821,7 +822,7 @@ selectItemForContextMenu(e) {
     for (let i=0; i<this.state.iconObjects.length ;i++) {
       iconObject = this.state.iconObjects[i];
       
-      if (iconObject.id === this.state.iconIDForDeletion) {
+      if (iconObject.id === this.state.selectedEventID) {
         return i;
       }
     }
@@ -831,12 +832,13 @@ selectItemForContextMenu(e) {
   removeIcon() {
     this.stopPointing();
     this.setState({actionID: 1}, function() {})
-    var icon = document.getElementById(this.state.iconIDForDeletion);
+    var icon = document.getElementById(this.state.selectedEventID);
     if (icon != null) {
       icon.remove();
       let i = this.findIconObjectOfOurID();
       
       this.removeFromIconObjects(i);
+      this.setState({selectedEventID: null});
       
       const data = new FormData();
       data.append('p_id', this.state.p_id);
@@ -878,7 +880,7 @@ selectItemForContextMenu(e) {
       iconObject = this.state.iconObjects[i]
       icon = document.getElementById(iconObject.id);
       if (icon != null) {
-        if (iconObject.id === this.state.iconIDForDeletion) {
+        if (iconObject.id === this.state.selectedEventID) {
           icon.style.border = '4px solid red';
           icon.style.border = 'block';
         } else {
@@ -894,14 +896,14 @@ selectItemForContextMenu(e) {
   }
 
   addComment() {
-    let whichComment = this.state.iconIDForDeletion
-    if (this.state.comments[whichComment] !== undefined) {
+    let whichEvent = this.state.selectedEventID
+    if (this.state.comments[whichEvent] !== undefined) {
       this.commentElement.current.setState({alreadySaved: true});
-      this.commentElement.current.setComment(this.state.comments[whichComment])
+      this.commentElement.current.setComment(this.state.comments[whichEvent])
       if (!this.state.addComment) {
         this.setState({addComment: !this.state.addComment});
       }
-    } else {
+    } else if (whichEvent !== null) {
       this.commentElement.current.clearComment();
       this.commentElement.current.setState({alreadySaved: false})
       this.setState({addComment: !this.state.addComment});
@@ -916,7 +918,7 @@ selectItemForContextMenu(e) {
   saveComment(e) {
     e.preventDefault();
     let commentsCopy = this.state.comments;
-    commentsCopy[this.state.iconIDForDeletion] = e.target.form.childNodes[1].value;
+    commentsCopy[this.state.selectedEventID] = e.target.form.childNodes[1].value;
     this.setState({comments: commentsCopy});
     // this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
     this.commentElement.current.clearComment();
@@ -929,7 +931,7 @@ selectItemForContextMenu(e) {
     data.append('comment', comment);
     data.append('p_id', this.state.p_id);
     data.append('u_id', this.state.u_id);
-    data.append('whichEvent', this.state.iconIDForDeletion);
+    data.append('whichEvent', this.state.selectedEventID);
     fetch(window.backend_url + 'updateeventwithcomment', {
       method: 'POST',
       body: data,
