@@ -1,6 +1,7 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
+import AddComment from '../components/AddComment';
 import ContextMenu from '../components/ContextMenu';
 import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
@@ -44,16 +45,19 @@ class BehaviourMapping extends React.Component {
         onlyObservation: true,
         drawLine: false,
         addInterview: false,
+        addComment: false,
         showContextMenu: false,
         coords: [],
         eightOfCoords: 0,
         interviews: [],
+        comments: {},
         i_ids: [],
         u_id: window.sessionStorage.getItem('uID'),
       };
       this.canvas = React.createRef();
       this.myImage = React.createRef();
       this.interviewElement = React.createRef();
+      this.commentElement = React.createRef();
 
       this.handleScroll = this.handleScroll.bind(this)
       this.handleResize = this.handleResize.bind(this);
@@ -78,11 +82,14 @@ class BehaviourMapping extends React.Component {
       this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
       this.changeShowContextMenu = this.changeShowContextMenu.bind(this);
       this.selectItemForContextMenu = this.selectItemForContextMenu.bind(this);
+      this.addComment = this.addComment.bind(this);
+      this.saveComment = this.saveComment.bind(this);
+      this.closeAddComment = this.closeAddComment.bind(this);
+      this.hideOrShowFunction = this.hideOrShowFunction.bind(this);
   }
 
   createIconObject(coordinates, currentSize, id) {
     let icon = {
-      update: false,
       id: id,
       originalCoord: coordinates,
       originalSize: currentSize,
@@ -124,7 +131,7 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
-    this.hideAll();
+    this.hideIcon();
     this.setState({ addIcon: !this.state.addIcon });
     this.setState({showContextMenu: false});
   }
@@ -158,13 +165,15 @@ class BehaviourMapping extends React.Component {
   }
 
   selectIcon(e) {
-    let newSrc = e.target.src;
+    let newSrc
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ')
       this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
+      newSrc = e.target.src;
     } else if (e.target.children[0].getAttribute('id') !== null ) {
       let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
       this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
+      newSrc = e.target.children[0].src;
     }
     this.setState({iconSRC: newSrc});      
     this.setState({ourSRC: newSrc});
@@ -263,25 +272,27 @@ class BehaviourMapping extends React.Component {
   }
 
   pointIcon() {
-    var degreerot = Math.atan2(
+    if (this.state.iconObjects.length > 0) {
+      var degreerot = Math.atan2(
         this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
         -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
-    ); 
-    var degrees = degreerot*180/Math.PI - 90;
-    var round_degree = Math.round(degrees);
-    var string_degree = 'rotate(' + round_degree.toString() +'deg)';
+      ); 
+      var degrees = degreerot*180/Math.PI - 90;
+      var round_degree = Math.round(degrees);
+      var string_degree = 'rotate(' + round_degree.toString() +'deg)';
 
-    this.setState({
-      ourIconCoord: {
-        x: this.state.ourIconCoord.x,
-        y: this.state.ourIconCoord.y,
-        degree: string_degree
+      this.setState({
+        ourIconCoord: {
+          x: this.state.ourIconCoord.x,
+          y: this.state.ourIconCoord.y,
+          degree: string_degree
+        }
+      });
+      var img = document.getElementById(this.state.iconObjects[this.state.iconObjects.length -1].id);
+      if (string_degree !== null && img !== null) {
+        img.style.transform = string_degree;
       }
-    });
-    var img = document.getElementById(this.state.iconObjects[this.state.iconObjects.length -1].id);
-    if (string_degree != null) {
-      img.style.transform = string_degree;
-    }
+    } 
   }
 
   startPointing() {
@@ -715,9 +726,9 @@ finishProject() {
   this.takeScreenshot();
   fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
   setTimeout(() => {
-    window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-    // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
-  }, 1500);
+      window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+      // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+    }, 1500);
   }
 }
 
@@ -749,18 +760,19 @@ changeSizeOfIcons(event) {
 }
 
 changeShowContextMenu() {
+  this.hideIcon();
   this.closeIconSelect();
-  this.hideAll();
   this.setState({showContextMenu: !this.state.showContextMenu});
 }
+
 
 selectItemForContextMenu(e) {
   let list = document.getElementById('favorite-icon-list');
   let li = document.createElement('li');
-  let newSrc, newText;
-  ({ newSrc, newText } = this.getNewSrcAndText(e, newSrc, newText, li));
+  let newSrc, newText, newF_id;
+  ({ newSrc, newText, newF_id } = this.getNewSrcAndText(e, newSrc, newText, newF_id, li));
   if (this.alreadyInList(newText, list) === false && this.objectExists(newText) === true) {
-    this.setEventlistenerAndAppendLi(li, newText, newSrc, list);
+    this.setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list);
   } else if (this.alreadyInList(newText, list) === true && this.objectExists(newText) === true) {
     let elementToRemove = document.getElementById(newSrc)
     list.removeChild(elementToRemove);
@@ -769,35 +781,157 @@ selectItemForContextMenu(e) {
 }
 
 
-  setEventlistenerAndAppendLi(li, newText, newSrc, list) {
+  setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list) {
     li.innerHTML = newText;
     li.addEventListener('click', () => {
-      this.setState({ ourSRC: li.getAttribute('id') });
       this.hideIcon();
+      this.setState({ ourSRC: li.getAttribute('id') });
+      this.setState({f_id: newF_id})
     });
-    this.setState({ ourSRC: newSrc }, function () { });
-    this.hideIcon();
+    this.setState({ ourSRC: newSrc });
     list.appendChild(li);
     this.setState({
       imgIcon: li.getAttribute('id')
     });
   }
 
-  getNewSrcAndText(e, newSrc, newText, li) {
+  getNewSrcAndText(e, newSrc, newText, newF_id, li) {
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ');
-      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newF_id = imgIdSplit[imgIdSplit.length - 1];
       newSrc = e.target.src;
       newText = this.setInnerHTML(e.target.getAttribute('id'));
       li.setAttribute('id', newSrc);
     } else if (e.target.children[0].getAttribute('id') !== null) {
       let imgIdSplit = e.target.children[0].getAttribute('id').split(' ');
-      this.setState({ f_id: imgIdSplit[imgIdSplit.length - 1] });
+      newF_id = imgIdSplit[imgIdSplit.length - 1];
       newSrc = e.target.children[0].src;
       newText = this.setInnerHTML(e.target.children[0].getAttribute('id'));
       li.setAttribute('id', newSrc);
     }
-    return { newSrc, newText };
+    return { newSrc, newText, newF_id};
+  }
+
+  
+
+  findIconObjectOfOurID() {
+    let iconObject;
+    for (let i=0; i<this.state.iconObjects.length ;i++) {
+      iconObject = this.state.iconObjects[i];
+      
+      if (iconObject.id === this.state.iconIDForDeletion) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  removeIcon() {
+    this.stopPointing();
+    this.setState({actionID: 1}, function() {})
+    var icon = document.getElementById(this.state.iconIDForDeletion);
+    if (icon != null) {
+      icon.remove();
+      let i = this.findIconObjectOfOurID();
+      
+      this.removeFromIconObjects(i);
+      
+      const data = new FormData();
+      data.append('p_id', this.state.p_id);
+      data.append('u_id', this.state.u_id);
+      data.append('number', i);
+  
+      fetch(window.backend_url +'deleteevent', {
+        method: 'POST',
+        body: data,
+      })
+
+      if (this.state.newIconID > 0) {
+        this.setState({newIconID: this.state.newIconID - 1}, function() {});
+      }
+      if (this.state.sendIconToBD === true) {
+        this.setState({sendIconToBD: false}, function() {});
+      }  
+    }
+  }
+
+  removeFromIconObjects(i) {
+    let newIconObjects = [...this.state.iconObjects];
+    if (newIconObjects.length > 1) {
+      newIconObjects.splice(i, 1);
+    } else {
+      this.clearIconObjects();
+    }
+    this.setState({iconObjects: newIconObjects},
+      function() {});
+  }
+
+
+  showChosenIcon() {
+    this.setState({actionID: null});
+    let iconObject;
+    let icon;
+    for (let i=0; i<this.state.iconObjects.length; i++) {
+      
+      iconObject = this.state.iconObjects[i]
+      icon = document.getElementById(iconObject.id);
+      if (icon != null) {
+        if (iconObject.id === this.state.iconIDForDeletion) {
+          icon.style.border = '4px solid red';
+          icon.style.border = 'block';
+        } else {
+          icon.style.border = 'none';
+        }
+      } else {
+      }
+    }
+  }
+
+  clearIconObjects() {
+    this.setState({iconObjects: []}, function() {});
+  }
+
+  addComment() {
+    let whichComment = this.state.iconIDForDeletion
+    if (this.state.comments[whichComment] !== undefined) {
+      this.commentElement.current.setState({alreadySaved: true});
+      this.commentElement.current.setComment(this.state.comments[whichComment])
+      if (!this.state.addComment) {
+        this.setState({addComment: !this.state.addComment});
+      }
+    } else {
+      this.commentElement.current.clearComment();
+      this.commentElement.current.setState({alreadySaved: false})
+      this.setState({addComment: !this.state.addComment});
+    }
+    
+
+  }
+  closeAddComment() {
+    this.setState({addComment: false});
+  }
+
+  saveComment(e) {
+    e.preventDefault();
+    let commentsCopy = this.state.comments;
+    commentsCopy[this.state.iconIDForDeletion] = e.target.form.childNodes[1].value;
+    this.setState({comments: commentsCopy});
+    // this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
+    this.commentElement.current.clearComment();
+    this.sendCommentToDb(this.commentElement.current.state.comment);
+    this.closeAddComment();
+  }
+
+  sendCommentToDb(comment) {
+    const data = new FormData();
+    data.append('comment', comment);
+    data.append('p_id', this.state.p_id);
+    data.append('u_id', this.state.u_id);
+    data.append('whichEvent', this.state.iconIDForDeletion);
+    fetch(window.backend_url + 'updateeventwithcomment', {
+      method: 'POST',
+      body: data,
+      })
   }
 
   componentDidMount() {
@@ -827,7 +961,9 @@ selectItemForContextMenu(e) {
     fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
     .then(data => {
-      setTimeout(() => this.loadFormerEvents(data), 500);
+      // if (data.length > 0) {
+      //   setTimeout(() => this.loadFormerEvents(data), 500);
+      // }
     });
 
     var firstTime = 0;
@@ -853,84 +989,6 @@ selectItemForContextMenu(e) {
         }
       }
     })(this.canvas.current, this.myImage.current);
-  }
-
-  findIconObjectOfOurID() {
-    let iconObject;
-    for (let i=0; i<this.state.iconObjects.length ;i++) {
-      iconObject = this.state.iconObjects[i];
-      if (iconObject.id === this.state.ourIconID) {
-        return i;
-      }
-    }
-    return null;
-  }
-
-  removeIcon() {
-    this.stopPointing();
-    this.setState({actionID: 1}, function() {})
-    var icon = document.getElementById(this.state.iconIDForDeletion);
-    if (icon != null && this.state.ourIconID >= 0) {
-      icon.remove();
-      let i = this.findIconObjectOfOurID();
-
-      this.removeFromIconObjects(i);
-      
-      const data = new FormData();
-      data.append('p_id', this.state.p_id);
-      data.append('u_id', this.state.u_id);
-      data.append('number', i);
-  
-      fetch(window.backend_url +'deleteevent', {
-        method: 'POST',
-        body: data,
-      })
-
-      // setTimeout(() => this.showChosenIcon(), 100);
-      this.setState({ourIconID: -1}, function() {});
-      if (this.state.newIconID > 0) {
-        this.setState({newIconID: this.state.newIconID - 1}, function() {});
-      }
-      if (this.state.sendIconToBD === true) {
-        this.setState({sendIconToBD: false}, function() {});
-      }  
-    }
-  }
-
-  removeFromIconObjects(i) {
-    let newIconObjects = [...this.state.iconObjects];
-    if (newIconObjects.length > 1) {
-      newIconObjects.splice(i, 1);
-    } else {
-      this.clearIconObjects();
-    }
-    this.setState({iconObjects: newIconObjects},
-      function() {});
-  }
-
-
-  showChosenIcon(id) {
-    this.setState({actionID: null});
-    let iconObject;
-    let icon;
-    for (let i=0; i<this.state.iconObjects.length; i++) {
-      
-      iconObject = this.state.iconObjects[i]
-      icon = document.getElementById(iconObject.id);
-      if (icon != null) {
-        if (iconObject.id === this.state.iconIDForDeletion) {
-          icon.style.border = '4px solid red';
-          icon.style.border = 'block';
-        } else {
-          icon.style.border = 'none';
-        }
-      } else {
-      }
-    }
-  }
-
-  clearIconObjects() {
-    this.setState({iconObjects: []}, function() {});
   }
 
 
@@ -966,11 +1024,18 @@ selectItemForContextMenu(e) {
                   close={this.closeIconSelect}
                 />
             </div> 
-            <div className={this.state.addInterview ? "interview" : "invisible"}> 
+            <div className={this.state.addInterview ? "textBox" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
                 save={this.saveInterview}
                 ref={this.interviewElement}
+              />  
+            </div>
+            <div className={this.state.addComment ? "textBox" : "invisible"}> 
+              <AddComment 
+                close={this.closeAddComment}
+                save={this.saveComment}
+                ref={this.commentElement}
               />  
             </div>
             <div className={this.state.showContextMenu ? "icons-visible" : "invisible"}>
@@ -980,7 +1045,7 @@ selectItemForContextMenu(e) {
               />
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add Event</li>               
+                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add event</li>               
                 <li className="bigButtonLi">
                   <div>Change size of events</div>
                   <div className="changeSizeContainer">
@@ -989,9 +1054,10 @@ selectItemForContextMenu(e) {
                   </div>
                 </li>
 
-                <li id="hide-or-show" className="buttonLi" onClick={() => this.hideOrShowFunction()}> {this.state.hideOrShow} Icons</li>
+                <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {this.state.hideOrShow} Icons</li>
                 {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
-                <li className="buttonLi" onClick={this.removeIcon}>Remove Icon</li>
+                <li className="buttonLi" onClick={this.removeIcon}>Remove event</li>
+                <li className="buttonLi" onClick={this.addComment}>Add comment</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>Choose favorite events</li>
                 <ul id="favorite-icon-list">
                   <li><h2>Favorites</h2></li>
@@ -1004,7 +1070,7 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
                 <li className="buttonLi" onClick={this.drawLine}>Add line</li>
                 <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
               </ul>
               
           </div>

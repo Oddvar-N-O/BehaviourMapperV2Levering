@@ -144,6 +144,7 @@ def deleteProjectHasEvent(e_id):
 def deleteEvent():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
+        print(request.form.get('number'))
         number = int(request.form.get('number'))
         print('N: ' + str(number))
         
@@ -160,31 +161,26 @@ def deleteEvent():
         delete_event = ("DELETE FROM Event WHERE id=?")
         res = query_db(delete_event, (e_id,), True)
         
-        return 'res'
+        return {}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-@bp.route('/updateevent', methods=['POST'])
-def updateEvent():
+@bp.route('/updateeventwithcomment', methods=['POST'])
+def updateEventWithComment():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
-        number = int(request.form.get('number'))
-        newRotation = request.form.get(newRotation)
-        print('NEW ROTATION: ' + str(newRotation))
+        whichEvent = int(request.form.get('whichEvent'))
         
-        eventsJSON = get_events_func(p_id)
-        events = json.loads(eventsJSON)
+        e_id = json.loads(get_events_func(p_id))[whichEvent][0] 
         
-        event = events[number]
-        e_id = event[0]
+        update_event = ("UPDATE Event SET comment=? WHERE id=?")
+        query_db(update_event, (request.form.get('comment'), e_id,), True)
         
-        update_event = ("UPDATE Event SET direction =? WHERE id=?")
-        res = query_db(update_event, (newRotation, e_id,), True)
-        
-        return 'res'
+        return {}
     else:
         logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
 
 def deleteImage(p_id):
     find_image_name = ("SELECT map, screenshot FROM Project WHERE id=?") 
@@ -321,8 +317,11 @@ def getImageFromID():
 
         result = query_db(get_figure_image_sql, (f_id,), True)
         image = {"image": ""}
-        for res in result:
-            image["image"] = res
+        if result != 0:
+            for res in result:
+                image["image"] = res
+        else:
+            return {}
         try:
             return send_from_directory(current_app.config['STATIC_URL_PATH'], image["image"])
         except FileNotFoundError:
@@ -522,18 +521,19 @@ def writeEventsToCSV(all_events_fromdb):
         if event != 0:
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
-        if data[5] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[5],), True))
+        if data[6] != 0:
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
             event_data.append({
                 'id':data[0], 
                 'direction':data[1], 
                 'center_coordinate':data[2],
                 'image_size_when_created': data[3],
                 'created': data[4],
-                'f_id': data[5],
+                'comment': data[5],
+                'f_id': data[6],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'f_id', 'description', 'color']
+    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
@@ -550,8 +550,7 @@ def createARCGIS():
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        eventsJSON = get_events_func(request.form.get('p_id'))
-        events = json.loads(eventsJSON)
+        events = json.loads(get_events_func(request.form.get('p_id')))
         
         imageCoord = []
         screenSize = []
