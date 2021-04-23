@@ -1,0 +1,46 @@
+{
+    "login": {
+        "login": "Login"
+    },
+    "startpage": {
+        "new" : "New Project",
+        "manage" : "Manage Project",
+        "logout" : "Log out",
+        "web-map" : "Use Web Map",
+        "load" : "Load Map From File"
+    },
+    "newProject": {
+        "title" : "New Project",
+        "name" : "Project Name",
+        "nameRequired" : "Project Name Required",
+        "desc" : "Description",
+        "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc.",
+        "image" : "Image",
+        "imageRequired" : "Image Required",
+        "go" : "Let's go!"
+    },
+    "chooseImage": {
+        "projectName" : "Project Name:",
+        "text": "Zoom in to choose your location, then click 'Use Map' to proceed",
+        "useMap": "Use Map"
+    },
+    "mapping": {
+        "addEvent": "Add Event",
+        "changeSize": "Change figure size",
+        "showIcons" : "Show Figures",
+        "hideIcons": "Hide Figures",
+        "chooseFavorite": "Choose favorite events",
+        "favorites" : "Favorites",
+        "finishMapping": "Finish project",
+        "addInterview": "Add Interview",
+        "addLine": "Add line",
+        "changeMode": "Change Mode",
+        "finishProject": "Finish project"
+    },
+    "allIcons": {
+        "man": "Man",
+        "woman": "Woman",
+        "child": "Child",
+        "group": "Group"
+    }
+}

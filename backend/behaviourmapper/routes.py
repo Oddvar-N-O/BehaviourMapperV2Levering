@@ -274,12 +274,12 @@ def getImageFromID():
 @bp.route('/getfiguredata')
 def getFigureData():
     if authenticateUser(request.args.get('u_id')):
-        get_figure_data_sql =("SELECT description, color, id FROM Figures")
+        get_figure_data_sql =("SELECT description, color, id, descriptionNO FROM Figures")
         result = select_db(get_figure_data_sql)
         result = result[:-1]
         data = []
         for res in result:
-            data.append({"description" : res[0], "color" : res[1], "id" : res[2]})
+            data.append({"description" : res[0], "color" : res[1], "id" : res[2], "descriptionNO" : res[3]})
         return json.dumps(data)
     else:
         logger.info("Not logged in.")

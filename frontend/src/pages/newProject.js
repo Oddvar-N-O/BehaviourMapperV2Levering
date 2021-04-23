@@ -3,6 +3,7 @@ import './newProject.css'
 import { Link } from 'react-router-dom';
 import * as AiIcons from 'react-icons/ai';
 import { Authenticated } from './auth/AuthContext'
+import { withTranslation } from 'react-i18next';
 
 class NewProject extends React.Component {
     constructor(props) {
@@ -10,8 +11,8 @@ class NewProject extends React.Component {
         this.state = {
             projectName: props.location.state.projectName,
             description: props.location.state.description,
-            projectNameLegend: "Project Name",
-            projectImageLegend: "Image",
+            projectNameLegend: "newProject.name",
+            projectImageLegend: "newProject.image",
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
             liColor: "#FDFFFC",
@@ -33,15 +34,15 @@ class NewProject extends React.Component {
         this.setState({
             [name]: value
         }, function() {})
-        if (this.state.projectNameLegend === "Project Name Required" && event.target.id === "project-name") {
-            this.setState({projectNameLegend: "Project Name"}, () => {
+        if (this.state.projectNameLegend === "newProject.nameRequired" && event.target.id === "project-name") {
+            this.setState({projectNameLegend: "newProject.name"}, () => {
                 this.changeColor();
             });   
         }
     }
     imageChosen() {
-        if (this.state.projectImageLegend === "Image Required") {
-            this.setState({projectImageLegend: "Image"}, () => {
+        if (this.state.projectImageLegend === "newProject.iamgeRequired") {
+            this.setState({projectImageLegend: "newProject.image"}, () => {
                 this.changeColor();
             }); 
         }  
@@ -50,7 +51,7 @@ class NewProject extends React.Component {
     changeColor() {
         if (this.state.liColor === "#FDFFFC") {
             this.setState({ liColor: "#EF2E3B" })
-        } else if (this.state.projectNameLegend === "Project Name"){
+        } else if (this.state.projectNameLegend === "newProject.name"){
             this.setState({ liColor: "#FDFFFC" })
         }  
     }
@@ -88,10 +89,10 @@ class NewProject extends React.Component {
                 this.handleRedirect();
             } else  {
                 if (this.state.projectName === "") {
-                    this.setState({projectNameLegend: "Project Name Required"});
+                    this.setState({projectNameLegend: "newProject.nameRequired"});
                 }
                 if (this.uploadInput.files.length === 0) {
-                    this.setState({projectImageLegend: "Image Required"});
+                    this.setState({projectImageLegend: "newProject.imageRequired"});
                 }
                 this.changeColor();
             }
@@ -99,7 +100,7 @@ class NewProject extends React.Component {
             if (this.state.projectName !== ""){
                 this.handleRedirect();
             } else  {
-                this.setState({projectNameLegend: "Project Name Required"});
+                this.setState({projectNameLegend: "newProject.nameRequired"});
                 this.changeColor();
             }
         }
@@ -143,6 +144,7 @@ class NewProject extends React.Component {
     }
 
     render() {
+        const { t } = this.props;
         let loadingGif
         if (this.state.loading) {
             loadingGif = <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
@@ -156,9 +158,9 @@ class NewProject extends React.Component {
                             <AiIcons.AiOutlineClose />
                         </Link>
                         <div id="heading-and-form">
-                            <h2>New Project {this.state.fromLoadMpap}</h2>
+                            <h2>{t('newProject.title')}</h2>
                             <form>
-                                <legend>{this.state.projectNameLegend}</legend> 
+                                <legend>{t(this.state.projectNameLegend)}</legend> 
                                 <input 
                                     id="project-name"
                                     type="text" 
@@ -167,18 +169,18 @@ class NewProject extends React.Component {
                                     onChange={this.handleChange} 
                                 /> 
                                 <br/>
-                                <legend>Description</legend>
+                                <legend>{t('newProject.desc')}</legend>
                                 <textarea 
                                     id="description"
                                     name="description" 
                                     value={this.state.description} 
-                                    placeholder="E.g. time of day, wheather conditions, special events etc." 
+                                    placeholder={t('newProject.descPlaceholder')} 
                                     onChange={this.handleChange}
                                 />
                             </form>
                         </div>
                         <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
-                            <legend>{this.state.projectImageLegend}</legend>
+                            <legend>{t(this.state.projectImageLegend)}</legend>
                             <input 
                                 ref={(ref) => { this.uploadInput = ref; }} 
                                 type="file"  
@@ -189,7 +191,7 @@ class NewProject extends React.Component {
                         <ul>
                             <li onClick={ (e) => {
                                 this.setRedirect(e);     
-                            }} style={{backgroundColor: this.state.liColor}}>Let's go!</li>
+                            }} style={{backgroundColor: this.state.liColor}}>{t('newProject.go')}</li>
                         </ul>
                     </div>
                     
@@ -198,4 +200,4 @@ class NewProject extends React.Component {
         )
     }
 }
-export default NewProject
+export default withTranslation('common')(NewProject)

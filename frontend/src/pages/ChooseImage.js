@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -11,6 +11,7 @@ import * as BiIcons from 'react-icons/bi';
 import {transformExtent} from 'ol/proj';
 import './ChooseImage.css'
 import { Authenticated } from './auth/AuthContext'
+import { withTranslation } from 'react-i18next';
 
 class ChooseImage extends React.Component {
   constructor(props) {
@@ -123,6 +124,7 @@ class ChooseImage extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
       return (
         <Authenticated>
           <div className="choose-image">
@@ -137,11 +139,9 @@ class ChooseImage extends React.Component {
               }}>
                 <BiIcons.BiArrowBack className="back-icon"/>
               </Link> 
-              {/* <span className="back-icon-text"> go back </span> */}
-              <div className="sidebar-text"> Projectname: <br/> {this.state.projectName}</div>
-              <div className="sidebar-text">Zoom in to choose your location,
-              then click "Use Map" to proceed</div>
-              <button className="choose-image-button" onClick={this.addProject}>Use Map</button>
+              <div className="sidebar-text"> {t('chooseImage.projectName')} <br/> {this.state.projectName}</div>
+              <div className="sidebar-text">{t('chooseImage.text')}</div>
+              <button className="choose-image-button" onClick={this.addProject}>{t('chooseImage.useMap')}</button>
             </div>
               <Link to="/startpage" className="close-icon">
                   <AiIcons.AiOutlineClose />
@@ -154,4 +154,4 @@ class ChooseImage extends React.Component {
 }
 
 
-export default ChooseImage
+export default withTranslation('common')(ChooseImage);

@@ -7,6 +7,8 @@ import './BehaviourMapping.css';
 import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
 import domtoimage from 'dom-to-image';
+import { withTranslation } from 'react-i18next';
+
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -854,6 +856,7 @@ selectItemForContextMenu(e) {
 
 
   render() {
+    const { t } = this.props;
     let imageClassList = classNames({
       'map-image': !this.state.imageUploaded,
       'uploaded-map-image': this.state.imageUploaded,
@@ -898,29 +901,29 @@ selectItemForContextMenu(e) {
               />
             </div> 
               <ul id="icon-list" className={this.state.onlyObservation ? "visible" : "invisible"}>
-                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>Add Event</li>               
+                <li id='addEventLi' className="bigButtonLi" onClick={this.newIcon}>{t('mapping.addEvent')}</li>               
                 <li className="bigButtonLi">
-                  <div>Change size of events</div>
+                  <div>{t('mapping.changeSize')}</div>
                   <div className="changeSizeContainer">
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>+</p>
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>-</p>
                   </div>
                 </li>
-                <li className="buttonLi" onClick={this.showAll}>Show icons</li>
-                <li className="buttonLi" onClick={this.hideAll}>Hide icons</li>
-                <li className="buttonLi" onClick={this.changeShowContextMenu}>Choose favorite events</li>
+                <li className="buttonLi" onClick={this.showAll}>{t('mapping.showIcons')}</li>
+                <li className="buttonLi" onClick={this.hideAll}>{t('mapping.hideIcons')}</li>
+                <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
-                  <li><h2>Favorites</h2></li>
+                  <li><h2>{t('mapping.favorites')}</h2></li>
                 </ul>
                 {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>Finish project</p></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
               <ul className={interviewLiClassList}>
-                <li className="buttonLi" onClick={this.addInterview}>Add Interview</li>
-                <li className="buttonLi" onClick={this.drawLine}>Add line</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
-                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>Finish project</p></Link></li>
+                <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
+                <li className="buttonLi" onClick={this.drawLine}>{t('mapping.addLine')}</li>
+                <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
+                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
               </ul>
               
           </div>
@@ -948,4 +951,4 @@ selectItemForContextMenu(e) {
   }
 }
 
-export default BehaviourMapping;
+export default withTranslation('common')(BehaviourMapping);
