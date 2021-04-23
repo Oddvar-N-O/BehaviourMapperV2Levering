@@ -1,6 +1,7 @@
 import React from 'react'
 import './AddComment.css'
 import * as AiIcons from 'react-icons/ai';
+import { withTranslation } from 'react-i18next';
 
 class AddComment extends React.Component {
     constructor(props) {
@@ -28,21 +29,22 @@ class AddComment extends React.Component {
     };
 
     render () {
+        const { t } = this.props;
         return (
             <div className="comment-box">
                 <div className="comment-box-heading">
-                    <h2>Comment </h2>
+                    <h2>{t('comments.comment')} </h2>
                     <div className="x" onClick={this.props.close}>
                         <AiIcons.AiOutlineClose/>
                     </div>
                 </div>
                 <form>
-                    <legend>Notes</legend> 
+                    <legend>{t('comments.notes')}</legend> 
                     <textarea 
                         id="comment"
                         name="comment" 
                         value={this.state.comment} 
-                        placeholder="E.g. time of day, wheather conditions, special events etc." 
+                        // placeholder="E.g. time of day, wheather conditions, special events etc." 
                         onChange={this.handleChange}
                     />
                     <input type="submit" value={this.state.alreadySaved ? "Update comment" : "Save comment"} onClick={this.props.save}></input>
@@ -54,4 +56,4 @@ class AddComment extends React.Component {
 }
 
 
-export default AddComment
+export default withTranslation('common')(AddComment)

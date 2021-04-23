@@ -25,9 +25,8 @@
         "useMap": "Bruk Kartutsnitt"
     },
     "mapping": {
-        "addEvent": "Legg Til Hendelse",
-        "icons": "Figurer",
-        "remove": "Slett figur",
+        "addEvent": "Ny Hendelse",
+        "remove": "Slett Figur",
         "addComment": "Legg til kommentar",
         "changeSize": "Velg Figurstørrelse",
         "showIcons" : "Vis Figurer",
@@ -45,6 +44,12 @@
         "woman": "Kvinne",
         "child": "Barn",
         "group": "Gruppe"
+    },
+    "comments": {
+        "comment": "Kommentar",
+        "notes": "Notater",
+        "update": "Oppdater Kommentar",
+        "save": "Lagre Kommentar"
     }
 
 }

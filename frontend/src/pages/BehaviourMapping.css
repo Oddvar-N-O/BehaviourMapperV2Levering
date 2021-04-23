@@ -184,3 +184,16 @@
 .background-image {
     order: 2;
 }
+
+.help{ 
+    position: absolute;
+    bottom: 0px;
+    right: 8px;
+    font-size: 33px;
+    color: #222020;
+}
+.helper-image{
+    position: absolute;
+    left: 240px;
+    height: 400px;
+}

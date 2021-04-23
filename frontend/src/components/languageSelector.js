@@ -4,8 +4,7 @@ import './languageSelector.css'
 import britishFlag from './images/britain.png'
 import norwegianFlag from './images/norway.png'
 
-function languageSelector()
-{
+function languageSelector() {
     const [t, i18n] = useTranslation('common');
     return <div className="language-selector">
         <img className="NO-flag" src={norwegianFlag} alt="no" onClick={() => i18n.changeLanguage('no')}/>

@@ -26,24 +26,29 @@
     },
     "mapping": {
         "addEvent": "Add Event",
-        "icons": "Icons",
-        "remove": "Remove event",
-        "addComment": "Add comment",
-        "changeSize": "Change figure size",
+        "remove": "Remove Event",
+        "addComment": "Add Comment",
+        "changeSize": "Change Figure Size",
         "showIcons" : "Show Figures",
         "hideIcons": "Hide Figures",
-        "chooseFavorite": "Choose favorite events",
+        "chooseFavorite": "Add Favorite Events",
         "favorites" : "Favorites",
-        "finishMapping": "Finish project",
+        "finishMapping": "Finish Project",
         "addInterview": "Add Interview",
-        "addLine": "Add line",
+        "addLine": "Add Line",
         "changeMode": "Change Mode",
-        "finishProject": "Finish project"
+        "finishProject": "Finish Project"
     },
     "allIcons": {
         "man": "Man",
         "woman": "Woman",
         "child": "Child",
         "group": "Group"
+    },
+    "comments": {
+        "comment": "Comment",
+        "notes": "Notes",
+        "update": "Update Comment",
+        "save": "Save Comment"
     }
 }
