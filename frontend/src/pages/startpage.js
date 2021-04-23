@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-sequences */
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import './startpage.css';
 import { Authenticated, useToken } from './auth/AuthContext'
@@ -33,7 +33,7 @@ function Startpage() {
     {useSetUserSession()}
   </Authenticated>
   
-  const {t, i18n} = useTranslation('common');
+  const {t} = useTranslation('common');
 
   // State for new_project
   const [new_project, setNewProject] = useState(false); // set state for new_project to false
