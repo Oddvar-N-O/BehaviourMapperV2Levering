@@ -27,7 +27,7 @@
     "mapping": {
         "addEvent": "Ny Hendelse",
         "remove": "Slett Figur",
-        "addComment": "Legg til kommentar",
+        "addComment": "Legg Til Kommentar",
         "changeSize": "Velg Figurstørrelse",
         "showIcons" : "Vis Figurer",
         "hideIcons": "Gjem Figurer",

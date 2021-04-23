@@ -47,7 +47,7 @@ class AddComment extends React.Component {
                         // placeholder="E.g. time of day, wheather conditions, special events etc." 
                         onChange={this.handleChange}
                     />
-                    <input type="submit" value={this.state.alreadySaved ? "Update comment" : "Save comment"} onClick={this.props.save}></input>
+                    <input type="submit" value={this.state.alreadySaved ? t('comments.update') : t('comments.save')} onClick={this.props.save}></input>
                 </form>
                 
             </div>

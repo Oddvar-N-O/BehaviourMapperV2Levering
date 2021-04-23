@@ -27,7 +27,7 @@
     "mapping": {
         "addEvent": "Add Event",
         "remove": "Remove Event",
-        "addComment": "Add Comment",
+        "addComment": "Add Comment To Event",
         "changeSize": "Change Figure Size",
         "showIcons" : "Show Figures",
         "hideIcons": "Hide Figures",

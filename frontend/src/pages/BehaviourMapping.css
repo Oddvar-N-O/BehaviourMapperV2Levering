@@ -191,6 +191,8 @@
     right: 8px;
     font-size: 33px;
     color: #222020;
+    cursor: pointer;
+    opacity: 0.8;
 }
 .helper-image{
     position: absolute;
