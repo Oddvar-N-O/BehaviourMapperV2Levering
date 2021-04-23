@@ -26,6 +26,9 @@
     },
     "mapping": {
         "addEvent": "Add Event",
+        "icons": "Icons",
+        "remove": "Remove event",
+        "addComment": "Add comment",
         "changeSize": "Change figure size",
         "showIcons" : "Show Figures",
         "hideIcons": "Hide Figures",

@@ -26,6 +26,9 @@
     },
     "mapping": {
         "addEvent": "Legg Til Hendelse",
+        "icons": "Figurer",
+        "remove": "Slett figur",
+        "addComment": "Legg til kommentar",
         "changeSize": "Velg Figurstørrelse",
         "showIcons" : "Vis Figurer",
         "hideIcons": "Gjem Figurer",

@@ -1,6 +1,7 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
+import AddComment from '../components/AddComment';
 import ContextMenu from '../components/ContextMenu';
 import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
@@ -8,7 +9,7 @@ import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
 import domtoimage from 'dom-to-image';
 import { withTranslation } from 'react-i18next';
-
+// import EventIcon from '../components/EventIcon';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -16,16 +17,15 @@ class BehaviourMapping extends React.Component {
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         imageUploaded: props.location.state.imageUploaded,
-        
         iconObjects: [], 
         ourSRC: null,
-        sendNewIconToBD: false,
+        sendIconToBD: false,
         newIconID: 0,
         actionID: 0,
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
-        
+        iconIDForDeletion: 0,
         
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
@@ -38,26 +38,29 @@ class BehaviourMapping extends React.Component {
         formerScreenSize: {x: 0, y: 0,},
         originalScreenSize: {x: 0, y: 0},
         mapblob: "",
-        hideOrShow: "hide",
+        hideOrShow: "Show",
         arcGISfilename: "",
         scrollHorizontal: 0,
         scrollVertical: 0,
         onlyObservation: true,
         drawLine: false,
         addInterview: false,
+        addComment: false,
         showContextMenu: false,
         coords: [],
         eightOfCoords: 0,
         interviews: [],
+        comments: {},
         i_ids: [],
         u_id: window.sessionStorage.getItem('uID'),
       };
+
       this.canvas = React.createRef();
       this.myImage = React.createRef();
       this.interviewElement = React.createRef();
+      this.commentElement = React.createRef();
 
       this.handleScroll = this.handleScroll.bind(this)
-      // this.moveIcon = this.moveIcon.bind(this)
       this.handleResize = this.handleResize.bind(this);
       this.writeFilename = this.writeFilename.bind(this);
       this.selectIcon = this.selectIcon.bind(this);
@@ -74,13 +77,21 @@ class BehaviourMapping extends React.Component {
       this.saveInterview = this.saveInterview.bind(this);
       this.finishProject = this.finishProject.bind(this);
       this.takeScreenshot = this.takeScreenshot.bind(this);
+      this.removeIcon = this.removeIcon.bind(this);
+      this.addListenerToImage = this.addListenerToImage.bind(this);
+      this.interactWithEvent = this.interactWithEvent.bind(this);
       this.changeSizeOfIcons = this.changeSizeOfIcons.bind(this);
       this.changeShowContextMenu = this.changeShowContextMenu.bind(this);
       this.selectItemForContextMenu = this.selectItemForContextMenu.bind(this);
+      this.addComment = this.addComment.bind(this);
+      this.saveComment = this.saveComment.bind(this);
+      this.closeAddComment = this.closeAddComment.bind(this);
+      this.hideOrShowFunction = this.hideOrShowFunction.bind(this);
   }
 
-  createIconObject(coordinates, currentSize) {
+  createIconObject(coordinates, currentSize, id) {
     let icon = {
+      id: id,
       originalCoord: coordinates,
       originalSize: currentSize,
     };
@@ -95,7 +106,7 @@ class BehaviourMapping extends React.Component {
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
-    // this.createIconObject(coordinates, currentSize)
+
     data.append('p_id', this.state.p_id);
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
@@ -121,7 +132,7 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
-    this.hideAll();
+    this.hideIcon();
     this.setState({ addIcon: !this.state.addIcon });
     this.setState({showContextMenu: false});
   }
@@ -155,13 +166,15 @@ class BehaviourMapping extends React.Component {
   }
 
   selectIcon(e) {
-    let newSrc = e.target.src;
+    let newSrc
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ')
       this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
+      newSrc = e.target.src;
     } else if (e.target.children[0].getAttribute('id') !== null ) {
       let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
       this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
+      newSrc = e.target.children[0].src;
     }
     this.setState({iconSRC: newSrc});      
     this.setState({ourSRC: newSrc});
@@ -190,13 +203,14 @@ class BehaviourMapping extends React.Component {
     if (this.state.ourSRC !== null && this.state.addIcon === false) {
       if (this.state.actionID === 0) {
         this.placeIcon(event);
-        this.setState({sendNewIconToBD: true}, function() {});
+        this.setState({sendIconToBD: true}, function() {});
         this.startPointing();
-      } else {
+      } else if (this.state.actionID === 1){
         this.pointIcon();
       }
     }
   }
+
 
   placeIcon(event) {
     this.findScreenSize()
@@ -206,6 +220,12 @@ class BehaviourMapping extends React.Component {
     img.style.height = this.state.eventSize + "px";
     img.style.width = this.state.eventSize + "px";
     img.setAttribute('id', this.state.newIconID.toString());
+
+    img.addEventListener('click', () => {
+      this.setState({iconIDForDeletion: img.getAttribute('id')}, function() {});
+      this.showChosenIcon(img.getAttribute('id'));
+    });
+    
     this.setState({
       ourIconID: this.state.newIconID
     }, function() {});
@@ -213,7 +233,8 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
-    let coordinates = [event.clientX - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
+    let coordinates = [event.clientX - 200 - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
+
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
@@ -222,40 +243,57 @@ class BehaviourMapping extends React.Component {
     if (typeof scrollVertical === 'number' && scrollVertical !== 0) {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
-    img.style.left = coordinates[0] +'px';
+
+    img.style.left = coordinates[0] + 200 +'px';
     img.style.top =  coordinates[1] +'px';
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
-    this.createIconObject(coordinates, imageSizeOnCreation);
+    this.createIconObject(coordinates, imageSizeOnCreation, img.getAttribute('id'));
     this.setState({
       ourIconCoord: {
-        x: coordinates[0] - 200,
+        x: coordinates[0],
         y: coordinates[1],
       }
     }, function() {});
-    // this.addListenerToImage(img);
-    this.findScreenSize();
   }
 
- pointIcon() {
-    var degreerot = Math.atan2(
+  interactWithEvent(img) {
+    if (img != null) {
+      if (img.style.border === '4px solid red') {
+        img.style.border = 'none';
+        img.style.borderRadius = '5px';
+        this.setState({ourIconID: img.getAttribute('id')})
+      } else {
+        img.style.border = '4px solid red';
+      }
+    }
+  }
+
+  addListenerToImage(img) {
+    img.addEventListener('click', this.interactWithEvent(img));
+  }
+
+  pointIcon() {
+    if (this.state.iconObjects.length > 0) {
+      var degreerot = Math.atan2(
         this.state.ourMouseCoord.x - this.state.ourIconCoord.x,
         -(this.state.ourMouseCoord.y - this.state.ourIconCoord.y),
-    ); 
-    var degrees = degreerot*180/Math.PI - 90;
-    var round_degree = Math.round(degrees);
-    var string_degree = 'rotate(' + round_degree.toString() +'deg)';
-   
-    this.setState({
-      ourIconCoord: {
-        x: this.state.ourIconCoord.x,
-        y: this.state.ourIconCoord.y,
-        degree: string_degree
+      ); 
+      var degrees = degreerot*180/Math.PI - 90;
+      var round_degree = Math.round(degrees);
+      var string_degree = 'rotate(' + round_degree.toString() +'deg)';
+
+      this.setState({
+        ourIconCoord: {
+          x: this.state.ourIconCoord.x,
+          y: this.state.ourIconCoord.y,
+          degree: string_degree
+        }
+      });
+      var img = document.getElementById(this.state.iconObjects[this.state.iconObjects.length -1].id);
+      if (string_degree !== null && img !== null) {
+        img.style.transform = string_degree;
       }
-    });
-    var img = document.getElementById(this.state.ourIconID.toString());
-    if (string_degree != null) {
-      img.style.transform = string_degree;
-    }
+    } 
   }
 
   startPointing() {
@@ -268,75 +306,54 @@ class BehaviourMapping extends React.Component {
     this.setState({
       actionID: 0,
     });
-    if (this.state.sendNewIconToBD) {
+    if (this.state.sendIconToBD) {
       this.sendEventToDatabase();
-      this.setState({sendNewIconToBD: false}, function() {});
+      this.setState({sendIconToBD: false}, function() {});
     }
   }
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon != null) {
+    if (icon !== null && this.state.hideOrShow !== 'Hide') {
       icon.style.display = 'none';
     }
     this.stopPointing()
   }
 
   showAll() {
-    this.stopPointing()
+    // this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
-      icon.style.display = 'block';
+      if (icon != null) {
+        icon.style.display = 'block';
+      }
     }
   }
 
   hideAll() {
-    this.stopPointing()
-    var icon;
+    // this.stopPointing()
+    let icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
-      icon.style.display = 'none';
+      if (icon != null) {
+        icon.style.display = 'none';
+      }
     }
   }
 
   closeIconSelect() {
-    //this.hideAll()
     if (this.state.addIcon) {
       this.setState({ addIcon: false});
-    }  
+    }
+    if (this.state.hideOrShow === 'Hide') {
+      this.showAll();
+    }
   }
-  
-  // addListenerToImage(img) {
-  //   img.addEventListener('click', function() {
-  //     if (img.style.border === '4px solid red') {
-  //       img.style.border = 'none';
-  //       img.style.borderRadius = '5px';
-        
-  //       // let iconInfo = this.state.iconObjects[id];
-  
-  //       // let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-  //       // icon.style.left = (coords[0] + 200) +'px';
-  //       // icon.style.top =  (coords[1]) +'px';
-  //     } else {
-  //       img.style.border = '4px solid red';
-  //     }
-  //   });
-  //   img.click();
-  // }
 
-  /* letImgDrop(ev) {
-    ev.preventDefault();
-  }*/
-  
-  
-  /*dropImg(ev) {
-    // console.log(ev.target.getAttribute('id'));
-    console.log(this.state.ourMouseCoord);
-    document.getElementById()
-  }*/
-  
 
+
+  
   setScreenSize() {
     let nw = document.querySelector('.map-image').naturalWidth;
     let nh = document.querySelector('.map-image').naturalHeight;
@@ -371,9 +388,9 @@ class BehaviourMapping extends React.Component {
     if (this.state.formerEvents !== []) {
       if (this.state.currentScreenSize.x !== 0) {
         this.findScreenSize();
-        // if (this.state.currentScreenSize.x != this.state.formerScreenSize.x || ) {
-        this.placeEventsAfterChange()
-        // }
+        if (this.state.currentScreenSize.x !== this.state.formerScreenSize.x || this.state.currentScreenSize.y !== this.state.formerScreenSize.y ) {
+          this.placeEventsAfterChange()
+        }
         this.setState({formerScreenSize: this.state.currentScreenSize});
       }
     }
@@ -397,11 +414,12 @@ class BehaviourMapping extends React.Component {
     let icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
-      let iconInfo = this.state.iconObjects[i];
-
-      let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-      icon.style.left = (coords[0] + 200) +'px';
-      icon.style.top =  (coords[1]) +'px';
+      if (icon != null) {
+        let iconInfo = this.state.iconObjects[i];
+        let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+        icon.style.left = (coords[0] + 200) +'px';
+        icon.style.top =  (coords[1]) +'px';
+      }
     }
   }
 
@@ -461,12 +479,6 @@ class BehaviourMapping extends React.Component {
       method: 'POST',
       body: data,
       })
-    //   .then((res) => {
-    //     res.json().then((data) => {
-    //       // most likely not needed, can just use interviewnumber to get the correct text.
-    //      this.setState({i_ids: [...this.state.i_ids, data.i_id[0]]});
-    //     });
-    // });
   }
 
   drawLine() {
@@ -474,7 +486,6 @@ class BehaviourMapping extends React.Component {
   }
 
   addToDrawList(e) {
-    // kjører hver gang en flytter på touchen. 
     if (this.state.eightOfCoords === 0) {
       let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
       this.setState({coords: [...this.state.coords, currCoords]});
@@ -568,7 +579,7 @@ class BehaviourMapping extends React.Component {
       let eventset = this.state.formerEvents[i];
       let imageSizeOnCreation = this.findIntegerCoordinates(eventset[0][3]);
       var coord = this.findIntegerCoordinates(eventset[0][2])
-      this.createIconObject(coord, imageSizeOnCreation);
+      this.createIconObject(coord, imageSizeOnCreation, i);
       let rotation = eventset[0][1]
       let f_id = eventset[0][5]
       coord = this.findNewCoordinates(imageSizeOnCreation, coord);
@@ -632,21 +643,15 @@ class BehaviourMapping extends React.Component {
         document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
         a.click();    
         a.remove();
-      });
-
-    // setTimeout(() => this.downloadArcGIS(), 1500);    
+      });   
   }
 
-  hideOrShow() {
-    let liElementHideOrShow = document.getElementById('hide-or-show');
-    if (this.state.hideOrShow === 'hide') {
-      this.setState({hideOrShow: 'show'});
-      this.hideAll();
-      liElementHideOrShow.innerHTML = "Show Icons"
-    } else {
-      this.setState({hideOrShow: 'hide'});
-      this.showAll();
-      liElementHideOrShow.innerHTML = "Hide Icons"
+  hideOrShowFunction() {
+    if (this.state.hideOrShow === 'Show') {
+      this.setState({hideOrShow: 'Hide'}, function() {this.showAll();});
+      // knappen forandre seg til show
+    } else if (this.state.hideOrShow === 'Hide') {
+      this.setState({hideOrShow: 'Show'}, function() {this.hideAll();});
     }
   }
 
@@ -660,8 +665,8 @@ class BehaviourMapping extends React.Component {
     let icon;
     let iconinfo;
     for (var i=0; i<this.state.newIconID; i++) {
-      icon = document.getElementById(i.toString());
       iconinfo = this.state.iconObjects[i];
+      icon = document.getElementById(iconinfo.id);
       let coord = iconinfo.originalCoord;
       icon.style.left = (coord[0] + change) + 'px'
       icon.style.top = (coord[1]) + 'px'
@@ -722,9 +727,9 @@ finishProject() {
   this.takeScreenshot();
   fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
   setTimeout(() => {
-    window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-    // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
-  }, 1500);
+      window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+      // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+    }, 1500);
   }
 }
 
@@ -756,39 +761,19 @@ changeSizeOfIcons(event) {
 }
 
 changeShowContextMenu() {
+  this.hideIcon();
   this.closeIconSelect();
-  this.hideAll();
   this.setState({showContextMenu: !this.state.showContextMenu});
 }
+
 
 selectItemForContextMenu(e) {
   let list = document.getElementById('favorite-icon-list');
   let li = document.createElement('li');
-  let newSrc = e.target.src;
-  li.setAttribute('id', newSrc);
-  let newText = this.setInnerHTML(e.target.getAttribute('id'));
-
-  if (e.target.getAttribute('id') !== null) {
-    let imgIdSplit = e.target.getAttribute('id').split(' ')
-    this.setState({f_id: imgIdSplit[imgIdSplit.length - 1 ]});
-  } else if (e.target.children[0].getAttribute('id') !== null ) {
-    let imgIdSplit = e.target.children[0].getAttribute('id').split(' ')
-    this.setState({f_id: imgIdSplit[imgIdSplit.length - 1]});
-  }
-
+  let newSrc, newText, newF_id;
+  ({ newSrc, newText, newF_id } = this.getNewSrcAndText(e, newSrc, newText, newF_id, li));
   if (this.alreadyInList(newText, list) === false && this.objectExists(newText) === true) {
-    li.innerHTML = newText;
-    li.addEventListener('click', () => {
-      this.setState({ourSRC: li.getAttribute('id')});
-      this.hideIcon()
-    });
-    this.setState({ourSRC: newSrc}, function() {});
-    this.hideIcon()
-
-    list.appendChild(li);
-    this.setState({
-      imgIcon: li.getAttribute('id')
-    });
+    this.setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list);
   } else if (this.alreadyInList(newText, list) === true && this.objectExists(newText) === true) {
     let elementToRemove = document.getElementById(newSrc)
     list.removeChild(elementToRemove);
@@ -796,6 +781,159 @@ selectItemForContextMenu(e) {
   this.setState({addIcon: false});
 }
 
+
+  setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list) {
+    li.innerHTML = newText;
+    li.addEventListener('click', () => {
+      this.hideIcon();
+      this.setState({ ourSRC: li.getAttribute('id') });
+      this.setState({f_id: newF_id})
+    });
+    this.setState({ ourSRC: newSrc });
+    list.appendChild(li);
+    this.setState({
+      imgIcon: li.getAttribute('id')
+    });
+  }
+
+  getNewSrcAndText(e, newSrc, newText, newF_id, li) {
+    if (e.target.getAttribute('id') !== null) {
+      let imgIdSplit = e.target.getAttribute('id').split(' ');
+      newF_id = imgIdSplit[imgIdSplit.length - 1];
+      newSrc = e.target.src;
+      newText = this.setInnerHTML(e.target.getAttribute('id'));
+      li.setAttribute('id', newSrc);
+    } else if (e.target.children[0].getAttribute('id') !== null) {
+      let imgIdSplit = e.target.children[0].getAttribute('id').split(' ');
+      newF_id = imgIdSplit[imgIdSplit.length - 1];
+      newSrc = e.target.children[0].src;
+      newText = this.setInnerHTML(e.target.children[0].getAttribute('id'));
+      li.setAttribute('id', newSrc);
+    }
+    return { newSrc, newText, newF_id};
+  }
+
+  
+
+  findIconObjectOfOurID() {
+    let iconObject;
+    for (let i=0; i<this.state.iconObjects.length ;i++) {
+      iconObject = this.state.iconObjects[i];
+      
+      if (iconObject.id === this.state.iconIDForDeletion) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  removeIcon() {
+    this.stopPointing();
+    this.setState({actionID: 1}, function() {})
+    var icon = document.getElementById(this.state.iconIDForDeletion);
+    if (icon != null) {
+      icon.remove();
+      let i = this.findIconObjectOfOurID();
+      
+      this.removeFromIconObjects(i);
+      
+      const data = new FormData();
+      data.append('p_id', this.state.p_id);
+      data.append('u_id', this.state.u_id);
+      data.append('number', i);
+  
+      fetch(window.backend_url +'deleteevent', {
+        method: 'POST',
+        body: data,
+      })
+
+      if (this.state.newIconID > 0) {
+        this.setState({newIconID: this.state.newIconID - 1}, function() {});
+      }
+      if (this.state.sendIconToBD === true) {
+        this.setState({sendIconToBD: false}, function() {});
+      }  
+    }
+  }
+
+  removeFromIconObjects(i) {
+    let newIconObjects = [...this.state.iconObjects];
+    if (newIconObjects.length > 1) {
+      newIconObjects.splice(i, 1);
+    } else {
+      this.clearIconObjects();
+    }
+    this.setState({iconObjects: newIconObjects},
+      function() {});
+  }
+
+
+  showChosenIcon() {
+    this.setState({actionID: null});
+    let iconObject;
+    let icon;
+    for (let i=0; i<this.state.iconObjects.length; i++) {
+      
+      iconObject = this.state.iconObjects[i]
+      icon = document.getElementById(iconObject.id);
+      if (icon != null) {
+        if (iconObject.id === this.state.iconIDForDeletion) {
+          icon.style.border = '4px solid red';
+          icon.style.border = 'block';
+        } else {
+          icon.style.border = 'none';
+        }
+      } else {
+      }
+    }
+  }
+
+  clearIconObjects() {
+    this.setState({iconObjects: []}, function() {});
+  }
+
+  addComment() {
+    let whichComment = this.state.iconIDForDeletion
+    if (this.state.comments[whichComment] !== undefined) {
+      this.commentElement.current.setState({alreadySaved: true});
+      this.commentElement.current.setComment(this.state.comments[whichComment])
+      if (!this.state.addComment) {
+        this.setState({addComment: !this.state.addComment});
+      }
+    } else {
+      this.commentElement.current.clearComment();
+      this.commentElement.current.setState({alreadySaved: false})
+      this.setState({addComment: !this.state.addComment});
+    }
+    
+
+  }
+  closeAddComment() {
+    this.setState({addComment: false});
+  }
+
+  saveComment(e) {
+    e.preventDefault();
+    let commentsCopy = this.state.comments;
+    commentsCopy[this.state.iconIDForDeletion] = e.target.form.childNodes[1].value;
+    this.setState({comments: commentsCopy});
+    // this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
+    this.commentElement.current.clearComment();
+    this.sendCommentToDb(this.commentElement.current.state.comment);
+    this.closeAddComment();
+  }
+
+  sendCommentToDb(comment) {
+    const data = new FormData();
+    data.append('comment', comment);
+    data.append('p_id', this.state.p_id);
+    data.append('u_id', this.state.u_id);
+    data.append('whichEvent', this.state.iconIDForDeletion);
+    fetch(window.backend_url + 'updateeventwithcomment', {
+      method: 'POST',
+      body: data,
+      })
+  }
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
@@ -824,10 +962,11 @@ selectItemForContextMenu(e) {
     fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
     .then(data => {
-      setTimeout(() => this.loadFormerEvents(data), 500);
+      // if (data.length > 0) {
+      //   setTimeout(() => this.loadFormerEvents(data), 500);
+      // }
     });
 
-    // resize the canvas to fill map part of window dynamically
     var firstTime = 0;
     (function(canvas, image) {
       window.addEventListener('resize', resizeCanvas, false);
@@ -849,7 +988,6 @@ selectItemForContextMenu(e) {
         } else {
           ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
         }
-              // draw all lines again.
       }
     })(this.canvas.current, this.myImage.current);
   }
@@ -880,6 +1018,7 @@ selectItemForContextMenu(e) {
     return (
       <Authenticated>
         <div id='maincont' >
+          
           <div className="sidebar">
             <div className={this.state.addIcon ? "icons-visible" : "icons-invisible"}>
                 <AllIcons 
@@ -887,11 +1026,18 @@ selectItemForContextMenu(e) {
                   close={this.closeIconSelect}
                 />
             </div> 
-            <div className={this.state.addInterview ? "interview" : "invisible"}> 
+            <div className={this.state.addInterview ? "textBox" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
                 save={this.saveInterview}
                 ref={this.interviewElement}
+              />  
+            </div>
+            <div className={this.state.addComment ? "textBox" : "invisible"}> 
+              <AddComment 
+                close={this.closeAddComment}
+                save={this.saveComment}
+                ref={this.commentElement}
               />  
             </div>
             <div className={this.state.showContextMenu ? "icons-visible" : "invisible"}>
@@ -909,8 +1055,11 @@ selectItemForContextMenu(e) {
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>-</p>
                   </div>
                 </li>
-                <li className="buttonLi" onClick={this.showAll}>{t('mapping.showIcons')}</li>
-                <li className="buttonLi" onClick={this.hideAll}>{t('mapping.hideIcons')}</li>
+
+                <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {this.state.hideOrShow} {t('mapping.icons')}</li>
+                {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
+                <li className="buttonLi" onClick={this.removeIcon}>{t('mapping.remove')}</li>
+                <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
                   <li><h2>{t('mapping.favorites')}</h2></li>
@@ -923,7 +1072,7 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
                 <li className="buttonLi" onClick={this.drawLine}>{t('mapping.addLine')}</li>
                 <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
-                <li id='finishProjectLi' className="buttonLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
               </ul>
               
           </div>
@@ -942,12 +1091,12 @@ selectItemForContextMenu(e) {
               ref={this.myImage}
             />
             <div id="icon-container" />
-          </div>
-          
-
+              
+            </div>
         </div>
       </Authenticated>
     );
+
   }
 }
 

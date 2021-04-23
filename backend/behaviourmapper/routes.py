@@ -62,10 +62,8 @@ def userInDB(openid):
     find_user = ("SELECT email FROM Users WHERE openid=?")
     res = query_db(find_user, (openid,), True)
     if res == 0:
-        print('GGAGAGGA')
         return False
     elif res != 0:
-        print('YEEEEEEET')
         return True
 
 def addUser(openid, email):
@@ -114,11 +112,72 @@ def addProject():
 def deleteProject():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
+        deleteAllEvents(p_id)
         deleteImage(p_id)
+
         delete_project = ("DELETE FROM Project WHERE id=?")
-        res = query_db(delete_project, (p_id,), True)
-        print(res)
+
+        query_db(delete_project, (p_id,), True)
+
         return "deleted"
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+def deleteAllEvents(p_id):
+    delete_event = ("DELETE FROM Event WHERE id=?")
+    eventsJSON = get_events_func(p_id)
+    events = json.loads(eventsJSON)
+    for event in events:
+        e_id = event[0]
+        deleteProjectHasEvent(e_id)
+        res = query_db(delete_event, (e_id,), True)
+        print(str(res))
+    return "deleted all events"
+
+def deleteProjectHasEvent(e_id):
+    delete_project_has_event = ("DELETE FROM Project_has_Event WHERE e_id=?")
+    res = query_db(delete_project_has_event, (e_id,), True)
+    return res
+
+@bp.route('/deleteevent', methods=['POST'])
+def deleteEvent():
+    if authenticateUser(request.form.get('u_id')):
+        p_id = request.form.get('p_id')
+        print(request.form.get('number'))
+        number = int(request.form.get('number'))
+        print('N: ' + str(number))
+        
+        eventsJSON = get_events_func(p_id)
+        events = json.loads(eventsJSON)
+        
+        print('Length of Array: ' + str(len(events)))
+        
+        event = events[number]
+        e_id = event[0]
+        res = deleteProjectHasEvent(e_id)
+
+        
+        delete_event = ("DELETE FROM Event WHERE id=?")
+        res = query_db(delete_event, (e_id,), True)
+        
+        return {}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/updateeventwithcomment', methods=['POST'])
+def updateEventWithComment():
+    if authenticateUser(request.form.get('u_id')):
+        p_id = request.form.get('p_id')
+        whichEvent = int(request.form.get('whichEvent'))
+        
+        e_id = json.loads(get_events_func(p_id))[whichEvent][0] 
+        
+        update_event = ("UPDATE Event SET comment=? WHERE id=?")
+        query_db(update_event, (request.form.get('comment'), e_id,), True)
+        
+        return {}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
@@ -132,9 +191,6 @@ def deleteImage(p_id):
             location = os.path.join(target, filename)
             if os.path.isfile(location):
                 os.remove(location)
-            else:
-                print('notnPATH')
-
 
 @bp.route('/updateproject')
 def updateProject():
@@ -261,8 +317,11 @@ def getImageFromID():
 
         result = query_db(get_figure_image_sql, (f_id,), True)
         image = {"image": ""}
-        for res in result:
-            image["image"] = res
+        if result != 0:
+            for res in result:
+                image["image"] = res
+        else:
+            return {}
         try:
             return send_from_directory(current_app.config['STATIC_URL_PATH'], image["image"])
         except FileNotFoundError:
@@ -462,18 +521,19 @@ def writeEventsToCSV(all_events_fromdb):
         if event != 0:
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
-        if data[5] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[5],), True))
+        if data[6] != 0:
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
             event_data.append({
                 'id':data[0], 
                 'direction':data[1], 
                 'center_coordinate':data[2],
                 'image_size_when_created': data[3],
                 'created': data[4],
-                'f_id': data[5],
+                'comment': data[5],
+                'f_id': data[6],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'f_id', 'description', 'color']
+    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
@@ -490,8 +550,7 @@ def createARCGIS():
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        eventsJSON = get_events_func(request.form.get('p_id'))
-        events = json.loads(eventsJSON)
+        events = json.loads(get_events_func(request.form.get('p_id')))
         
         imageCoord = []
         screenSize = []

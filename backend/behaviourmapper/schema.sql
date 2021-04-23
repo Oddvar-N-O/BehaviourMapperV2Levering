@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS [Event] (
      "direction" DECIMAL NULL, 
      "center_coordinate" VARCHAR NULL,
      "image_size_when_created" VARCHAR NULL, 
-     "created" TIME NULL,  
+     "created" TIME NULL,
+     "comment" VARCHAR NULL,  
      "f_id" INTEGER NOT NULL,
      FOREIGN KEY (f_id) REFERENCES [Figures](id)
 );

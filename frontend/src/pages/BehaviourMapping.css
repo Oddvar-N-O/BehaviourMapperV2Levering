@@ -128,11 +128,10 @@
     display: none; 
 }
 
-.interview {
+.textBox {
     display: flex;
     flex-direction: row;
     height: 100%;
-    width: 100%;
     flex-wrap: wrap;
     font-size: 48%;
     text-align: center;
@@ -151,6 +150,8 @@
     width: calc(100vw - 200px);
     min-height: 300px;
     min-width: 400px;
+    /* height: 600px;
+    width: 600px;*/
     order: 3;
 }
 .uploaded-map-image {
