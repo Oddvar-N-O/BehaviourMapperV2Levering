@@ -56,4 +56,4 @@ class AddComment extends React.Component {
 }
 
 
-export default withTranslation('common')(AddComment)
+export default withTranslation('common', { withRef: true })(AddComment)
