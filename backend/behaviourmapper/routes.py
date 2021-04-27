@@ -519,7 +519,7 @@ def writeEventsToCSV(all_events_fromdb):
             event_data.append({
                 'id':data[0], 
                 'action': data[1],
-                'group': data [2],
+                'groupName': data [2],
                 'direction':data[3], 
                 'center_coordinate':data[4],
                 'image_size_when_created': data[5],
@@ -536,82 +536,48 @@ def writeEventsToCSV(all_events_fromdb):
             writer.writerow(event_data[i])
 
 def generateDictOfEvents(events):
-    dictWithFIDKey = {}
+    actionDict = {}
     # 1-16 men, 17-32 women, 33-48 children, 49+ = groups
     for event in events:
         if type(event) == list:
             action = event[1]
-            if action not in dictWithFIDKey:
+            if action not in actionDict:
                 listOfEvents = []
                 listOfEvents.append(event)
-                dictWithFIDKey[action] = listOfEvents
-            elif action in dictWithFIDKey:
-                existingListOfEvents = dictWithFIDKey[action]
+                actionDict[action] = listOfEvents
+            elif action in actionDict:
+                existingListOfEvents = actionDict[action]
                 existingListOfEvents.append(event)
-                dictWithFIDKey[action] = existingListOfEvents
+                actionDict[action] = existingListOfEvents
 
-    # Vi itererer gjennom alle hendelsene
-    # la oss ta sykkel
-    dictAllExamplesPersonType = {'Events': events, 'Man': [], 'Woman': [], 'Child': [], 'Group': []}
+    dictAllEventsOfGroup = {'Events': events, 'Man': [], 'Woman': [], 'Child': [], 'Group': []}
 
-    finishedDictOfEvents = {}
-    for key in dict.keys(dictWithFIDKey):
-        print(key)
-        listOfEventType = dictWithFIDKey[key]
+    sortedDict = {}
+    for eventType in dict.keys(actionDict):
+        # print(action)
+        allExamplesOfAction = actionDict[eventType]
         # Vi har en dict med alle Persongruppene sykkel kan være
-        dictPersonType = {'Man': [], 'Woman': [], 'Child': [], 'All': []}
-        finishedDictOfEvents[key] = dictPersonType
-        dictGroup = {}
-        for event in listOfEventType:
-            existingDictPersonType = finishedDictOfEvents[key]
+        eventTypeGroupsort = {'Man': [], 'Woman': [], 'Child': [], 'Group': [], 'All': []}
+        sortedDict[eventType] = eventTypeGroupsort
+
+        for event in allExamplesOfAction:
+            eventTypeGroupsort = sortedDict[eventType]
             personType = event[2]
-            print('ev: ' + str(event))
 
-            print('pt: ' + personType)
-            print('-------')
-            """
-            print(existingDictPersonType)
-            
-            """
-
-            entireEventList = existingDictPersonType['All']
+            entireEventList = eventTypeGroupsort['All']
             entireEventList.append(event)
-            existingDictPersonType['All'] = entireEventList
+            eventTypeGroupsort['All'] = entireEventList
 
-            if personType == 'Group':
-                groups = dictAllExamplesPersonType['Group']
-                groups.append(event)
-                dictAllExamplesPersonType['Group'] = groups
+            actionListByPersonType = eventTypeGroupsort[personType]
+            actionListByPersonType.append(event)
+            eventTypeGroupsort[personType] = actionListByPersonType
 
-            elif personType == 'Man':
-                listOfMen = existingDictPersonType['Man']
-                listOfMen.append(event)
-                existingDictPersonType['Man'] = listOfMen
-                # print(listOfMen)
-                # print('-----')
-
-                allMen = dictAllExamplesPersonType['Man']
-                allMen.append(event)
-                dictAllExamplesPersonType['Man'] = allMen
-            elif personType == 'Woman':
-                listOfWomen = existingDictPersonType['Woman']
-                listOfWomen.append(event)
-                existingDictPersonType['Woman'] = listOfWomen
-
-                allWomen = dictAllExamplesPersonType['Woman']
-                allWomen.append(event)
-                dictAllExamplesPersonType['Woman'] = allWomen
-            elif personType == 'Child':
-                listOfChildren = existingDictPersonType['Child']
-                listOfChildren.append(event)
-                existingDictPersonType['Child'] = listOfChildren
-
-                allChildren = dictAllExamplesPersonType['Child']
-                allChildren.append(event)
-                dictAllExamplesPersonType['Child'] = allChildren
+            allPersonTypeEvents = dictAllEventsOfGroup[personType]
+            allPersonTypeEvents.append(event)
+            dictAllEventsOfGroup[personType] = allPersonTypeEvents
     
-    finishedDictOfEvents['All'] = dictAllExamplesPersonType 
-    return finishedDictOfEvents
+    sortedDict['All'] = dictAllEventsOfGroup
+    return sortedDict
 
 
 @bp.route('/createarcgis', methods=['POST'])
@@ -634,18 +600,16 @@ def createARCGIS():
 
         eventsJSON = get_events_func(request.form.get('p_id'))
         events = json.loads(eventsJSON)
-        # print(events);
+
         sortedEvents = generateDictOfEvents(events)
         for key in dict.keys(sortedEvents):
             innerDict = sortedEvents[key]
+            # print(key)
             for innerKey in dict.keys(innerDict):
                 foldername = key + innerKey
-                # print(foldername)
                 exists = doesFolderExist(foldername) # also check if changed
 
                 if exists == True: # for senere utvikling av vilkårlige ikoner
-                    # print('Exists: ' + foldername)
-                    # print('--------------------')
                     filename = findShapefileName(foldername)
                     shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
                     w = shp.Writer(shapeFileName)
@@ -660,7 +624,6 @@ def createARCGIS():
                         w.record(str(point_ID), 'Point')
                         point_ID += 1
                     w.close()
-            print()
         zip_files('shapefiles')
         return sendFileToFrontend('shapefiles.zip')
     else:
