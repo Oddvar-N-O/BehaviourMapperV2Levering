@@ -514,36 +514,21 @@ def writeEventsToCSV(all_events_fromdb):
         if event != 0:
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
-<<<<<<< HEAD
-        if data[7] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[7],), True))
+        if data[6] != 0:
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[8],), True))
             event_data.append({
-                'id':data[0],
+                'id':data[0], 
                 'action': data[1],
-                'group': data[2],
+                'group': data [2],
                 'direction':data[3], 
                 'center_coordinate':data[4],
                 'image_size_when_created': data[5],
                 'created': data[6],
-                'f_id': data[7],
+                'comment': data[7],
+                'f_id': data[8],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'action', 'group' 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'f_id', 'description', 'color']
-=======
-        if data[6] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
-            event_data.append({
-                'id':data[0], 
-                'direction':data[1], 
-                'center_coordinate':data[2],
-                'image_size_when_created': data[3],
-                'created': data[4],
-                'comment': data[5],
-                'f_id': data[6],
-                'description': figure[0],
-                'color': figure[1]})
-    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
->>>>>>> f7030afa6bd89ab6af936ed2cc289a404d828dff
+    event_fieldnames = ['id', 'action', 'group', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
@@ -571,6 +556,7 @@ def generateDictOfEvents(events):
 
     finishedDictOfEvents = {}
     for key in dict.keys(dictWithFIDKey):
+        print(key)
         listOfEventType = dictWithFIDKey[key]
         # Vi har en dict med alle Persongruppene sykkel kan være
         dictPersonType = {'Man': [], 'Woman': [], 'Child': [], 'All': []}
@@ -579,19 +565,30 @@ def generateDictOfEvents(events):
         for event in listOfEventType:
             existingDictPersonType = finishedDictOfEvents[key]
             personType = event[2]
+            print('ev: ' + str(event))
+
+            print('pt: ' + personType)
+            print('-------')
+            """
+            print(existingDictPersonType)
+            
+            """
 
             entireEventList = existingDictPersonType['All']
             entireEventList.append(event)
             existingDictPersonType['All'] = entireEventList
 
             if personType == 'Group':
-                groups = dictAllExamplesPersonType['Man']
+                groups = dictAllExamplesPersonType['Group']
                 groups.append(event)
-                dictAllExamplesPersonType['Man'] = groups
+                dictAllExamplesPersonType['Group'] = groups
+
             elif personType == 'Man':
                 listOfMen = existingDictPersonType['Man']
                 listOfMen.append(event)
                 existingDictPersonType['Man'] = listOfMen
+                # print(listOfMen)
+                # print('-----')
 
                 allMen = dictAllExamplesPersonType['Man']
                 allMen.append(event)
@@ -626,11 +623,6 @@ def createARCGIS():
         target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
         if not os.path.isdir(target):
             os.mkdir(target)
-<<<<<<< HEAD
-=======
-
-        events = json.loads(get_events_func(request.form.get('p_id')))
->>>>>>> f7030afa6bd89ab6af936ed2cc289a404d828dff
         
         get_proj_sql = ("SELECT * FROM Project WHERE id=?")
         pid = (request.form.get('p_id'))
@@ -643,7 +635,6 @@ def createARCGIS():
         eventsJSON = get_events_func(request.form.get('p_id'))
         events = json.loads(eventsJSON)
         # print(events);
-        print()
         sortedEvents = generateDictOfEvents(events)
         for key in dict.keys(sortedEvents):
             innerDict = sortedEvents[key]
@@ -654,6 +645,7 @@ def createARCGIS():
 
                 if exists == True: # for senere utvikling av vilkårlige ikoner
                     # print('Exists: ' + foldername)
+                    # print('--------------------')
                     filename = findShapefileName(foldername)
                     shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
                     w = shp.Writer(shapeFileName)
@@ -668,6 +660,7 @@ def createARCGIS():
                         w.record(str(point_ID), 'Point')
                         point_ID += 1
                     w.close()
+            print()
         zip_files('shapefiles')
         return sendFileToFrontend('shapefiles.zip')
     else:
