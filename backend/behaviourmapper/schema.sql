@@ -53,7 +53,9 @@ CREATE TABLE IF NOT EXISTS "Figures" (
 DROP TABLE IF EXISTS [Event];
 
 CREATE TABLE IF NOT EXISTS [Event] (
-     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+     "action" VARCHAR NULL,
+     "group_name" VARCHAR NULL, 
      "direction" DECIMAL NULL, 
      "center_coordinate" VARCHAR NULL,
      "image_size_when_created" VARCHAR NULL, 

@@ -25,6 +25,8 @@ class BehaviourMapping extends React.Component {
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
         iconIDForDeletion: 0,
+        ourEventName: null,
+        ourEventGroup: null,
         
         // Perhaps collect all these into one object at a late time
         p_id: props.location.state.p_id,
@@ -100,6 +102,9 @@ class BehaviourMapping extends React.Component {
     }
 
     data.append('p_id', this.state.p_id);
+    data.append('action', this.state.ourEventName);
+    data.append('group', this.state.ourEventGroup);
+
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
@@ -153,11 +158,14 @@ class BehaviourMapping extends React.Component {
           break;
       }
       let innerHTML = descr[0] + ": " + descr[1];
+      this.setState({ourEventName: descr[0]}, function() {});
+      this.setState({ourEventGroup: descr[1]}, function() {});    
       return innerHTML; 
     }
   }
 
   selectIcon(e) {
+    this.setInnerHTML(e.target.getAttribute('id'))
     let newSrc = e.target.src;
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ')
@@ -204,6 +212,7 @@ class BehaviourMapping extends React.Component {
 
   placeIcon(event) {
     this.findScreenSize()
+    console.log('PI: ' + this.state.ourEventName + ' ' + this.state.ourEventGroup);
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
@@ -752,6 +761,9 @@ changeShowContextMenu() {
   this.closeIconSelect();
   this.hideAll();
   this.setState({showContextMenu: !this.state.showContextMenu});
+  if (this.state.hideOrShow === 'Hide') {
+    this.showAll();
+  }
 }
 
 selectItemForContextMenu(e) {
@@ -859,7 +871,7 @@ selectItemForContextMenu(e) {
     let iconObject;
     for (let i=0; i<this.state.iconObjects.length ;i++) {
       iconObject = this.state.iconObjects[i];
-      if (iconObject.id === this.state.ourIconID) {
+      if (iconObject.id === this.state.iconIDForDeletion) {
         return i;
       }
     }
@@ -870,7 +882,7 @@ selectItemForContextMenu(e) {
     this.stopPointing();
     this.setState({actionID: 1}, function() {})
     var icon = document.getElementById(this.state.iconIDForDeletion);
-    if (icon != null && this.state.ourIconID >= 0) {
+    if (icon != null) { // && this.state.ourIconID >= 0) {
       icon.remove();
       let i = this.findIconObjectOfOurID();
 
@@ -887,7 +899,7 @@ selectItemForContextMenu(e) {
       })
 
       // setTimeout(() => this.showChosenIcon(), 100);
-      this.setState({ourIconID: -1}, function() {});
+      //this.setState({ourIconID: -1}, function() {});
       if (this.state.newIconID > 0) {
         this.setState({newIconID: this.state.newIconID - 1}, function() {});
       }
