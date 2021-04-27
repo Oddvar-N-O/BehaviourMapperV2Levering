@@ -1,0 +1,55 @@
+{
+    "login": {
+        "login": "Log Inn"
+    },
+    "startpage": {
+        "new" : "Nytt Prosjekt",
+        "manage" : "Behandle Prosjekt",
+        "logout" : "Log ut",
+        "web-map" : "Bruk web-bassert kart",
+        "load" : "Last opp kart fra fil"
+    },
+    "newProject": {
+        "title" : "Nytt Prosjekt",
+        "name" : "Prosjektnavn",
+        "nameRequired" : "Vennligst skriv inn et prosjektnavn",
+        "desc" : "Beskrivelse",
+        "descPlaceholder" : "For eksempel tidspunkt, vær, spesielle hendelser og så videre.",
+        "image" : "Bilde",
+        "imageRequired" : "Vennligst legg til et bilde",
+        "go" : "Start!"
+    },
+    "chooseImage": {
+        "projectName" : "Prosjektnavn:",
+        "text": "Zoom inn for å velge kartutsnit, trykk på 'Bruk Kartutsnitt' for å gå videre",
+        "useMap": "Bruk Kartutsnitt"
+    },
+    "mapping": {
+        "addEvent": "Ny Hendelse",
+        "remove": "Slett Figur",
+        "addComment": "Legg Til Kommentar",
+        "changeSize": "Velg Figurstørrelse",
+        "showIcons" : "Vis Figurer",
+        "hideIcons": "Gjem Figurer",
+        "chooseFavorite": "Velg Favoritter",
+        "favorites" : "Favoritter",
+        "finishMapping": "Avslutt",
+        "addInterview": "Legg Til Intervju",
+        "addLine": "Legg Til Linje",
+        "changeMode": "Bytt Modus",
+        "finishProject": "Avslutt"
+    },
+    "allIcons": {
+        "man": "Mann",
+        "woman": "Kvinne",
+        "child": "Barn",
+        "group": "Gruppe"
+    },
+    "comments": {
+        "comment": "Kommentar",
+        "notes": "Notater",
+        "update": "Oppdater Kommentar",
+        "save": "Lagre Kommentar"
+    }
+
+}
