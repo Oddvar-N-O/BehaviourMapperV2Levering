@@ -163,7 +163,6 @@ def updateEventWithComment():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
         whichEvent = int(request.form.get('whichEvent'))
-        
         e_id = json.loads(get_events_func(p_id))[whichEvent][0] 
         
         update_event = ("UPDATE Event SET comment=? WHERE id=?")
@@ -503,7 +502,7 @@ def writeProjectToCSV(project_fromdb):
         'rightX':project_fromdb[11],
         'upperY':project_fromdb[12]})
     proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','u_id']
-    with open('behaviourmapper\static\csvfiles\project.csv', 'w+') as f:
+    with open(os.path.join(Config.CSVFILES_FOLDER, "project.csv"), 'w+') as f:
         writer = csv.DictWriter(f, proj_fieldnames)
         writer.writeheader()
         writer.writerow(project_data)
@@ -529,7 +528,7 @@ def writeEventsToCSV(all_events_fromdb):
                 'description': figure[0],
                 'color': figure[1]})
     event_fieldnames = ['id', 'action', 'group_name', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
-    with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
+    with open(os.path.join(Config.CSVFILES_FOLDER, "events.csv"), 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
         for i in range(len(event_data)):
@@ -645,17 +644,19 @@ def findShapefileName(folderName):
 
 
 def sendFileToFrontend(file): #path, ziph):
-    placement = os.path.abspath(file)
+    placement = os.path.join(Config.ZIPFILES_FOLDER, file)
     try:
         return send_file(placement)
     except FileNotFoundError:
         abort(404)
 
 def zip_files(typeOfFiles):
-    with zipfile.ZipFile(typeOfFiles + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
-            # thisworks
+    with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
             absPath = os.path.abspath(typeOfFiles)
-            filesLocation = 'behaviourmapper/static/' + typeOfFiles
+            if typeOfFiles == "csvfiles":
+                filesLocation = Config.CSVFILES_FOLDER
+            elif typeOfFiles == "shapefiles":
+                filesLocation = Config.SHAPEFILES_FOLDER
             for filename in os.listdir(filesLocation):
                 f = os.path.join(filesLocation, filename)
                 arcname = f[len(filesLocation) + 1:]

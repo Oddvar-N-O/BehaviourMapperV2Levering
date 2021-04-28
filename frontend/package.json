@@ -1,6 +1,6 @@
 {
   "name": "behaviour_mapper",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "private": true,
   "homepage": "https://www.ux.uis.no/behaviourmapper",
   "proxy": "http://0.0.0.0:5000",

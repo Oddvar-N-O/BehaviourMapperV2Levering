@@ -62,10 +62,10 @@ function ManageProject() {
     function exportZipFiles(e) {
       e.preventDefault();
       let backendAPI, filename
-      if (e.target.textContent === "Export to csv") {
+      if (e.target.textContent === "Export to CSV" || e.target.textContent === "Eksporter til CSV") {
         backendAPI = 'exporttocsv'
         filename = 'csvfiles'
-      } else if (e.target.textContent === "Export Shapefiles") {
+      } else if (e.target.textContent === "Export Shapefiles" || e.target.textContent === "Eksporter Shapefiler") {
         backendAPI = 'createarcgis'
         filename = 'shapefiles'
       }
