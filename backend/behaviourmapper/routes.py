@@ -519,7 +519,7 @@ def writeEventsToCSV(all_events_fromdb):
             event_data.append({
                 'id':data[0], 
                 'action': data[1],
-                'groupName': data [2],
+                'group_name': data [2],
                 'direction':data[3], 
                 'center_coordinate':data[4],
                 'image_size_when_created': data[5],
@@ -528,7 +528,7 @@ def writeEventsToCSV(all_events_fromdb):
                 'f_id': data[8],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'action', 'group', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
+    event_fieldnames = ['id', 'action', 'group_name', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
