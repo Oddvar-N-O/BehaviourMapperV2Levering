@@ -27,6 +27,8 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
+        ourEventName: null,
+        ourEventGroup: null,
         selectedEventID: null,
         
         // Perhaps collect all these into one object at a late time
@@ -112,6 +114,9 @@ class BehaviourMapping extends React.Component {
     }
 
     data.append('p_id', this.state.p_id);
+    data.append('action', this.state.ourEventName);
+    data.append('group', this.state.ourEventGroup);
+
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
@@ -165,11 +170,14 @@ class BehaviourMapping extends React.Component {
           break;
       }
       let innerHTML = descr[0] + ": " + descr[1];
+      this.setState({ourEventName: descr[0]}, function() {});
+      this.setState({ourEventGroup: descr[1]}, function() {});    
       return innerHTML; 
     }
   }
 
   selectIcon(e) {
+    this.setInnerHTML(e.target.getAttribute('id'))
     let newSrc
     if (e.target.getAttribute('id') !== null) {
       let imgIdSplit = e.target.getAttribute('id').split(' ')
@@ -218,6 +226,7 @@ class BehaviourMapping extends React.Component {
 
   placeIcon(event) {
     this.findScreenSize()
+    console.log('PI: ' + this.state.ourEventName + ' ' + this.state.ourEventGroup);
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
@@ -766,6 +775,9 @@ changeShowContextMenu() {
   this.hideIcon();
   this.closeIconSelect();
   this.setState({showContextMenu: !this.state.showContextMenu});
+  if (this.state.hideOrShow === 'Hide') {
+    this.showAll();
+  }
 }
 
 

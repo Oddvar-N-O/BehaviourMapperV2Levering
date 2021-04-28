@@ -37,11 +37,8 @@ def logout():
 def login():
     if oidc.user_loggedin:
         email = oidc.user_getfield('email')
-        print(email)
         openid = oidc.user_getfield('sub')
-        print(openid)
         if not userInDB(openid):
-            print('lacking')
             addUser(openid, email)
         session['username'] = openid
         return redirect('http://localhost:3000/behaviourmapper/startpage')
@@ -132,7 +129,6 @@ def deleteAllEvents(p_id):
         e_id = event[0]
         deleteProjectHasEvent(e_id)
         res = query_db(delete_event, (e_id,), True)
-        print(str(res))
     return "deleted all events"
 
 def deleteProjectHasEvent(e_id):
@@ -146,17 +142,13 @@ def deleteEvent():
         p_id = request.form.get('p_id')
         print(request.form.get('number'))
         number = int(request.form.get('number'))
-        print('N: ' + str(number))
         
         eventsJSON = get_events_func(p_id)
         events = json.loads(eventsJSON)
         
-        print('Length of Array: ' + str(len(events)))
-        
         event = events[number]
         e_id = event[0]
         res = deleteProjectHasEvent(e_id)
-
         
         delete_event = ("DELETE FROM Event WHERE id=?")
         res = query_db(delete_event, (e_id,), True)
@@ -284,7 +276,7 @@ def get_events_func(p_id):
 
     for e_id in e_ids:
         query_event = query_db(get_event_sql, (str(e_id),), True)
-        events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4]))
+        events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4], query_event[5]))
     return json.dumps(events)
 
 # Usage /getfigure?description=<desc>&color=<color>
@@ -375,11 +367,13 @@ def favicon():
 def addEvent():
     if authenticateUser(request.form.get('u_id')):
         add_event = ("INSERT INTO Event "
-              "(direction, center_coordinate, created, image_size_when_created, f_id) "
-              "VALUES (?,?,?,?,?)")
+              "(action, group_name, direction, center_coordinate, created, image_size_when_created, f_id) "
+              "VALUES (?,?,?,?,?,?,?)")
         project_id = request.form.get('p_id') 
-        d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
-                            request.form.get('created'), request.form.get('image_size'), request.form.get('f_id'))
+        d_event_values = (request.form.get('action'), request.form.get('group'),
+                        request.form.get('direction'), request.form.get('center_coordinate'), 
+                        request.form.get('created'), request.form.get('image_size'), 
+                        request.form.get('f_id'))
         e_id = query_db(add_event, d_event_values) # Adds to Event table in db
         add_relation = ("INSERT INTO Project_has_Event "
               "(p_id, e_id) "
@@ -514,7 +508,6 @@ def writeProjectToCSV(project_fromdb):
         writer.writeheader()
         writer.writerow(project_data)
 
-
 def writeEventsToCSV(all_events_fromdb):
     event_data, events = [], []
     for event in all_events_fromdb:
@@ -522,23 +515,70 @@ def writeEventsToCSV(all_events_fromdb):
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
         if data[6] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[8],), True))
             event_data.append({
                 'id':data[0], 
-                'direction':data[1], 
-                'center_coordinate':data[2],
-                'image_size_when_created': data[3],
-                'created': data[4],
-                'comment': data[5],
-                'f_id': data[6],
+                'action': data[1],
+                'groupName': data [2],
+                'direction':data[3], 
+                'center_coordinate':data[4],
+                'image_size_when_created': data[5],
+                'created': data[6],
+                'comment': data[7],
+                'f_id': data[8],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
+    event_fieldnames = ['id', 'action', 'group', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open('behaviourmapper\static\csvfiles\events.csv', 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
         for i in range(len(event_data)):
             writer.writerow(event_data[i])
+
+def generateDictOfEvents(events):
+    actionDict = {}
+    # 1-16 men, 17-32 women, 33-48 children, 49+ = groups
+    for event in events:
+        if type(event) == list:
+            action = event[1]
+            if action not in actionDict:
+                listOfEvents = []
+                listOfEvents.append(event)
+                actionDict[action] = listOfEvents
+            elif action in actionDict:
+                existingListOfEvents = actionDict[action]
+                existingListOfEvents.append(event)
+                actionDict[action] = existingListOfEvents
+
+    dictAllEventsOfGroup = {'Events': events, 'Man': [], 'Woman': [], 'Child': [], 'Group': []}
+
+    sortedDict = {}
+    for eventType in dict.keys(actionDict):
+        # print(action)
+        allExamplesOfAction = actionDict[eventType]
+        # Vi har en dict med alle Persongruppene sykkel kan være
+        eventTypeGroupsort = {'Man': [], 'Woman': [], 'Child': [], 'Group': [], 'All': []}
+        sortedDict[eventType] = eventTypeGroupsort
+
+        for event in allExamplesOfAction:
+            eventTypeGroupsort = sortedDict[eventType]
+            personType = event[2]
+
+            entireEventList = eventTypeGroupsort['All']
+            entireEventList.append(event)
+            eventTypeGroupsort['All'] = entireEventList
+
+            actionListByPersonType = eventTypeGroupsort[personType]
+            actionListByPersonType.append(event)
+            eventTypeGroupsort[personType] = actionListByPersonType
+
+            allPersonTypeEvents = dictAllEventsOfGroup[personType]
+            allPersonTypeEvents.append(event)
+            dictAllEventsOfGroup[personType] = allPersonTypeEvents
+    
+    sortedDict['All'] = dictAllEventsOfGroup
+    return sortedDict
+
 
 @bp.route('/createarcgis', methods=['POST'])
 def createARCGIS():
@@ -549,16 +589,7 @@ def createARCGIS():
         target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
         if not os.path.isdir(target):
             os.mkdir(target)
-
-        events = json.loads(get_events_func(request.form.get('p_id')))
         
-        imageCoord = []
-        screenSize = []
-        for event in events:
-            if type(event) == list:
-                imageCoord.append(event[2])
-                screenSize.append(event[3])
-
         get_proj_sql = ("SELECT * FROM Project WHERE id=?")
         pid = (request.form.get('p_id'))
         project_values = query_db(get_proj_sql, (str(pid),), True)
@@ -567,35 +598,51 @@ def createARCGIS():
         rightX = float(project_values[11])
         upperY = float(project_values[12])
 
-        iconCoord = []
+        eventsJSON = get_events_func(request.form.get('p_id'))
+        events = json.loads(eventsJSON)
 
-        for i in range(len(imageCoord)):
-            iconCoord.append(findNewCoordinates(leftX, lowerY, rightX, upperY, imageCoord[i], screenSize[i]))
-        # autoincrement
-        arcgis_filename = "yote",
-        # location = 'behaviormapper/static/shapefiles/tree'
-        w = shp.Writer('behaviourmapper/static/shapefiles/test')
+        sortedEvents = generateDictOfEvents(events)
+        for key in dict.keys(sortedEvents):
+            innerDict = sortedEvents[key]
+            # print(key)
+            for innerKey in dict.keys(innerDict):
+                foldername = key + innerKey
+                exists = doesFolderExist(foldername) # also check if changed
 
-        
-        # w = shp.Writer(os.path.join(target, 'tree'))
-        # clog her
-        w.autoBalance = 1
-        w.field('Background', 'C', '40') # image
-
-        point_ID = 1
-        
-        for coordinateSet in iconCoord:
-            x = coordinateSet[0]
-            y = coordinateSet[1]
-            w.point(x, y)
-            w.record(str(point_ID), 'Point')
-            point_ID += 1
-
+                if exists == True: # for senere utvikling av vilkårlige ikoner
+                    filename = findShapefileName(foldername)
+                    shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
+                    w = shp.Writer(shapeFileName)
+                    w.field('Background', 'C', '40')
+                    point_ID = 1
+                    eventGroup = innerDict[innerKey]
+                    for event in eventGroup:
+                        newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[4], event[5])
+                        x = newCoords[0]
+                        y = newCoords[1]
+                        w.point(x, y)
+                        w.record(str(point_ID), 'Point')
+                        point_ID += 1
+                    w.close()
         zip_files('shapefiles')
         return sendFileToFrontend('shapefiles.zip')
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+def doesFolderExist(folderName):
+    filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
+    if os.path.exists(filesLocation):
+        return True
+    return False
+
+def findShapefileName(folderName):
+    filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
+    for filename in os.listdir(filesLocation):
+        # print(filename)
+        if filename.endswith((".shp", "_files")):
+            return filename
+
 
 def sendFileToFrontend(file): #path, ziph):
     placement = os.path.abspath(file)
@@ -606,15 +653,22 @@ def sendFileToFrontend(file): #path, ziph):
 
 def zip_files(typeOfFiles):
     with zipfile.ZipFile(typeOfFiles + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
+            # thisworks
             absPath = os.path.abspath(typeOfFiles)
             filesLocation = 'behaviourmapper/static/' + typeOfFiles
             for filename in os.listdir(filesLocation):
                 f = os.path.join(filesLocation, filename)
                 arcname = f[len(filesLocation) + 1:]
-                print ('zipping %s as %s' % (os.path.join(filesLocation, filename),
-                                        arcname))
+                # print ('zipping %s as %s' % (os.path.join(filesLocation, filename), arcname))
                 if os.path.isfile(f):
                     my_zip.write(f, arcname=arcname)
+                elif os.path.isdir(f):
+                    for root, dirs, files in os.walk(f):
+                        for fname in files:
+                            my_zip.write(os.path.join(root, fname),
+                            os.path.relpath(os.path.join(root, fname),
+                            os.path.join(f, '..')))
+                    
 
 def addMapName(mapname, p_id, u_id):
     add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
