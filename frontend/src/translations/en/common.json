@@ -19,6 +19,12 @@
         "imageRequired" : "Image Required",
         "go" : "Let's go!"
     },
+    "manageProject": {
+        "description" : "Description: ",
+        "exportShapefiles" : "Export Shapefiles",
+        "exportToCsv" : "Export to CSV",
+        "delete" : "Delete this project"
+    },
     "chooseImage": {
         "projectName" : "Project Name:",
         "text": "Zoom in to choose your location, then click 'Use Map' to proceed",
