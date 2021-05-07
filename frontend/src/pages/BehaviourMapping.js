@@ -47,7 +47,10 @@ class BehaviourMapping extends React.Component {
         scrollHorizontal: 0,
         scrollVertical: 0,
         onlyObservation: true,
-        drawLine: false,
+        drawOnCanvas: false,
+        chosenColorForDrawing: '#FF0000',
+        activateOnMouseMove: false,
+        chosenDrawingEvent: undefined,
         addInterview: false,
         addComment: false,
         showContextMenu: false,
@@ -75,9 +78,15 @@ class BehaviourMapping extends React.Component {
       this.hideAll = this.hideAll.bind(this);
       this.argCIS = this.argCIS.bind(this);
       this.changeMode = this.changeMode.bind(this);
-      this.drawLine = this.drawLine.bind(this);
+      this.whichDrawingFunction = this.whichDrawingFunction.bind(this);
+      this.activateDrawingOnCanvas = this.activateDrawingOnCanvas.bind(this);
+      // this.drawPoint = this.drawPoint.bind(this);
+      this.chooseColorForDrawing = this.chooseColorForDrawing.bind(this);
       this.addToDrawList = this.addToDrawList.bind(this);
       this.drawFunction = this.drawFunction.bind(this);
+      // this.drawLineFunction = this.drawLineFunction.bind(this);
+      // this.drawAreaFunction = this.drawAreaFunction.bind(this);
+      // this.drawPointFunction = this.drawPointFunction.bind(this);
       this.addInterview = this.addInterview.bind(this);
       this.saveInterview = this.saveInterview.bind(this);
       this.finishProject = this.finishProject.bind(this);
@@ -226,7 +235,6 @@ class BehaviourMapping extends React.Component {
 
   placeIcon(event) {
     this.findScreenSize()
-    console.log('PI: ' + this.state.ourEventName + ' ' + this.state.ourEventGroup);
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
@@ -492,16 +500,39 @@ class BehaviourMapping extends React.Component {
       })
   }
 
-  drawLine() {
-    this.setState({drawLine: true});
+  whichDrawingFunction(e) {
+    if (e.target.innerText === "Add Line" || e.target.innerText === "Legg Til Linje" ) {
+      this.setState({chosenDrawingEvent: "line"})
+    } else if (e.target.innerText === "Add Area" || e.target.innerText === "Legg Til Område" ) {
+      this.setState({chosenDrawingEvent: "area"})
+    } else if (e.target.innerText === "Add Point" || e.target.innerText === "Legg Til Punkt" ) {
+      this.setState({chosenDrawingEvent: "point"})
+    }
+    this.setState({drawOnCanvas: true});
+  }
+
+  activateDrawingOnCanvas() {
+    this.setState({activateOnMouseMove: true});
+  }
+
+
+  chooseColorForDrawing(event) {
+    console.log(this.state.chosenColorForDrawing)
+    this.setState({chosenColorForDrawing: event.target.value})
   }
 
   addToDrawList(e) {
-    if (this.state.eightOfCoords === 0) {
-      let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
+    if (e._reactName === "onTouchMove") {
+      if (this.state.eightOfCoords === 0) {
+        let currCoords = [(e["touches"][0].clientX - 200), (e["touches"][0].clientY ) ];
+        this.setState({coords: [...this.state.coords, currCoords]});
+      }
+      this.oneEigthOfCoords();
+    }
+    else if (e._reactName === "onMouseMove" || e._reactName === "onTouchStart") {
+      let currCoords = [(e.clientX - 200), (e.clientY ) ];
       this.setState({coords: [...this.state.coords, currCoords]});
     }
-    this.oneEigthOfCoords();
   }
 
   oneEigthOfCoords() {
@@ -512,7 +543,17 @@ class BehaviourMapping extends React.Component {
     }
   }
 
-  drawFunction(){
+  drawFunction() {
+    if (this.state.chosenDrawingEvent === "line") {
+      this.drawLineFunction();
+    } else if (this.state.chosenDrawingEvent === "area") {
+      this.drawAreaFunction();
+    } else if (this.state.chosenDrawingEvent === "point") {
+      this.drawPointFunction();
+    }
+  }
+
+  drawLineFunction(){
     if (this.state.coords.length <= 3 ) {
       return
     }
@@ -523,7 +564,7 @@ class BehaviourMapping extends React.Component {
       this.state.coords[this.state.coords.length - 3][0], 
       this.state.coords[this.state.coords.length - 3][1]];
     ctx.beginPath();
-    ctx.strokeStyle = "red";
+    ctx.strokeStyle = this.state.chosenColorForDrawing;
     ctx.lineWidth = 2;
     ctx.moveTo(this.state.coords[0][0], this.state.coords[0][1]);
     for (let coord of this.state.coords) {
@@ -531,10 +572,37 @@ class BehaviourMapping extends React.Component {
     }
     this.drawArrow(ctx, lastTwoCoords);
     ctx.stroke();
-    this.setState({drawLine: false});
-    this.setState({coords: []});
-    
-    // bruke litt samme metoder som gjort i mappingen for å få en ny linje hver gang og kunne vise alle og skjule alle linjer.
+    this.sendInterviewFigureToDb();
+  }
+
+  drawAreaFunction(){
+    if (this.state.coords.length <= 3 ) {
+      return
+    }
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    ctx.beginPath();
+    ctx.strokeStyle = this.state.chosenColorForDrawing;
+    ctx.lineWidth = 2;
+    ctx.moveTo(this.state.coords[0][0], this.state.coords[0][1]);
+    for (let coord of this.state.coords) {
+      ctx.lineTo(coord[0], coord[1]);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    this.sendInterviewFigureToDb();
+  }
+
+  drawPointFunction(){
+    if (this.state.coords.length <= 0 ) {
+      return
+    }
+    const canvas = this.canvas.current;
+    const ctx = canvas.getContext("2d");
+    let halfTheSize = 5 / 2
+    ctx.fillStyle = this.state.chosenColorForDrawing;
+    ctx.fillRect(this.state.coords[0][0] - halfTheSize, this.state.coords[0][1] - halfTheSize, 5, 5)
+    this.sendInterviewFigureToDb();
   }
 
   drawArrow(ctx, lastTwoCoords) {
@@ -552,6 +620,27 @@ class BehaviourMapping extends React.Component {
     ctx.moveTo(lastTwoCoords[0] + bottomX, lastTwoCoords[1] + bottomY);
     ctx.lineTo(lastTwoCoords[0], lastTwoCoords[1]);
     ctx.lineTo(lastTwoCoords[0] + topX, lastTwoCoords[1] + topY);
+  }
+  
+  clearDrawing() {
+    this.setState({drawOnCanvas: false});
+    this.setState({activateOnMouseMove: false});
+    this.setState({coords: []});
+  }
+
+  sendInterviewFigureToDb() {
+    const data = new FormData();
+    const p_id = this.state.p_id;
+    data.append('points', this.state.coords);
+    data.append('color', this.state.chosenColorForDrawing);
+    data.append('type', this.state.chosenDrawingEvent);
+    data.append('ie_id', 1);
+    data.append('u_id', this.state.u_id);
+    fetch(window.backend_url + 'addterviewfigure', {
+      method: 'POST',
+      body: data,
+      })
+    this.clearDrawing();
   }
 
   handleScroll() {
@@ -1002,11 +1091,11 @@ selectItemForContextMenu(e) {
       function resizeCanvas() {
         canvas.width = window.innerWidth - 200;
         canvas.height = window.innerHeight;
-        drawStuff(); 
+        drawMap(); 
       }
       resizeCanvas();
   
-      function drawStuff() {
+      function drawMap() {
         let ctx = canvas.getContext("2d");
         if (firstTime === 0) {
           image.onload = () => {
@@ -1085,29 +1174,36 @@ selectItemForContextMenu(e) {
                 </li>
 
                 <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {t(this.state.hideOrShow)}</li>
-                {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
                 <li className="buttonLi" onClick={this.removeIcon}>{t('mapping.remove')}</li>
                 <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
                   <li><h2>{t('mapping.favorites')}</h2></li>
                 </ul>
-                {/* <li className="buttonLi" onClick={this.changeMode}>Change Mode</li> */}
+                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
                 <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
               <ul className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
-                <li className="buttonLi" onClick={this.drawLine}>{t('mapping.addLine')}</li>
+                <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addLine')}</li>
+                <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addArea')}</li>
+                <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addPoint')}</li>
                 <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
+                <li><input type="color" value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing} /></li>
                 <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
               </ul>
               
           </div>
           <div className={screenshotDivClassList}>
             <canvas 
-              onTouchMove={this.state.drawLine ? this.addToDrawList : null}
+              onTouchStart={this.state.drawOnCanvas ? this.activateDrawingOnCanvas : null}
+              onTouchMove={this.state.activateOnMouseMove ? this.addToDrawList : null}
               onTouchEnd={this.drawFunction}
+              onMouseDown={this.state.drawOnCanvas ? this.activateDrawingOnCanvas : null}
+              onMouseMove={this.state.activateOnMouseMove ? this.addToDrawList : null}
+              onMouseUp={this.drawFunction}
               className={canvasClassList}
               ref={this.canvas}
             />

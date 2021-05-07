@@ -26,16 +26,25 @@ CREATE TABLE IF NOT EXISTS [Project] (
     FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
 
+DROP TABLE IF EXISTS "InterviewFigures";
+
+CREATE TABLE IF NOT EXISTS "InterviewFigures" (
+	"id"	INTEGER NOT NULL UNIQUE,
+    "points" VARCHAR NULL,
+    "color" VARCHAR NULL,
+    "type" VARCHAR NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
 DROP TABLE IF EXISTS "InterviewEvents";
 
 CREATE TABLE IF NOT EXISTS "InterviewEvents" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"interview"	VARCHAR NULL,
-    "area" VARCHAR NULL,
-    "lines" VARCHAR NULL,
-    "point" VARCHAR NULL,
+    "figures" INTEGER NULL,
 	"p_id"	INTEGER NOT NULL,
     FOREIGN KEY (p_id) REFERENCES "Project"(id)
+    FOREIGN KEY (figures) REFERENCES 'InterviewFigures'(id)
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
