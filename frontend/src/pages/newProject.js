@@ -31,10 +31,6 @@ class NewProject extends React.Component {
         this.Loading = this.Loading.bind(this)
     }
 
-    componentDidMount() {
-        console.log(this.state.fromLoadMap)
-    }
-
     handleChange(event) { 
         const {name, value} = event.target;
         this.setState({
@@ -90,27 +86,28 @@ class NewProject extends React.Component {
 
     setRedirect(event) {
         event.preventDefault();
-        if (this.state.fromLoadMap) {
-            if (this.state.projectName !== "" && this.uploadInput.files.length !== 0){
-                this.handleRedirect();
-            } else  {
-                if (this.state.projectName === "") {
-                    this.setState({projectNameLegend: "newProject.nameRequired"});
-                }
-                if (this.uploadInput.files.length === 0) {
-                    this.setState({projectImageLegend: "newProject.imageRequired"});
-                }
-                this.changeColor();
-            }
-        } else {
-            if (this.state.projectName !== ""){
-                this.handleRedirect();
-            } else  {
-                this.setState({projectNameLegend: "newProject.nameRequired"});
-                this.changeColor();
+        let informationMissing = false
+        if (this.state.projectName === "") {
+            this.setState({projectNameLegend: "newProject.nameRequired"})
+            informationMissing = true
+        }
+        if (this.state.fromLoadMap){
+            if (this.uploadInput.files.length === 0){
+                this.setState({projectImageLegend: "newProject.imageRequired"})
+                informationMissing = true
             }
         }
-        
+        if (this.state.survey){
+            if (this.state.questions===""){
+                console.log('missing questions!') // TODO: fix translation!
+                informationMissing = true
+            }
+        }
+        if (informationMissing) {
+            this.changeColor();
+        } else {
+            this.handleRedirect();
+        }
     }
     handleRedirect() {
         if (this.state.fromLoadMap){
@@ -136,6 +133,7 @@ class NewProject extends React.Component {
                 state: {
                     projectName: this.state.projectName,
                     description: this.state.description,
+                    survey: this.state.survey,
                     u_id : this.state.u_id,
                 },
             });
@@ -184,7 +182,7 @@ class NewProject extends React.Component {
                                     onChange={this.handleChange}
                                 />
                                 <br/>
-                                <div className={this.state.survey ? '' : 'invisible'}>
+                                <div className={this.state.survey ? 'questionsField' : 'invisible'}>
                                     <legend>{t('newProject.questions')}</legend>
                                     <textarea 
                                         className="questions"
@@ -195,17 +193,17 @@ class NewProject extends React.Component {
                                     />
                                 </div>
                             </form>
+                        
+                            <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
+                                <legend>{t(this.state.projectImageLegend)}</legend>
+                                <input 
+                                    ref={(ref) => { this.uploadInput = ref; }} 
+                                    type="file"  
+                                    className='file-button' 
+                                    onChange={this.imageChosen}
+                                />
+                            </form>
                         </div>
-    
-                        <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
-                            <legend>{t(this.state.projectImageLegend)}</legend>
-                            <input 
-                                ref={(ref) => { this.uploadInput = ref; }} 
-                                type="file"  
-                                className='file-button' 
-                                onChange={this.imageChosen}
-                            />
-                        </form>
                         <ul>
                             <li onClick={ (e) => {
                                 this.setRedirect(e);     

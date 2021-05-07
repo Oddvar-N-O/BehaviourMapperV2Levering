@@ -17,9 +17,9 @@
         "name" : "Project Name",
         "nameRequired" : "Project Name Required",
         "desc" : "Description",
-        "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc.",
+        "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc",
         "questions" : "Questions",
-        "questionsPlaceholder" : "Enter questions here, make a new line for each.",
+        "questionsPlaceholder" : "Enter questions here, make a new line for each to seperate them",
         "image" : "Image",
         "imageRequired" : "Image Required",
         "go" : "Let's go!"

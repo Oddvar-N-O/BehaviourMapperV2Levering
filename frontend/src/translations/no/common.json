@@ -17,7 +17,7 @@
         "name" : "Prosjektnavn",
         "nameRequired" : "Vennligst skriv inn et prosjektnavn",
         "desc" : "Beskrivelse",
-        "descPlaceholder" : "For eksempel tidspunkt, vær, spesielle hendelser og så videre.",
+        "descPlaceholder" : "For eksempel tidspunkt, vær eller spesielle hendelser",
         "questions" : "Spørsmål",
         "questionsPlaceholder" : "Skriv inn spørsmål her, avslutt med linjeskift",
         "image" : "Bilde",

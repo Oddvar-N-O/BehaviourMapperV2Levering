@@ -21,6 +21,7 @@ class ChooseImage extends React.Component {
         description: props.location.state.description,
         p_id: "",
         u_id: window.sessionStorage.getItem('uID'),
+        survey: props.location.state.survey,
       }
       this.map = new Map({
         target: null,
@@ -135,6 +136,7 @@ class ChooseImage extends React.Component {
                     fromLoadMap: false,
                     projectName: this.state.projectName,
                     description: this.state.description,
+                    survey: this.state.survey
                 }
               }}>
                 <BiIcons.BiArrowBack className="back-icon"/>

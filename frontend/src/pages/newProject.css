@@ -5,6 +5,7 @@
     height: 100vh;
 }
 
+
 .new-project-box, .new-project-box-upload {
     display: flex;
     flex-direction: column;
@@ -47,7 +48,7 @@
 .new-project h2 {
     text-align: center;
     font-size: 55px;
-    padding-bottom: 20px;
+    padding-bottom: 25px;
     color: #58A4B0;
 }
 
@@ -96,14 +97,18 @@ input, textarea {
 }
 
 .survey-description {
-    height: 40px;
+    height: 90px;
     resize: none;
 }
 
 .questions {
-    height: 85px;
+    height: 90px;
     resize: none;
+    width: 100%;
+}
 
+.questionsField {
+    width: 100%;
 }
 
 /* BUTTON */
@@ -144,7 +149,9 @@ input, textarea {
     font-size: 14px;
     outline: none;
     padding: 4px, 9px;
+    margin-top: 5px;
     margin-bottom: 12px;
+    
 }
 
 .upload-button {
@@ -166,5 +173,5 @@ input, textarea {
   }
 
 .invisible {
-    display: none;
+    display: none !important;
 }
