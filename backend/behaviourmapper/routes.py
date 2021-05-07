@@ -629,7 +629,7 @@ def createARCGIS():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-@bp.route('addterviewfigure', methods=['POST'])
+@bp.route('addinterviewfigure', methods=['POST'])
 def addInterviewFigure():
     if authenticateUser(request.form.get('u_id')):
         add_int_figure = ('INSERT INTO InterviewFigures'

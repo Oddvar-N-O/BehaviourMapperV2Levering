@@ -630,13 +630,13 @@ class BehaviourMapping extends React.Component {
 
   sendInterviewFigureToDb() {
     const data = new FormData();
-    const p_id = this.state.p_id;
     data.append('points', this.state.coords);
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
+    // must change to get ie_id from state.
     data.append('ie_id', 1);
     data.append('u_id', this.state.u_id);
-    fetch(window.backend_url + 'addterviewfigure', {
+    fetch(window.backend_url + 'addinterviewfigure', {
       method: 'POST',
       body: data,
       })
