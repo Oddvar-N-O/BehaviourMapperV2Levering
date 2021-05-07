@@ -1,15 +1,3 @@
-/* @media only screen and (max-width: 600px) {
-    .new-project-box h2 {
-        font-size: 4.5vh;
-    }
-  } */
-
-  /* @media only screen and (min-width: 1200px) {
-    #new-project .close-icon {
-        left: calc(228px + 50vw);
-    }
-  } */
-
 .new-project {
     display: flex;
     /* align-items: center; */
@@ -31,22 +19,6 @@
     border-radius: 5px;
     box-shadow: 2px 2px 4px #222020;
 }
-
-/* @media only screen and (max-width: 525px) {
-    .new-project-box, .new-project-box-upload {
-        width: 100vw;
-    }
-    .new-project h2 {
-        font-size: 2vw;
-    }
-    .loading{
-        height: 90px;
-        position: absolute;
-        left: calc(110px + 50vw);
-        top: 590px;
-    }
-} */
-
 
 .loading{
     height: 30px;
@@ -79,23 +51,21 @@
     color: #58A4B0;
 }
 
-
-
 .new-project form {
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: baseline;
     font-size: 20px;
     margin: 5px 0;
     text-align: left;
 }
 
 /* FORM */
-#project-name, #description {
+#project-name, .mapping-description, .survey-description, .questions {
     width: 100%;
-    font-size: 18px;
+    font-size: 16px;
     border: none;
     background-color: #ece8e8;
     margin: 5px 0;
@@ -116,13 +86,24 @@ input, textarea {
   }
 
 #project-name {
-    height: 30px;
+    height: 25px;
     
 }
 
-#description {
+.mapping-description {
     height: 210px;
     resize: none;
+}
+
+.survey-description {
+    height: 40px;
+    resize: none;
+}
+
+.questions {
+    height: 85px;
+    resize: none;
+
 }
 
 /* BUTTON */
@@ -155,9 +136,7 @@ input, textarea {
 
 /* FILE BUTTONS */
 
-.new-project .hide-file-management {
-    display: none;
-}
+
 
 .file-button {
     display: inline-block;
@@ -185,3 +164,7 @@ input, textarea {
     .new-project h2 {font-size: 10vw;}
     .close-icon {left: 5px;}
   }
+
+.invisible {
+    display: none;
+}

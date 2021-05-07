@@ -15,10 +15,12 @@ class NewProject extends React.Component {
             projectImageLegend: "newProject.image",
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
+            survey: props.location.state.survey,
             liColor: "#FDFFFC",
             p_id: "",
             u_id: window.sessionStorage.getItem('uID'),
             loading: false,
+            questions: "",
         }
         
         this.handleChange = this.handleChange.bind(this);
@@ -27,6 +29,10 @@ class NewProject extends React.Component {
         this.imageChosen = this.imageChosen.bind(this);
         this.redirectToMapping = this.redirectToMapping.bind(this);
         this.Loading = this.Loading.bind(this)
+    }
+
+    componentDidMount() {
+        console.log(this.state.fromLoadMap)
     }
 
     handleChange(event) { 
@@ -171,15 +177,27 @@ class NewProject extends React.Component {
                                 <br/>
                                 <legend>{t('newProject.desc')}</legend>
                                 <textarea 
-                                    id="description"
+                                    className={this.state.survey ? 'survey-description' : 'mapping-description'}
                                     name="description" 
                                     value={this.state.description} 
                                     placeholder={t('newProject.descPlaceholder')} 
                                     onChange={this.handleChange}
                                 />
+                                <br/>
+                                <div className={this.state.survey ? '' : 'invisible'}>
+                                    <legend>{t('newProject.questions')}</legend>
+                                    <textarea 
+                                        className="questions"
+                                        name="questions" 
+                                        value={this.state.questions} 
+                                        placeholder={t('newProject.questionsPlaceholder')} 
+                                        onChange={this.handleChange}
+                                    />
+                                </div>
                             </form>
                         </div>
-                        <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
+    
+                        <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
                             <legend>{t(this.state.projectImageLegend)}</legend>
                             <input 
                                 ref={(ref) => { this.uploadInput = ref; }} 
