@@ -734,18 +734,19 @@ finishProject() {
   if (window.confirm("This action will end the mapping, and is irreversible. Continue?")) {
     let time = String(new Date());
   this.takeScreenshot();
-  this.sendEventSizeToProject();
-  fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+  // this.sendEventSizeToProject();
+  fetch(window.backend_url + `updateiconsize?p_id=${this.state.p_id}&iconSize=${this.state.eventSize}`);
   setTimeout(() => {
-      window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-      // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
-    }, 1500);
+    fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+    setTimeout(() => {
+        window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+        // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+      }, 1500);
+    }, 200);
   }
 }
 
-sendEventSizeToProject() {
-  fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&iconSize=${this.state.eventSize}`);
-}
+// sendEventSizeToProject() {}
 
 changeSizeOfIcons(event) {
   if (event.target.textContent === "+") {

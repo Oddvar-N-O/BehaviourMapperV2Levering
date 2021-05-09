@@ -360,7 +360,7 @@ def favicon():
     except FileNotFoundError:
         abort(404)
 
-@bp.route('/addsizetoproject')
+@bp.route('/updateiconsize')
 def addSizeToProject():
     if authenticateUser(request.form.get('u_id')):
         update_sql = ("UPDATE Project SET iconSize=? WHERE id=?")
@@ -377,14 +377,6 @@ editing, and deletion, because you can't hit a POST action in the address
 bar of your browser. Use GET when it's safe to allow a person to call an
 action. So a URL like:
 """
-@bp.route('/addinterviewarea', methods=['POST']) #why post not get?
-def addInterviewEvent():
-    print('Yet')
-    if authenticateUser(request.form.get('u_id')):
-        return {}
-    else:
-        logger.info("Not logged in.")
-        raise InvalidUsage("Bad request", status_code=400)
 
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
@@ -472,7 +464,6 @@ def getScreenshot():
         raise InvalidUsage("Bad request", status_code=400)
 
 def getElementXandY(element):
-    print(element)
     stringCoord = element.split(",")
     intCoord = list(map(float, stringCoord))
     return intCoord
@@ -525,8 +516,9 @@ def writeProjectToCSV(project_fromdb):
         'leftX':project_fromdb[9],
         'lowerY':project_fromdb[10],
         'rightX':project_fromdb[11],
-        'upperY':project_fromdb[12]})
-    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','u_id']
+        'upperY':project_fromdb[12],
+        'iconSize':project_fromdb[13]})
+    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','iconSize','u_id']
     with open(os.path.join(Config.CSVFILES_FOLDER, "project.csv"), 'w+') as f:
         writer = csv.DictWriter(f, proj_fieldnames)
         writer.writeheader()
@@ -539,17 +531,15 @@ def writeEventsToCSV(all_events_fromdb):
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
         if data[6] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[8],), True))
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
             event_data.append({
                 'id':data[0], 
-                'action': data[1],
-                'group_name': data [2],
-                'direction':data[3], 
-                'center_coordinate':data[4],
-                'image_size_when_created': data[5],
-                'created': data[6],
-                'comment': data[7],
-                'f_id': data[8],
+                'direction':data[1], 
+                'center_coordinate':data[2],
+                'image_size_when_created': data[3],
+                'created': data[4],
+                'comment': data[5],
+                'f_id': data[6],
                 'description': figure[0],
                 'color': figure[1]})
     event_fieldnames = ['id', 'action', 'group_name', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
