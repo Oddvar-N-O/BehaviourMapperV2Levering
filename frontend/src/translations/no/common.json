@@ -6,8 +6,8 @@
         "new" : "Nytt Prosjekt",
         "manage" : "Behandle Prosjekt",
         "logout" : "Log ut",
-        "web-map" : "Bruk web-bassert kart",
-        "load" : "Last opp kart fra fil"
+        "web-map" : "Webbasert kart",
+        "load" : "Last opp kart"
     },
     "newProject": {
         "title" : "Nytt Prosjekt",
@@ -19,9 +19,15 @@
         "imageRequired" : "Vennligst legg til et bilde",
         "go" : "Start!"
     },
+    "manageProject": {
+        "description" : "Beskrivelse: ",
+        "exportShapefiles" : "Eksporter Shapefiler",
+        "exportToCsv" : "Eksporter til CSV",
+        "delete" : "Slett prosjekt"
+    },
     "chooseImage": {
         "projectName" : "Prosjektnavn:",
-        "text": "Zoom inn for å velge kartutsnit, trykk på 'Bruk Kartutsnitt' for å gå videre",
+        "text": "Zoom inn for å velge kartutsnitt, trykk på 'Bruk Kartutsnitt' for å gå videre",
         "useMap": "Bruk Kartutsnitt"
     },
     "mapping": {
@@ -29,8 +35,8 @@
         "remove": "Slett Figur",
         "addComment": "Legg Til Kommentar",
         "changeSize": "Velg Figurstørrelse",
-        "showIcons" : "Vis Figurer",
-        "hideIcons": "Gjem Figurer",
+        "showIcons" : "Vis Hendelser",
+        "hideIcons": "Gjem Hendelser",
         "chooseFavorite": "Velg Favoritter",
         "favorites" : "Favoritter",
         "finishMapping": "Avslutt",

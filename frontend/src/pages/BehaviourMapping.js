@@ -911,6 +911,7 @@ selectItemForContextMenu(e) {
   }
 
   addComment() {
+    this.stopPointing();
     let whichEvent = this.state.selectedEventID
     if (this.state.comments[whichEvent] !== undefined) {
       this.commentElement.current.setState({alreadySaved: true});
@@ -1044,6 +1045,7 @@ selectItemForContextMenu(e) {
       'screenshot-div': true,
       'visible': true
     });
+
 
     return (
       <Authenticated>

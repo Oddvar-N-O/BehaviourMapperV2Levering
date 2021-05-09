@@ -7,6 +7,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
     APPLICATION_ROOT = '/'
     UPLOAD_FOLDER = os.path.join(basedir, 'static/uploads')
+    ZIPFILES_FOLDER = os.path.join(basedir, 'static/zipfiles')
+    SHAPEFILES_FOLDER = os.path.join(basedir, 'static/shapefiles')
+    CSVFILES_FOLDER = os.path.join(basedir, 'static/csvfiles')
     STATIC_URL_PATH = os.path.join(basedir, "static")
     ALLOWED_EXTENSIONS = {"jpg", "png", "jpeg", "pdf", "gif"}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024

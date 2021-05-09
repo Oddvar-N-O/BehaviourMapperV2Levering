@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import SidebarLP from '../components/sidebarLP';
 import * as AiIcons from 'react-icons/ai';
 import './manageProject.css'
+import { useTranslation } from 'react-i18next';
+
+
 
 function ManageProject() {
   const [allProjects, setAllProjects] = useState('No projects found');
@@ -10,6 +13,7 @@ function ManageProject() {
   const [currImage, setCurrImage] = useState(null)
   const [showProjInfo, setshowProjInfo] = useState(false);
   const u_id = window.sessionStorage.getItem("uID");
+  const {t} = useTranslation('common');
 
   useEffect(() => {
     if (u_id === null) {
@@ -58,10 +62,10 @@ function ManageProject() {
     function exportZipFiles(e) {
       e.preventDefault();
       let backendAPI, filename
-      if (e.target.textContent === "Export to csv") {
+      if (e.target.textContent === "Export to CSV" || e.target.textContent === "Eksporter til CSV") {
         backendAPI = 'exporttocsv'
         filename = 'csvfiles'
-      } else if (e.target.textContent === "Export Shapefiles") {
+      } else if (e.target.textContent === "Export Shapefiles" || e.target.textContent === "Eksporter Shapefiler") {
         backendAPI = 'createarcgis'
         filename = 'shapefiles'
       }
@@ -105,17 +109,17 @@ function ManageProject() {
             <SidebarLP  getCurrProj={getCurrProj} projects={allProjects} />
             <div className={showProjInfo ? "show-project-list" : "hide-project-list"}>
               <h1>{currProj["name"]}</h1>
-              <p>Description: {currProj["description"]}</p>
+              <p>{t('manageProject.description')} {currProj["description"]}</p>
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} src={currImage} id='opplastetKart' />
               <div id="manage-buttons">
               <button onClick={exportZipFiles}>
-                Export Shapefiles
+              {t('manageProject.exportShapefiles')}
               </button>
               <button onClick={exportZipFiles}>
-                Export to csv
+              {t('manageProject.exportToCsv')}
               </button>
               <button onClick={deleteProject}>
-                Delete this project
+              {t('manageProject.delete')}
               </button>
               </div>
             </div>
