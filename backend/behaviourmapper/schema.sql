@@ -85,11 +85,11 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 DROP TABLE IF EXISTS "InterviewObjects_has_InterviewFigures";
 
 CREATE TABLE IF NOT EXISTS "InterviewObjects_has_InterviewFigures" (
-	"ie_id"	INTEGER NOT NULL,
-	"ief_id"	INTEGER NOT NULL,
-	PRIMARY KEY ("ie_id", "ief_id"),
-	FOREIGN KEY("ie_id") REFERENCES [InterviewEvents](id),
-	FOREIGN KEY("ief_id") REFERENCES [InterviewFigures](id)
+	"io_id"	INTEGER NOT NULL,
+	"if_id"	INTEGER NOT NULL,
+	PRIMARY KEY ("io_id", "ief_id"),
+	FOREIGN KEY("io_id") REFERENCES [InterviewEvents](id),
+	FOREIGN KEY("if_id") REFERENCES [InterviewFigures](id)
 ); 
 
 INSERT INTO 'Figures' ("description", "descriptionNO", "color", "image") VALUES 
