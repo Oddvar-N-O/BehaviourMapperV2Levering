@@ -111,26 +111,16 @@ class ChooseImage extends React.Component {
       }); 
   }
 
-  redirectToMapping() {
-    if (!this.state.survey) {   
-      this.props.history.push({
-        pathname: '/mapping',
-        state: {
-            p_id: this.state.p_id,
-            imageUploaded: false,
-            onlyObservation: true,
-        },
-      });
-    } else {
-      this.props.history.push({
-        pathname: '/mapping',
-        state: {
-            p_id: this.state.p_id,
-            imageUploaded: false,
-            onlyObservation: false,
-        },
-      });
-    }
+  redirectToMapping() { 
+    this.props.history.push({
+      pathname: '/mapping',
+      state: {
+          p_id: this.state.p_id,
+          imageUploaded: false,
+          onlyObservation: !this.state.survey,
+      },
+    });
+    
   }
   
   
