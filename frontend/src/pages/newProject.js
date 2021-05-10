@@ -71,7 +71,6 @@ class NewProject extends React.Component {
           body: data,
         }).then(setTimeout(
             () => this.redirectToMapping(), 3000));
-        console.log('upload done')
     }
 
     redirectToMapping() {
@@ -80,6 +79,7 @@ class NewProject extends React.Component {
             state: {
                 p_id: this.state.p_id,
                 imageUploaded: true,
+                onlyObservation: !this.state.survey
             },
         })
     }
@@ -99,7 +99,11 @@ class NewProject extends React.Component {
         }
         if (this.state.survey){
             if (this.state.questions===""){
-                console.log('missing questions!') // TODO: fix translation!
+                if (informationMissing===false) {
+                    if (window.confirm("Do you want to continue without any questions?")){
+                        this.handleRedirect();
+                    } 
+                }
                 informationMissing = true
             }
         }
@@ -109,42 +113,78 @@ class NewProject extends React.Component {
             this.handleRedirect();
         }
     }
+
     handleRedirect() {
         if (this.state.fromLoadMap){
-            const data = new FormData();
-            data.append('name', this.state.projectName);
-            data.append('description', this.state.description);
-            data.append('startdate', new Date());
-            data.append('map', this.uploadInput.files[0].name);
-            data.append('u_id', this.state.u_id);
-            
-            fetch(window.backend_url + 'addproject', {
-            method: 'POST',
-            body: data,
-            }).then((response) => {
-                response.json().then((data) => {
-                    this.setState({p_id: data.p_id[0]});
-                    this.handleUploadImage(data.p_id[0]);
-                });
+            this.redirectLoad()
+        }
+        if (!this.state.survey){
+            if (!this.state.fromLoadMap){
+                this.redirectMappingWeb()
+            }
+        }
+        if (this.state.survey){
+            if (!this.state.fromLoadMap){
+                this.redirectSurveyWeb()
+            }
+        }
+    }
+
+    redirectLoad() {
+        const data = new FormData();
+        data.append('name', this.state.projectName);
+        data.append('description', this.state.description);
+        data.append('startdate', new Date());
+        data.append('map', this.uploadInput.files[0].name);
+        data.append('u_id', this.state.u_id);
+        if (this.state.survey){
+            data.append('questions', this.state.questions)
+          } else {
+            data.append('questions', 0)
+          }
+        fetch(window.backend_url + 'addproject', {
+        method: 'POST',
+        body: data,
+        }).then((response) => {
+            response.json().then((data) => {
+                this.setState({p_id: data.p_id[0]});
+                this.handleUploadImage(data.p_id[0]);
             });
-        } else {
-            this.props.history.push({
-                pathname: '/chooseImage',
-                state: {
-                    projectName: this.state.projectName,
-                    description: this.state.description,
-                    survey: this.state.survey,
-                    u_id : this.state.u_id,
-                },
-            });
-        }  
+        });
+    }
+
+    redirectMappingWeb() {
+        this.props.history.push({
+            pathname: '/chooseImage',
+            state: {
+                projectName: this.state.projectName,
+                description: this.state.description,
+                survey: this.state.survey,
+                u_id : this.state.u_id,
+                questions : 0,
+                onlyObservation : true,
+            },
+        });
+    }
+
+    redirectSurveyWeb() {
+        this.props.history.push({
+            pathname: '/chooseImage',
+            state: {
+                projectName: this.state.projectName,
+                description: this.state.description,
+                survey: this.state.survey,
+                u_id : this.state.u_id,
+                questions : this.state.questions,
+                onlyObservation : false,
+            },
+        });
     }
 
     Loading() {
         if (this.this.state.loading) {
             return <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
         }
-        return <div>hei</div>
     }
 
     render() {

@@ -18,7 +18,7 @@
         "nameRequired" : "Project Name Required",
         "desc" : "Description",
         "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc",
-        "questions" : "Questions",
+        "questions" : "Questions For Survey",
         "questionsPlaceholder" : "Enter questions here, make a new line for each to seperate them",
         "image" : "Image",
         "imageRequired" : "Image Required",

@@ -29,7 +29,6 @@ class AllIcons extends React.Component {
             this.setState({
                 allIconData: data
             })
-            console.log(this.state.allIconData)
             for (let i=0; i<this.state.allIconData.length; i++){
                 if (this.state.allIconData[i].color === "red"){
                     this.state.redData.push(this.state.allIconData[i])

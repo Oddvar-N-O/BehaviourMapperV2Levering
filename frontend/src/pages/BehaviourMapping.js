@@ -19,6 +19,7 @@ class BehaviourMapping extends React.Component {
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         imageUploaded: props.location.state.imageUploaded,
+        onlyObservation: props.location.state.onlyObservation,
         iconObjects: [], 
         ourSRC: null,
         sendIconToBD: false,
@@ -46,7 +47,6 @@ class BehaviourMapping extends React.Component {
         arcGISfilename: "",
         scrollHorizontal: 0,
         scrollVertical: 0,
-        onlyObservation: true,
         drawLine: false,
         addInterview: false,
         addComment: false,
