@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS "InterviewFigures" (
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
-DROP TABLE IF EXISTS "InterviewEvents";
+DROP TABLE IF EXISTS "InterviewObjects";
 
-CREATE TABLE IF NOT EXISTS "InterviewEvents" (
+CREATE TABLE IF NOT EXISTS "InterviewObjects" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"interview"	VARCHAR NULL,
 	"p_id"	INTEGER NOT NULL,
