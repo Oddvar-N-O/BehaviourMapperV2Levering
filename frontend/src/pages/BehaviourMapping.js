@@ -74,7 +74,6 @@ class BehaviourMapping extends React.Component {
       this.showAll = this.showAll.bind(this);
       this.hideAll = this.hideAll.bind(this);
       this.argCIS = this.argCIS.bind(this);
-      this.changeMode = this.changeMode.bind(this);
       this.drawLine = this.drawLine.bind(this);
       this.addToDrawList = this.addToDrawList.bind(this);
       this.drawFunction = this.drawFunction.bind(this);
@@ -141,7 +140,7 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
-    this.hideIcon();
+    // this.hideIcon();
     this.setState({ addIcon: !this.state.addIcon });
     this.setState({showContextMenu: false});
   }
@@ -322,13 +321,13 @@ class BehaviourMapping extends React.Component {
     });
     if (this.state.sendIconToBD) {
       this.sendEventToDatabase();
-      this.setState({sendIconToBD: false}, function() {});
+      this.setState({sendIconToBD: false});
     }
   }
 
   hideIcon() {
     var icon = document.getElementById(this.state.ourIconID.toString())
-    if (icon !== null && this.state.hideOrShow !== 'Hide Figures') {
+    if (icon !== null && this.state.hideOrShow !== 'mapping.hideIcons') {
       icon.style.display = 'none';
     }
     this.stopPointing()
@@ -432,13 +431,6 @@ class BehaviourMapping extends React.Component {
         icon.style.top =  (coords[1]) +'px';
       }
     }
-  }
-
-  changeMode() {
-    this.stopPointing();
-    this.setState({onlyObservation: !this.state.onlyObservation});
-    this.setState({addIcon: false});
-    this.setState({addInterview: false});
   }
 
   addInterview(whichInterview=0) {
