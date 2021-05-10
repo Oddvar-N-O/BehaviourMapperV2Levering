@@ -197,8 +197,19 @@ def updateProject():
 @bp.route('/addinterview', methods=['POST'])
 def addInterview():
     if authenticateUser(request.form.get('u_id')):
-        add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
+        add_interview = ("INSERT INTO InterviewObjects (interview, p_id) VALUES (?,?)")
         args = (request.form.get('interview'), request.form.get('p_id'))
+        i_id = query_db(add_interview, args)
+        return {"i_id": i_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/updateinterview', methods=['POST'])
+def updateInterview():
+    if authenticateUser(request.form.get('u_id')):
+        add_interview = ("UPDATE InterviewObjects SET interview=? WHERE id=?")
+        args = (request.form.get('interview'), request.form.get('io_id'))
         i_id = query_db(add_interview, args)
         return {"i_id": i_id}
     else:

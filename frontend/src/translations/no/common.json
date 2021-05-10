@@ -44,6 +44,8 @@
         "addLine": "Legg Til Linje",
         "addArea": "Legg Til Område",
         "addPoint": "Legg Til Punkt",
+        "newInterviewee": "Nytt Intervjuobjekt",
+        "color": "Farge",
         "changeMode": "Bytt Modus",
         "finishProject": "Avslutt"
     },

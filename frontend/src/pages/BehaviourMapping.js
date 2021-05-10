@@ -48,7 +48,7 @@ class BehaviourMapping extends React.Component {
         scrollVertical: 0,
         onlyObservation: true,
         drawOnCanvas: false,
-        chosenColorForDrawing: '#FF0000',
+        chosenColorForDrawing: '#008000',
         activateOnMouseMove: false,
         chosenDrawingEvent: undefined,
         addInterview: false,
@@ -56,6 +56,7 @@ class BehaviourMapping extends React.Component {
         showContextMenu: false,
         coords: [],
         eightOfCoords: 0,
+        currentInterviewObject: undefined,
         interviews: [],
         comments: {},
         i_ids: [],
@@ -80,15 +81,11 @@ class BehaviourMapping extends React.Component {
       this.changeMode = this.changeMode.bind(this);
       this.whichDrawingFunction = this.whichDrawingFunction.bind(this);
       this.activateDrawingOnCanvas = this.activateDrawingOnCanvas.bind(this);
-      // this.drawPoint = this.drawPoint.bind(this);
       this.chooseColorForDrawing = this.chooseColorForDrawing.bind(this);
       this.addToDrawList = this.addToDrawList.bind(this);
       this.drawFunction = this.drawFunction.bind(this);
-      // this.drawLineFunction = this.drawLineFunction.bind(this);
-      // this.drawAreaFunction = this.drawAreaFunction.bind(this);
-      // this.drawPointFunction = this.drawPointFunction.bind(this);
       this.addInterview = this.addInterview.bind(this);
-      this.saveInterview = this.saveInterview.bind(this);
+      this.newInterviewee = this.newInterviewee.bind(this);
       this.finishProject = this.finishProject.bind(this);
       this.takeScreenshot = this.takeScreenshot.bind(this);
       this.removeIcon = this.removeIcon.bind(this);
@@ -449,52 +446,46 @@ class BehaviourMapping extends React.Component {
     this.setState({addInterview: false});
   }
 
-  addInterview(whichInterview=0) {
-    if (whichInterview > 0) {
-      this.interviewElement.current.setState({alreadySaved: true});
-      this.interviewElement.current.setInterview(this.state.interviews[whichInterview-1])
-      if (!this.state.addInterview) {
-        this.setState({addInterview: !this.state.addInterview});
-      }
-    } else {
+  newInterviewee() {
+    if (window.confirm("This will clear and save all work for the current interviewee. \n\n Do you want to continue?")) {
+      this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
+      let canvas = this.canvas.current;
+      let image = this.myImage.current;
+      let ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth - 200;
+      canvas.height = window.innerHeight;
+      ctx.drawImage(image, 0,0,canvas.width,canvas.height);
       this.interviewElement.current.clearInterview();
-      this.interviewElement.current.setState({alreadySaved: false})
+      this.clearDrawing();
+      // This should use the questions received from DB, or another state. #TODO
+      this.sendInterviewObjectToDb("questions");
+    }
+  }
+
+  addInterview() {
       this.setState({addInterview: !this.state.addInterview});
-    }
-    
   }
 
-  saveInterview(e) {
-    e.preventDefault();
-    let list = document.getElementsByClassName('interview-sidebar-li')[0];
-    let li = document.createElement('li');
-
-    let interviewNumber = this.state.interviews.length + 1;
-    let newText = "Interview number: " + interviewNumber;
-    
-    if (this.objectExists(newText) === true) {
-      this.setState({interviews: [...this.state.interviews, e.target.form.childNodes[1].value]});
-      this.interviewElement.current.clearInterview();
-      this.sendInterviewToDb(this.interviewElement.current.state.interview);
-      
-      li.innerHTML = newText;
-      li.addEventListener('click', (e) => {
-        this.addInterview(e.target.innerText[e.target.innerText.length - 1]);
-      });
-      list.appendChild(li);
-
-      this.addInterview();
-    }
-  }
-
-  sendInterviewToDb(interviewData) {
+  sendInterviewObjectToDb(interviewData) {
     const data = new FormData();
-    const interview = interviewData;
-    const p_id = this.state.p_id;
-    data.append('interview', interview);
-    data.append('p_id', p_id);
+    data.append('interview', interviewData);
+    data.append('p_id', this.state.p_id);
     data.append('u_id', this.state.u_id);
+    this.interviewElement.current.setInterview(interviewData);
     fetch(window.backend_url + 'addinterview', {
+      method: 'POST',
+      body: data,
+      }).then(res => res.json()).then(data => {
+        this.setState({currentInterviewObject: data.i_id[0]});
+    });
+  }
+
+  updateInterviewObjectInDb(interviewData) {
+    const data = new FormData();
+    data.append('interview', interviewData);
+    data.append('io_id', this.state.currentInterviewObject);
+    data.append('u_id', this.state.u_id);
+    fetch(window.backend_url + 'updateinterview', {
       method: 'POST',
       body: data,
       })
@@ -502,11 +493,11 @@ class BehaviourMapping extends React.Component {
 
   whichDrawingFunction(e) {
     if (e.target.innerText === "Add Line" || e.target.innerText === "Legg Til Linje" ) {
-      this.setState({chosenDrawingEvent: "line"})
+      this.setState({chosenDrawingEvent: "Line"})
     } else if (e.target.innerText === "Add Area" || e.target.innerText === "Legg Til Område" ) {
-      this.setState({chosenDrawingEvent: "area"})
+      this.setState({chosenDrawingEvent: "Area"})
     } else if (e.target.innerText === "Add Point" || e.target.innerText === "Legg Til Punkt" ) {
-      this.setState({chosenDrawingEvent: "point"})
+      this.setState({chosenDrawingEvent: "Point"})
     }
     this.setState({drawOnCanvas: true});
   }
@@ -514,10 +505,9 @@ class BehaviourMapping extends React.Component {
   activateDrawingOnCanvas() {
     this.setState({activateOnMouseMove: true});
   }
-
+s
 
   chooseColorForDrawing(event) {
-    console.log(this.state.chosenColorForDrawing)
     this.setState({chosenColorForDrawing: event.target.value})
   }
 
@@ -544,11 +534,11 @@ class BehaviourMapping extends React.Component {
   }
 
   drawFunction() {
-    if (this.state.chosenDrawingEvent === "line") {
+    if (this.state.chosenDrawingEvent === "Line") {
       this.drawLineFunction();
-    } else if (this.state.chosenDrawingEvent === "area") {
+    } else if (this.state.chosenDrawingEvent === "Area") {
       this.drawAreaFunction();
-    } else if (this.state.chosenDrawingEvent === "point") {
+    } else if (this.state.chosenDrawingEvent === "Point") {
       this.drawPointFunction();
     }
   }
@@ -633,9 +623,8 @@ class BehaviourMapping extends React.Component {
     data.append('points', this.state.coords);
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
-    // must change to get ie_id from state.
     // Must fix CSV export to work with these events.
-    data.append('ie_id', 1);
+    data.append('ie_id', this.state.currentInterviewObject);
     data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterviewfigure', {
       method: 'POST',
@@ -824,12 +813,15 @@ class BehaviourMapping extends React.Component {
 
 finishProject() {
   if (window.confirm("This action will end the mapping, and is irreversible. Continue?")) {
+    if (!this.state.onlyObservation) {
+      this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
+    }
     let time = String(new Date());
-  this.takeScreenshot();
-  fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
-  setTimeout(() => {
-      window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-      // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+    this.takeScreenshot();
+    fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+    setTimeout(() => {
+        window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+        // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
     }, 1500);
   }
 }
@@ -1058,6 +1050,8 @@ selectItemForContextMenu(e) {
     window.addEventListener('scroll', this.handleScroll);
     this.findScreenSize();
     this.initiateFormerScreenSize();
+    // #TODO Must add questions from state.
+    this.sendInterviewObjectToDb("questions");
     window.addEventListener('resize', this.handleResize);
     fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
@@ -1147,7 +1141,7 @@ selectItemForContextMenu(e) {
             <div className={this.state.addInterview ? "textBox" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
-                save={this.saveInterview}
+                // save={this.saveInterview}
                 ref={this.interviewElement}
               />  
             </div>
@@ -1187,12 +1181,20 @@ selectItemForContextMenu(e) {
                 
               </ul>
               <ul className={interviewLiClassList}>
+                <li className="buttonLi" onClick={this.newInterviewee}>{t('mapping.newInterviewee')}</li>
                 <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addLine')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addArea')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addPoint')}</li>
                 <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
-                <li><input type="color" value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing} /></li>
+                <li>
+                  <label>{t('mapping.color')}</label>
+                  <select value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing}>
+                    <option value="#008000">Green</option>
+                    <option value="#ff0000">Red</option>
+                    <option value="#000000">Black</option>
+                  </select>
+                </li>
                 <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
               </ul>
               
