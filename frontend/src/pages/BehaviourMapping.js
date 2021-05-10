@@ -456,10 +456,6 @@ class BehaviourMapping extends React.Component {
 
   }
 
-  addInterview() {
-      this.setState({addInterview: !this.state.addInterview});
-  }
-
   sendInterviewObjectToDb(interviewData) {
     const data = new FormData();
     data.append('interview', interviewData);
