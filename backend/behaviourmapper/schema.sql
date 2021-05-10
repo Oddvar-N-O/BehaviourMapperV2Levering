@@ -1,10 +1,4 @@
-DROP TABLE IF EXISTS "Users" ;
 
-CREATE TABLE IF NOT EXISTS "Users" (
-	"openid"    VARCHAR NULL UNIQUE,
-    "email" VARCHAR NULL,
-	PRIMARY KEY("openid")
-);
 
 DROP TABLE IF EXISTS [Project];
 
@@ -26,6 +20,13 @@ CREATE TABLE IF NOT EXISTS [Project] (
     u_id INTEGER,
     questions VARCHAR NULL,
     FOREIGN KEY (u_id) REFERENCES "Users"(openid)
+);
+DROP TABLE IF EXISTS "Users" ;
+
+CREATE TABLE IF NOT EXISTS "Users" (
+	"openid"    VARCHAR NULL UNIQUE,
+    "email" VARCHAR NULL,
+	PRIMARY KEY("openid")
 );
 
 DROP TABLE IF EXISTS "InterviewFigures";
@@ -88,8 +89,8 @@ DROP TABLE IF EXISTS "InterviewObjects_has_InterviewFigures";
 CREATE TABLE IF NOT EXISTS "InterviewObjects_has_InterviewFigures" (
 	"io_id"	INTEGER NOT NULL,
 	"if_id"	INTEGER NOT NULL,
-	PRIMARY KEY ("io_id", "ief_id"),
-	FOREIGN KEY("io_id") REFERENCES [InterviewEvents](id),
+	PRIMARY KEY ("io_id", "if_id"),
+	FOREIGN KEY("io_id") REFERENCES [InterviewObjects](id),
 	FOREIGN KEY("if_id") REFERENCES [InterviewFigures](id)
 ); 
 

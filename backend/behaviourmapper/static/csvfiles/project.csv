@@ -1,2 +1,2 @@
-id,name,description,map,screenshot,startdate,enddate,originalsize,zoom,leftX,lowerY,rightX,upperY,iconSize,u_id
-17,sis,sis,sis.png,sis_ss.png,Sun May 09 2021 18:48:32 GMT+0200 (Central European Summer Time),Sun May 09 2021 18:48:49 GMT 0200 (Central European Summer Time),14.910996374836715,"866,688",5.7208281514873125,58.96809254291196,5.760357827368294,58.984278314455565,60,
+id,name,description,map,screenshot,startdate,enddate,originalsize,zoom,leftX,lowerY,rightX,upperY,iconSize,questions
+12,KARTLEGGING,dssa,KARTLEGGING.png,KARTLEGGING_ss.png,Mon May 10 2021 13:49:45 GMT+0200 (sentraleuropeisk sommertid),Mon May 10 2021 13:49:59 GMT 0200 (sentraleuropeisk sommertid),12,"1097,966",5.544794469482421,58.88438834052235,5.921419530517578,59.05534966562479,50,0

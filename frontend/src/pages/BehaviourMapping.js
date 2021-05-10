@@ -55,6 +55,7 @@ class BehaviourMapping extends React.Component {
         eightOfCoords: 0,
         currentInterviewObject: undefined,
         interviews: [],
+        projectQuestions: "",
         comments: {},
         i_ids: [],
         u_id: window.sessionStorage.getItem('uID'),
@@ -443,8 +444,7 @@ class BehaviourMapping extends React.Component {
     if (window.confirm("This will clear and save all work for the current interviewee. \n\n Do you want to continue?")) {
       this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
       this.clearCanvas();
-      // This should use the questions received from DB, or another state. #TODO
-      this.sendInterviewObjectToDb("questions");
+      this.sendInterviewObjectToDb(this.state.projectQuestions);
     }
   }
   
@@ -1048,9 +1048,15 @@ selectItemForContextMenu(e) {
     window.addEventListener('scroll', this.handleScroll);
     this.findScreenSize();
     this.initiateFormerScreenSize();
+    if (!this.state.onlyObservation) {
+      fetch(window.backend_url + `getquestionsfromproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    .then(res => res.json())
+    .then(data => {
+      this.setState({projectQuestions: data.questions});
+      this.sendInterviewObjectToDb(data.questions);
+    });
+    }
     
-    // #TODO Must add questions from state.
-    this.sendInterviewObjectToDb("questions");
     window.addEventListener('resize', this.handleResize);
     fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())

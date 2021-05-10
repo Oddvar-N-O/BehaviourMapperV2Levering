@@ -1,5 +1,5 @@
 id,action,group_name,direction,center_coordinate,image_size_when_created,created,comment,f_id,description,color
-91,,,undefined,"518,255","876,688",Sun May 09 2021 18:48:38 GMT+0200 (Central European Summer Time),,3,feeding birds,blue
-92,,,undefined,"289,348","876,688",Sun May 09 2021 18:48:40 GMT+0200 (Central European Summer Time),,8,stop,blue
-93,,,undefined,"239,101","876,688",Sun May 09 2021 18:48:49 GMT+0200 (Central European Summer Time),,1,walk,blue
-94,,,undefined,"239,101","876,688",Sun May 09 2021 18:48:49 GMT+0200 (Central European Summer Time),,1,walk,blue
+4,,,rotate(-193deg),"539,256","1107,966",Mon May 10 2021 13:49:51 GMT+0200 (sentraleuropeisk sommertid),,2,bike,blue
+5,,,rotate(-154deg),"463,420","1107,966",Mon May 10 2021 13:49:54 GMT+0200 (sentraleuropeisk sommertid),,3,feeding birds,blue
+6,,,rotate(81deg),"761,206","1107,966",Mon May 10 2021 13:49:59 GMT+0200 (sentraleuropeisk sommertid),,4,scooter,blue
+7,,,rotate(81deg),"761,206","1107,966",Mon May 10 2021 13:49:59 GMT+0200 (sentraleuropeisk sommertid),,4,scooter,blue

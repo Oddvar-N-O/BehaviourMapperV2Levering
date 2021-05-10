@@ -90,24 +90,6 @@ def allowed_file(filename):
 @bp.route('/addproject', methods=['POST'])
 def addProject():
     if authenticateUser(request.form.get('u_id')):
-        if request.form.get('questions') == 0:
-            addSurveyProject()
-        else:
-            add_small_project = ("INSERT INTO Project "
-                "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id)"
-                "VALUES (?,?,?,?,?,?,?,?,?,?)")
-            small_project_values = (request.form.get('name'), request.form.get('description'), 
-                                request.form.get('startdate'), request.form.get('zoom'),
-                                request.form.get('originalsize'), request.form.get('leftX'), 
-                                request.form.get('lowerY'), request.form.get('rightX'), 
-                                request.form.get('upperY'), request.form.get('u_id'))
-            p_id = query_db(add_small_project, small_project_values)
-        return {"p_id": p_id}
-    else:
-        logger.info("Not logged in.")
-        raise InvalidUsage("Bad request", status_code=400)
-
-def addSurveyProject():
         add_small_project = ("INSERT INTO Project "
             "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id, questions)"
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)")
@@ -118,6 +100,11 @@ def addSurveyProject():
                             request.form.get('upperY'), request.form.get('u_id'),
                             request.form.get('questions'))
         p_id = query_db(add_small_project, small_project_values)
+        return {"p_id": p_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
 
 @bp.route('/deleteproject', methods=['POST'])
 def deleteProject():
@@ -225,6 +212,17 @@ def updateInterview():
         args = (request.form.get('interview'), request.form.get('io_id'))
         i_id = query_db(add_interview, args)
         return {"i_id": i_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/getquestionsfromproject')
+def getQuestionsFromProject():
+    if authenticateUser(request.args.get('u_id')):
+        get_questions = ('SELECT questions FROM Project WHERE id=?')
+        values = (request.args.get('p_id'),)
+        questions = query_db(get_questions, values, True)
+        return {'questions': questions[0]}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
@@ -519,9 +517,15 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates, screenSize
 def exportToCsv():
     if authenticateUser(request.form.get('u_id')):
         project_fromdb = query_db('SELECT * FROM Project WHERE u_id=? AND id=? ', (request.form.get('u_id'),request.form.get('p_id')), True)
-        all_events_fromdb = query_db('SELECT e_id FROM Project_has_Event WHERE p_id=?', (request.form.get('p_id'),))
+        if project_fromdb[15] != "0":
+            all_interview_objects_fromdb = query_db('SELECT * FROM InterviewObjects WHERE p_id=?', (request.form.get('p_id'),))
+            writeInterviewObjectsToCSV(all_interview_objects_fromdb)
+            clearEventsCSV()
+        else:
+            all_events_fromdb = query_db('SELECT e_id FROM Project_has_Event WHERE p_id=?', (request.form.get('p_id'),))
+            writeEventsToCSV(all_events_fromdb)
+            clearInterviewObjectsCSVs()
         writeProjectToCSV(project_fromdb)
-        writeEventsToCSV(all_events_fromdb)
         zip_files('csvfiles')
         return sendFileToFrontend('csvfiles.zip')
     else:
@@ -543,8 +547,9 @@ def writeProjectToCSV(project_fromdb):
         'lowerY':project_fromdb[10],
         'rightX':project_fromdb[11],
         'upperY':project_fromdb[12],
-        'iconSize':project_fromdb[13]})
-    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','iconSize','u_id']
+        'iconSize':project_fromdb[13],
+        'questions':project_fromdb[15]})
+    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','iconSize','questions']
     with open(os.path.join(Config.CSVFILES_FOLDER, "project.csv"), 'w+') as f:
         writer = csv.DictWriter(f, proj_fieldnames)
         writer.writeheader()
@@ -574,6 +579,77 @@ def writeEventsToCSV(all_events_fromdb):
         writer.writeheader()
         for i in range(len(event_data)):
             writer.writerow(event_data[i])
+
+
+def writeInterviewObjectsToCSV(all_interview_objects_fromdb):
+    interview_object_with_figure_ids, io_data = [], []
+    for interview_object in all_interview_objects_fromdb:
+        if interview_object != 0:
+            interview_object_with_figure_ids.append([interview_object,getAllInterviewObjectsFigures(interview_object[0])])
+    for interview_object in interview_object_with_figure_ids:
+        if interview_object != 0:
+            io_data.append({
+                'id':interview_object[0][0], 
+                'interview':interview_object[0][1], 
+                'p_id':interview_object[0][2],
+                'if_ids': interview_object[1],
+            })
+    fieldnames = ['id', 'interview', 'p_id', 'if_ids']
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjects.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, fieldnames)
+        writer.writeheader()
+        for i in range(len(io_data)):
+            writer.writerow(io_data[i])
+    writeInterviewObjectFiguresToCSV(interview_object_with_figure_ids)
+
+
+def writeInterviewObjectFiguresToCSV(interview_object_with_figure_ids):
+    iof_data = []
+    for interview_object in interview_object_with_figure_ids:
+        if interview_object[1] != 0:
+            for figure_id in interview_object[1]:
+                if figure_id != 0:
+                    figure_data = query_db('SELECT * FROM InterviewFigures WHERE id=?', (figure_id,), True)
+                    iof_data.append({
+                        'id':figure_data[0], 
+                        'points': figure_data[1],
+                        'color': figure_data[2],
+                        'type': figure_data[3]
+                    })
+    fieldnames = ['id','points', 'color', 'type']
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjectFigures.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, fieldnames)
+        writer.writeheader()
+        for i in range(len(iof_data)):
+            writer.writerow(iof_data[i])
+
+
+def getAllInterviewObjectsFigures(figure_id):
+    figure_ids = []
+    if_ids = query_db('SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?', (figure_id,))
+    for if_id in if_ids:
+        if if_id != 0:
+            figure_ids.append(if_id[0])
+    return figure_ids
+
+
+def clearEventsCSV():
+    with open(os.path.join(Config.CSVFILES_FOLDER, "events.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, "")
+        writer.writeheader()
+        writer.writerow({})
+
+
+def clearInterviewObjectsCSVs():
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjectFigures.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, "")
+        writer.writeheader()
+        writer.writerow({})
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjects.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, "")
+        writer.writeheader()
+        writer.writerow({})
+
 
 def findEventColorAndDesciription(f_id):
     get_DescCol_sql = ("SELECT description, color FROM Figures WHERE id=?")
