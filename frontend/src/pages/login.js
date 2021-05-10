@@ -9,8 +9,7 @@ class Login extends React.Component {
     }
 
     login() {
-        window.location.href = 'http://localhost:5000/behaviourmapper/login'
-        // window.location.href = 'http://behaviourmapper.ux.uis.no/login'
+        window.location.href = window.backend_url + 'login'
     }
 
     render() { 
