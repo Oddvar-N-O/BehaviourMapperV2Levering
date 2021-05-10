@@ -58,8 +58,7 @@ function Startpage() {
           <div className="menu">
 
             <ul className= {`start-menu ${startMenu ? 'visible' : 'invisible'}`}>
-              <li onClick={ () => { changeStartMenuState(), changeProjectMenuState() }}
-                >{t('startpage.new')}</li>
+              <li onClick={ () => { changeStartMenuState(), changeProjectMenuState() }}>{t('startpage.new')}</li>
               <li><Link to={"/manageProject"}>{t('startpage.manage')}</Link></li>
               <li onClick={ () => { logout() }}>{t('startpage.logout')}</li>
             </ul>
