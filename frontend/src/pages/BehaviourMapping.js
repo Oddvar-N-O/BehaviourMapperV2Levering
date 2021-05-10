@@ -634,6 +634,7 @@ class BehaviourMapping extends React.Component {
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
     // must change to get ie_id from state.
+    // Must fix CSV export to work with these events.
     data.append('ie_id', 1);
     data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterviewfigure', {

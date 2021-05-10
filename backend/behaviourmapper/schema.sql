@@ -41,10 +41,8 @@ DROP TABLE IF EXISTS "InterviewEvents";
 CREATE TABLE IF NOT EXISTS "InterviewEvents" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"interview"	VARCHAR NULL,
-    "figures" INTEGER NULL,
 	"p_id"	INTEGER NOT NULL,
     FOREIGN KEY (p_id) REFERENCES "Project"(id)
-    FOREIGN KEY (figures) REFERENCES 'InterviewFigures'(id)
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
@@ -83,6 +81,16 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 	PRIMARY KEY ("p_id", "e_id"),
 	FOREIGN KEY("p_id") REFERENCES [Project](id),
 	FOREIGN KEY("e_id") REFERENCES [Event](id)
+); 
+
+DROP TABLE IF EXISTS "InterviewEvents_has_InterviewFigures";
+
+CREATE TABLE IF NOT EXISTS "InterviewEvents_has_InterviewFigures" (
+	"ie_id"	INTEGER NOT NULL,
+	"ief_id"	INTEGER NOT NULL,
+	PRIMARY KEY ("ie_id", "ief_id"),
+	FOREIGN KEY("ie_id") REFERENCES [InterviewEvents](id),
+	FOREIGN KEY("ief_id") REFERENCES [InterviewFigures](id)
 ); 
 
 INSERT INTO 'Figures' ("description", "descriptionNO", "color", "image") VALUES 
