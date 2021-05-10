@@ -42,6 +42,8 @@
         "finishMapping": "Finish Project",
         "addInterview": "Add Interview",
         "addLine": "Add Line",
+        "addArea": "Add Area",
+        "addPoint": "Add Point",
         "changeMode": "Change Mode",
         "finishProject": "Finish Project"
     },

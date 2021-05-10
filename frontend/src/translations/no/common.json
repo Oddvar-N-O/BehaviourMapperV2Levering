@@ -42,6 +42,8 @@
         "finishMapping": "Avslutt",
         "addInterview": "Legg Til Intervju",
         "addLine": "Legg Til Linje",
+        "addArea": "Legg Til Område",
+        "addPoint": "Legg Til Punkt",
         "changeMode": "Bytt Modus",
         "finishProject": "Avslutt"
     },

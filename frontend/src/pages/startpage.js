@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import './startpage.css';
 import { Authenticated, useToken } from './auth/AuthContext'
 import { useTranslation } from 'react-i18next';
-import i18next from 'i18next';
 
 function useSetUserSession() {
   let accessToken = useToken()
@@ -39,9 +38,6 @@ function Startpage() {
   const [new_project, setNewProject] = useState(false); // set state for new_project to false
   const changeNewVisibility = () => setNewProject(!new_project); // change state for new procject (true/false)
   const hideNewProject = () => setNewProject(false); // set state to false
-  // const [userID, setUserID] = useState("");
-  // const { access_token } = useToken();
-  // const setsomething = useSetUserSession();
 
   // State for load_project
   const [load_project, setLoadProject] = useState(false);
@@ -54,15 +50,6 @@ function Startpage() {
     window.location.href = window.backend_url + "logout";
   }
 
-  function test() {
-    console.log(i18next.languages[0])
-  }
-  // const logout = () => window.location.href = window.backend_url + "/logout";
-  // State for User Profile
-  // const [user_profile, setUserProfile] = useState(false)
-  // const changeUserVisibility = () => setUserProfile(!user_profile) 
-  // const hideUserProfile = () => setUserProfile(false) 
-
     return (
       <Authenticated>
         <div className="startpage">
@@ -70,7 +57,7 @@ function Startpage() {
           <div className="menu">
             <ul id='start-menu'>
               {/* NEW PROJECT */}
-              <li onClick={ () => { hideLoadProject(), changeNewVisibility(), test() }}
+              <li onClick={ () => { hideLoadProject(), changeNewVisibility() }}
                 className={new_project ? 'active' : 'passive'}
                 >{t('startpage.new')}</li>
               {/* LOAD PROJECT */}

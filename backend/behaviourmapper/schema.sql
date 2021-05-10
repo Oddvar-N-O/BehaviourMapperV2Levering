@@ -27,14 +27,21 @@ CREATE TABLE IF NOT EXISTS [Project] (
     FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
 
-DROP TABLE IF EXISTS "InterviewEvents";
+DROP TABLE IF EXISTS "InterviewFigures";
 
-CREATE TABLE IF NOT EXISTS "InterviewEvents" (
+CREATE TABLE IF NOT EXISTS "InterviewFigures" (
+	"id"	INTEGER NOT NULL UNIQUE,
+    "points" VARCHAR NULL,
+    "color" VARCHAR NULL,
+    "type" VARCHAR NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+DROP TABLE IF EXISTS "InterviewObjects";
+
+CREATE TABLE IF NOT EXISTS "InterviewObjects" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"interview"	VARCHAR NULL,
-    "area" VARCHAR NULL,
-    "lines" VARCHAR NULL,
-    "point" VARCHAR NULL,
 	"p_id"	INTEGER NOT NULL,
     FOREIGN KEY (p_id) REFERENCES "Project"(id)
 	PRIMARY KEY("id" AUTOINCREMENT)
@@ -73,6 +80,16 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 	PRIMARY KEY ("p_id", "e_id"),
 	FOREIGN KEY("p_id") REFERENCES [Project](id),
 	FOREIGN KEY("e_id") REFERENCES [Event](id)
+); 
+
+DROP TABLE IF EXISTS "InterviewObjects_has_InterviewFigures";
+
+CREATE TABLE IF NOT EXISTS "InterviewObjects_has_InterviewFigures" (
+	"ie_id"	INTEGER NOT NULL,
+	"ief_id"	INTEGER NOT NULL,
+	PRIMARY KEY ("ie_id", "ief_id"),
+	FOREIGN KEY("ie_id") REFERENCES [InterviewEvents](id),
+	FOREIGN KEY("ief_id") REFERENCES [InterviewFigures](id)
 ); 
 
 INSERT INTO 'Figures' ("description", "descriptionNO", "color", "image") VALUES 
