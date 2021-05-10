@@ -820,8 +820,7 @@ finishProject() {
     setTimeout(() => {
     fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
     setTimeout(() => {
-        window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-        // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+        window.location.href = window.backend_url + "startpage"
       }, 1500);
     }, 200);
   }
