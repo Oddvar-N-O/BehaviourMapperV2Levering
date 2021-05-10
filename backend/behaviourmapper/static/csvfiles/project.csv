@@ -1,2 +1,2 @@
-id,name,description,map,screenshot,startdate,enddate,originalsize,zoom,leftX,lowerY,rightX,upperY,u_id
-3,r32,,r32.png,r32_ss.png,Wed Apr 28 2021 13:53:07 GMT+0200 (sentraleuropeisk sommertid),Wed Apr 28 2021 13:53:34 GMT 0200 (sentraleuropeisk sommertid),12,"820,966",5.592344670898437,58.88438834052235,5.873869329101562,59.05534966562479,
+id,name,description,map,screenshot,startdate,enddate,originalsize,zoom,leftX,lowerY,rightX,upperY,iconSize,u_id
+17,sis,sis,sis.png,sis_ss.png,Sun May 09 2021 18:48:32 GMT+0200 (Central European Summer Time),Sun May 09 2021 18:48:49 GMT 0200 (Central European Summer Time),14.910996374836715,"866,688",5.7208281514873125,58.96809254291196,5.760357827368294,58.984278314455565,60,

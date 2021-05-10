@@ -27,8 +27,6 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
-        ourEventName: null,
-        ourEventGroup: null,
         selectedEventID: null,
         
         // Perhaps collect all these into one object at a late time
@@ -120,9 +118,6 @@ class BehaviourMapping extends React.Component {
     }
 
     data.append('p_id', this.state.p_id);
-    data.append('action', this.state.ourEventName);
-    data.append('group', this.state.ourEventGroup);
-
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
@@ -176,8 +171,8 @@ class BehaviourMapping extends React.Component {
           break;
       }
       let innerHTML = descr[0] + ": " + descr[1];
-      this.setState({ourEventName: descr[0]}, function() {});
-      this.setState({ourEventGroup: descr[1]}, function() {});    
+      // this.setState({ourEventName: descr[0]}, function() {});
+      // this.setState({ourEventGroup: descr[1]}, function() {});    
       return innerHTML; 
     }
   }
@@ -252,8 +247,7 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
-    let coordinates = [event.clientX - 200 - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
-
+    let coordinates = [event.clientX - 200, event.clientY];
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
@@ -263,8 +257,8 @@ class BehaviourMapping extends React.Component {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
 
-    img.style.left = coordinates[0] + 200 +'px';
-    img.style.top =  coordinates[1] +'px';
+    img.style.left = coordinates[0] + 200 - (this.state.eventSize / 2) +'px';
+    img.style.top =  coordinates[1] - (this.state.eventSize / 2) +'px';
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     this.createIconObject(coordinates, imageSizeOnCreation, img.getAttribute('id'));
     this.setState({
@@ -449,17 +443,22 @@ class BehaviourMapping extends React.Component {
   newInterviewee() {
     if (window.confirm("This will clear and save all work for the current interviewee. \n\n Do you want to continue?")) {
       this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
-      let canvas = this.canvas.current;
-      let image = this.myImage.current;
-      let ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth - 200;
-      canvas.height = window.innerHeight;
-      ctx.drawImage(image, 0,0,canvas.width,canvas.height);
-      this.interviewElement.current.clearInterview();
-      this.clearDrawing();
+      this.clearCanvas();
       // This should use the questions received from DB, or another state. #TODO
       this.sendInterviewObjectToDb("questions");
     }
+  }
+  
+  clearCanvas() {
+    let canvas = this.canvas.current;
+    let image = this.myImage.current;
+    let ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth - 200;
+    canvas.height = window.innerHeight;
+    ctx.drawImage(image, 0,0,canvas.width,canvas.height);
+    this.interviewElement.current.clearInterview();
+    this.clearDrawing();
+
   }
 
   addInterview() {
@@ -624,7 +623,7 @@ s
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
     // Must fix CSV export to work with these events.
-    data.append('ie_id', this.state.currentInterviewObject);
+    data.append('io_id', this.state.currentInterviewObject);
     data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterviewfigure', {
       method: 'POST',
@@ -758,15 +757,15 @@ s
       iconinfo = this.state.iconObjects[i];
       icon = document.getElementById(iconinfo.id);
       let coord = iconinfo.originalCoord;
-      icon.style.left = (coord[0] + change) + 'px'
-      icon.style.top = (coord[1]) + 'px'
+      icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+      icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
     }
   }
 
   
   takeScreenshot() {
     this.stopPointing();
-    // event.preventDefault();
+    this.sendEventToDatabase();
     this.showAll();
     this.changePosScreenshot(0);
     var node = document.querySelector('.screenshot-div');
@@ -815,16 +814,21 @@ finishProject() {
   if (window.confirm("This action will end the mapping, and is irreversible. Continue?")) {
     if (!this.state.onlyObservation) {
       this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
+      this.clearCanvas();
     }
     let time = String(new Date());
     this.takeScreenshot();
+    fetch(window.backend_url + `updateiconsize?p_id=${this.state.p_id}&iconSize=${this.state.eventSize}`);
+    setTimeout(() => {
     fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
     setTimeout(() => {
         window.location.href = "http://localhost:3000/behaviourmapper/startpage"
         // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
-    }, 1500);
+      }, 1500);
+    }, 200);
   }
 }
+
 
 changeSizeOfIcons(event) {
   if (event.target.textContent === "+") {
@@ -1141,7 +1145,6 @@ selectItemForContextMenu(e) {
             <div className={this.state.addInterview ? "textBox" : "invisible"}> 
               <Interview 
                 close={this.addInterview}
-                // save={this.saveInterview}
                 ref={this.interviewElement}
               />  
             </div>
@@ -1195,7 +1198,7 @@ selectItemForContextMenu(e) {
                     <option value="#000000">Black</option>
                   </select>
                 </li>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishProject')}</p></li>
               </ul>
               
           </div>
