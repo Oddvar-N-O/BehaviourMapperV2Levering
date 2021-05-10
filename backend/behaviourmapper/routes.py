@@ -658,6 +658,8 @@ def clearInterviewObjectsCSVs():
 
 
 def findEventColorAndDesciription(f_id):
+    if f_id == '':
+        return None
     get_DescCol_sql = ("SELECT description, color FROM Figures WHERE id=?")
     query_res = query_db(get_DescCol_sql, (f_id,), True)
     res = ['empty', 'space']
@@ -670,6 +672,8 @@ def findEventColorAndDesciription(f_id):
         res[1] = 'Child'
     elif query_res[1] == 'yellow':
         res[1] = 'Group'
+    else:
+        return None
     return res
 
 def generateDictOfEvents(events):
@@ -679,16 +683,17 @@ def generateDictOfEvents(events):
     for event in events:
         f_id = event[len(event)-1]
         actionGroup = findEventColorAndDesciription(f_id)
-        if type(event) == list:
-            action = actionGroup[0]
-            if action not in actionDict:
-                listOfEvents = []
-                listOfEvents.append(event)
-                actionDict[action] = listOfEvents
-            elif action in actionDict:
-                existingListOfEvents = actionDict[action]
-                existingListOfEvents.append(event)
-                actionDict[action] = existingListOfEvents
+        if actionGroup != None:
+            if type(event) == list:
+                action = actionGroup[0]
+                if action not in actionDict:
+                    listOfEvents = []
+                    listOfEvents.append(event)
+                    actionDict[action] = listOfEvents
+                elif action in actionDict:
+                    existingListOfEvents = actionDict[action]
+                    existingListOfEvents.append(event)
+                    actionDict[action] = existingListOfEvents
 
     dictAllEventsOfGroup = {'Events': events, 'Man': [], 'Woman': [], 'Child': [], 'Group': []}
 
@@ -769,14 +774,16 @@ def createARCGIS():
         
         sortedInterviewFiguresJSON = getInterviewFiguresSorted(pid)
         sortedInterviewFigures = json.loads(sortedInterviewFiguresJSON)
+
         for objectType in dict.keys(sortedInterviewFigures):
             innerDict = sortedInterviewFigures[objectType]
+            
             for context in dict.keys(innerDict):
                 foldername = objectType + context
                 exists = doesFolderExist(foldername)
                 if exists == True: # for senere utvikling av vilkårlige ikoner
                     filename = findShapefileName(foldername)
-                    
+
                     shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
                     dictObjectByContext = innerDict[context]
                     w = shp.Writer(shapeFileName)
@@ -789,16 +796,17 @@ def createARCGIS():
                         pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
                         screenSizeWhenCreated = drawnObject[3]
                         for i in range(len(pairsOfCoordinates)):
+                            # so far so good
                             coordinates = pairsOfCoordinates[i]
                             newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)                        
                             pairsOfCoordinates[i] = newCoords
-                        if objectType == 'line':
+                        if objectType == 'Line':
                             w.line([pairsOfCoordinates])
                             w.record(str(point_ID), str(objectType))
-                        elif objectType == 'area':
+                        elif objectType == 'Area':
                             w.poly([pairsOfCoordinates])
                             w.record(str(point_ID), str(objectType))
-                        elif objectType == 'point':
+                        elif objectType == 'Point':
                             coord = pairsOfCoordinates[0]
                             w.point(coord[0], coord[1])
                             w.record(str(point_ID), str(objectType))
@@ -806,7 +814,7 @@ def createARCGIS():
                            
                     w.close()
         zip_files('shapefiles')
-        clearShapefiles()
+        # clearShapefiles()
         return sendFileToFrontend('shapefiles.zip')
     else:
         logger.info("Not logged in.")
@@ -834,11 +842,11 @@ def getInterviewFiguresSorted(p_id):
     except:         
         raise InvalidUsage("Bad arg", status_code=400)
 
-    get_InterviewID_sql = ("SELECT id FROM InterviewEvents WHERE p_id=?")
-    ie_id = query_db(get_InterviewID_sql, (str(p_id),), True)
+    get_InterviewID_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
+    io_id = query_db(get_InterviewID_sql, (str(p_id),), True)
 
-    get_figureIds_sql = ("SELECT if_id FROM Interview_has_Figures WHERE ie_id=?")     
-    query_if_ids = query_db(get_figureIds_sql, (ie_id[0],))
+    get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
+    query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
     query_if_ids = query_if_ids[:-1]
 
     if_ids = []
@@ -852,9 +860,8 @@ def getInterviewFiguresSorted(p_id):
     dictAllInterviewFigureTypes = {}
     for if_id in if_ids:
         query_figure = query_db(get_figure_sql, (str(if_id),), True)
-
         emotionalContext = findEmotionalContext(query_figure[2])
-        
+
         if query_figure[-1] not in dictAllInterviewFigureTypes:
             dictByContext = {'Positive': [], 'Negative': [], 'Neutral': []}
 
@@ -865,8 +872,7 @@ def getInterviewFiguresSorted(p_id):
             dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
         else:
             innerDict = dictAllInterviewFigureTypes[query_figure[-1]]
-            
-            
+                        
             objectInContext = innerDict[emotionalContext]
             objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
             innerDict[emotionalContext] = objectInContext
@@ -878,7 +884,7 @@ def findEmotionalContext(color):
     context = None
     if color == "#008000":
         context = 'Positive'
-    elif color == "#FF0000":
+    elif color == "#ff0000":
         context = 'Negative'
     elif color == "#000000":
         context = 'Neutral'
@@ -889,8 +895,9 @@ def addInterviewFigure():
     if authenticateUser(request.form.get('u_id')):
         add_int_figure = ('INSERT INTO InterviewFigures'
             '(points, color, image_size_when_created, type)'
-            'VALUES (?,?,?)')
+            'VALUES (?,?,?,?)')
         add_relation = ('INSERT INTO InterviewObjects_has_InterviewFigures (io_id, if_id) VALUES (?,?)')
+        
         add_int_values = (request.form.get('points'),request.form.get('color'),request.form.get('image_size'),request.form.get('type'))
         ief_id = query_db(add_int_figure, add_int_values, True)
         relation_values = (request.form.get('io_id'), ief_id)
