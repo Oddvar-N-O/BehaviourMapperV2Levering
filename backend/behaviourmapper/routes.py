@@ -635,7 +635,7 @@ def addInterviewFigure():
         add_int_figure = ('INSERT INTO InterviewFigures'
             '(points, color, type)'
             'VALUES (?,?,?)')
-        add_relation = ('INSERT INTO InterviewEvents_has_InterviewFigures (ie_id, ief_id) VALUES (?,?)')
+        add_relation = ('INSERT INTO InterviewObjects_has_InterviewFigures (ie_id, ief_id) VALUES (?,?)')
         add_int_values = (request.form.get('points'),request.form.get('color'),request.form.get('type'))
         ief_id = query_db(add_int_figure, add_int_values, True)
         relation_values = (request.form.get('ie_id'), ief_id)

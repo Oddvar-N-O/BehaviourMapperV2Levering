@@ -83,9 +83,9 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 	FOREIGN KEY("e_id") REFERENCES [Event](id)
 ); 
 
-DROP TABLE IF EXISTS "InterviewEvents_has_InterviewFigures";
+DROP TABLE IF EXISTS "InterviewObjects_has_InterviewFigures";
 
-CREATE TABLE IF NOT EXISTS "InterviewEvents_has_InterviewFigures" (
+CREATE TABLE IF NOT EXISTS "InterviewObjects_has_InterviewFigures" (
 	"ie_id"	INTEGER NOT NULL,
 	"ief_id"	INTEGER NOT NULL,
 	PRIMARY KEY ("ie_id", "ief_id"),
