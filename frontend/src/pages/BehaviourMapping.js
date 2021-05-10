@@ -1167,14 +1167,12 @@ selectItemForContextMenu(e) {
                 </li>
 
                 <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {t(this.state.hideOrShow)}</li>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
                 <li className="buttonLi" onClick={this.removeIcon}>{t('mapping.remove')}</li>
                 <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
                   <li><h2>{t('mapping.favorites')}</h2></li>
                 </ul>
-                <li className="buttonLi" onClick={this.changeMode}>Change Mode</li>
                 <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
@@ -1184,7 +1182,6 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addLine')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addArea')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addPoint')}</li>
-                <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
                 <li>
                   <label>{t('mapping.color')}</label>
                   <select value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing}>
