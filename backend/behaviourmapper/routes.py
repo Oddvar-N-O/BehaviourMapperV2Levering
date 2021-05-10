@@ -18,7 +18,6 @@ from .db import init_db, query_db, select_db
 from .errorhandlers import InvalidUsage
 
 bp = Blueprint('behaviourmapper', __name__, url_prefix="/behaviourmapper")
-# bp = Blueprint('behaviourmapper', __name__)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -91,24 +90,6 @@ def allowed_file(filename):
 @bp.route('/addproject', methods=['POST'])
 def addProject():
     if authenticateUser(request.form.get('u_id')):
-        if request.form.get('questions') == 0:
-            addSurveyProject()
-        else:
-            add_small_project = ("INSERT INTO Project "
-                "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id)"
-                "VALUES (?,?,?,?,?,?,?,?,?,?)")
-            small_project_values = (request.form.get('name'), request.form.get('description'), 
-                                request.form.get('startdate'), request.form.get('zoom'),
-                                request.form.get('originalsize'), request.form.get('leftX'), 
-                                request.form.get('lowerY'), request.form.get('rightX'), 
-                                request.form.get('upperY'), request.form.get('u_id'))
-            p_id = query_db(add_small_project, small_project_values)
-        return {"p_id": p_id}
-    else:
-        logger.info("Not logged in.")
-        raise InvalidUsage("Bad request", status_code=400)
-
-def addSurveyProject():
         add_small_project = ("INSERT INTO Project "
             "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id, questions)"
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)")
@@ -119,6 +100,11 @@ def addSurveyProject():
                             request.form.get('upperY'), request.form.get('u_id'),
                             request.form.get('questions'))
         p_id = query_db(add_small_project, small_project_values)
+        return {"p_id": p_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
 
 @bp.route('/deleteproject', methods=['POST'])
 def deleteProject():
@@ -155,7 +141,6 @@ def deleteProjectHasEvent(e_id):
 def deleteEvent():
     if authenticateUser(request.form.get('u_id')):
         p_id = request.form.get('p_id')
-        print(request.form.get('number'))
         number = int(request.form.get('number'))
         
         eventsJSON = get_events_func(p_id)
@@ -212,10 +197,32 @@ def updateProject():
 @bp.route('/addinterview', methods=['POST'])
 def addInterview():
     if authenticateUser(request.form.get('u_id')):
-        add_interview = ("INSERT INTO InterviewEvents (interview, p_id) VALUES (?,?)")
+        add_interview = ("INSERT INTO InterviewObjects (interview, p_id) VALUES (?,?)")
         args = (request.form.get('interview'), request.form.get('p_id'))
         i_id = query_db(add_interview, args)
         return {"i_id": i_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/updateinterview', methods=['POST'])
+def updateInterview():
+    if authenticateUser(request.form.get('u_id')):
+        add_interview = ("UPDATE InterviewObjects SET interview=? WHERE id=?")
+        args = (request.form.get('interview'), request.form.get('io_id'))
+        i_id = query_db(add_interview, args)
+        return {"i_id": i_id}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('/getquestionsfromproject')
+def getQuestionsFromProject():
+    if authenticateUser(request.args.get('u_id')):
+        get_questions = ('SELECT questions FROM Project WHERE id=?')
+        values = (request.args.get('p_id'),)
+        questions = query_db(get_questions, values, True)
+        return {'questions': questions[0]}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
@@ -290,7 +297,7 @@ def get_events_func(p_id):
 
     for e_id in e_ids:
         query_event = query_db(get_event_sql, (str(e_id),), True)
-        events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4], query_event[5]))
+        events.append((query_event[0],query_event[1],query_event[2],query_event[3],query_event[4], query_event[5], query_event[6]))
     return json.dumps(events)
 
 # Usage /getfigure?description=<desc>&color=<color>
@@ -377,15 +384,32 @@ def favicon():
     except FileNotFoundError:
         abort(404)
 
+@bp.route('/updateiconsize')
+def addSizeToProject():
+    if authenticateUser(request.form.get('u_id')):
+        update_sql = ("UPDATE Project SET iconSize=? WHERE id=?")
+        values = (request.args.get('iconSize'), request.args.get('p_id'))
+        query_db(update_sql, values)
+        return {"Status": "Success"}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+    
+"""
+Use POST for destructive actions such as creation (I'm aware of the irony),
+editing, and deletion, because you can't hit a POST action in the address
+bar of your browser. Use GET when it's safe to allow a person to call an
+action. So a URL like:
+"""
+
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
     if authenticateUser(request.form.get('u_id')):
         add_event = ("INSERT INTO Event "
-              "(action, group_name, direction, center_coordinate, created, image_size_when_created, f_id) "
-              "VALUES (?,?,?,?,?,?,?)")
+              "(direction, center_coordinate, created, image_size_when_created, f_id) "
+              "VALUES (?,?,?,?,?)")
         project_id = request.form.get('p_id') 
-        d_event_values = (request.form.get('action'), request.form.get('group'),
-                        request.form.get('direction'), request.form.get('center_coordinate'), 
+        d_event_values = (request.form.get('direction'), request.form.get('center_coordinate'), 
                         request.form.get('created'), request.form.get('image_size'), 
                         request.form.get('f_id'))
         e_id = query_db(add_event, d_event_values) # Adds to Event table in db
@@ -393,6 +417,7 @@ def addEvent():
               "(p_id, e_id) "
               "VALUES (?,?)")
         query_db(add_relation, (project_id, e_id[-1])) # Adds to the relation table in db
+        
         return {}
     else:
         logger.info("Not logged in.")
@@ -492,9 +517,15 @@ def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates, screenSize
 def exportToCsv():
     if authenticateUser(request.form.get('u_id')):
         project_fromdb = query_db('SELECT * FROM Project WHERE u_id=? AND id=? ', (request.form.get('u_id'),request.form.get('p_id')), True)
-        all_events_fromdb = query_db('SELECT e_id FROM Project_has_Event WHERE p_id=?', (request.form.get('p_id'),))
+        if project_fromdb[15] != "0":
+            all_interview_objects_fromdb = query_db('SELECT * FROM InterviewObjects WHERE p_id=?', (request.form.get('p_id'),))
+            writeInterviewObjectsToCSV(all_interview_objects_fromdb)
+            clearEventsCSV()
+        else:
+            all_events_fromdb = query_db('SELECT e_id FROM Project_has_Event WHERE p_id=?', (request.form.get('p_id'),))
+            writeEventsToCSV(all_events_fromdb)
+            clearInterviewObjectsCSVs()
         writeProjectToCSV(project_fromdb)
-        writeEventsToCSV(all_events_fromdb)
         zip_files('csvfiles')
         return sendFileToFrontend('csvfiles.zip')
     else:
@@ -515,8 +546,10 @@ def writeProjectToCSV(project_fromdb):
         'leftX':project_fromdb[9],
         'lowerY':project_fromdb[10],
         'rightX':project_fromdb[11],
-        'upperY':project_fromdb[12]})
-    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','u_id']
+        'upperY':project_fromdb[12],
+        'iconSize':project_fromdb[13],
+        'questions':project_fromdb[15]})
+    proj_fieldnames = ['id', 'name','description','map','screenshot','startdate','enddate','originalsize','zoom','leftX','lowerY','rightX','upperY','iconSize','questions']
     with open(os.path.join(Config.CSVFILES_FOLDER, "project.csv"), 'w+') as f:
         writer = csv.DictWriter(f, proj_fieldnames)
         writer.writeheader()
@@ -529,17 +562,15 @@ def writeEventsToCSV(all_events_fromdb):
             events.append(query_db('SELECT * FROM Event WHERE id=?', (event[0],), True))
     for data in events:
         if data[6] != 0:
-            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[8],), True))
+            figure = (query_db('SELECT description, color FROM Figures WHERE id=?', (data[6],), True))
             event_data.append({
                 'id':data[0], 
-                'action': data[1],
-                'group_name': data [2],
-                'direction':data[3], 
-                'center_coordinate':data[4],
-                'image_size_when_created': data[5],
-                'created': data[6],
-                'comment': data[7],
-                'f_id': data[8],
+                'direction':data[1], 
+                'center_coordinate':data[2],
+                'image_size_when_created': data[3],
+                'created': data[4],
+                'comment': data[5],
+                'f_id': data[6],
                 'description': figure[0],
                 'color': figure[1]})
     event_fieldnames = ['id', 'action', 'group_name', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
@@ -549,12 +580,101 @@ def writeEventsToCSV(all_events_fromdb):
         for i in range(len(event_data)):
             writer.writerow(event_data[i])
 
+
+def writeInterviewObjectsToCSV(all_interview_objects_fromdb):
+    interview_object_with_figure_ids, io_data = [], []
+    for interview_object in all_interview_objects_fromdb:
+        if interview_object != 0:
+            interview_object_with_figure_ids.append([interview_object,getAllInterviewObjectsFigures(interview_object[0])])
+    for interview_object in interview_object_with_figure_ids:
+        if interview_object != 0:
+            io_data.append({
+                'id':interview_object[0][0], 
+                'interview':interview_object[0][1], 
+                'p_id':interview_object[0][2],
+                'if_ids': interview_object[1],
+            })
+    fieldnames = ['id', 'interview', 'p_id', 'if_ids']
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjects.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, fieldnames)
+        writer.writeheader()
+        for i in range(len(io_data)):
+            writer.writerow(io_data[i])
+    writeInterviewObjectFiguresToCSV(interview_object_with_figure_ids)
+
+
+def writeInterviewObjectFiguresToCSV(interview_object_with_figure_ids):
+    iof_data = []
+    for interview_object in interview_object_with_figure_ids:
+        if interview_object[1] != 0:
+            for figure_id in interview_object[1]:
+                if figure_id != 0:
+                    figure_data = query_db('SELECT * FROM InterviewFigures WHERE id=?', (figure_id,), True)
+                    iof_data.append({
+                        'id':figure_data[0], 
+                        'points': figure_data[1],
+                        'color': figure_data[2],
+                        'type': figure_data[3]
+                    })
+    fieldnames = ['id','points', 'color', 'type']
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjectFigures.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, fieldnames)
+        writer.writeheader()
+        for i in range(len(iof_data)):
+            writer.writerow(iof_data[i])
+
+
+def getAllInterviewObjectsFigures(figure_id):
+    figure_ids = []
+    if_ids = query_db('SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?', (figure_id,))
+    for if_id in if_ids:
+        if if_id != 0:
+            figure_ids.append(if_id[0])
+    return figure_ids
+
+
+def clearEventsCSV():
+    with open(os.path.join(Config.CSVFILES_FOLDER, "events.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, "")
+        writer.writeheader()
+        writer.writerow({})
+
+
+def clearInterviewObjectsCSVs():
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjectFigures.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, "")
+        writer.writeheader()
+        writer.writerow({})
+    with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjects.csv"), 'w+') as f:
+        writer = csv.DictWriter(f, "")
+        writer.writeheader()
+        writer.writerow({})
+
+
+def findEventColorAndDesciription(f_id):
+    get_DescCol_sql = ("SELECT description, color FROM Figures WHERE id=?")
+    query_res = query_db(get_DescCol_sql, (f_id,), True)
+    res = ['empty', 'space']
+    res[0] = query_res[0]
+    if query_res[1] == 'blue':
+        res[1] = 'Man'
+    elif query_res[1] == 'red':
+        res[1] = 'Woman'
+    elif query_res[1] == 'green':
+        res[1] = 'Child'
+    elif query_res[1] == 'yellow':
+        res[1] = 'Group'
+    return res
+
 def generateDictOfEvents(events):
     actionDict = {}
     # 1-16 men, 17-32 women, 33-48 children, 49+ = groups
+    
     for event in events:
+        f_id = event[len(event)-1]
+        actionGroup = findEventColorAndDesciription(f_id)
         if type(event) == list:
-            action = event[1]
+            action = actionGroup[0]
             if action not in actionDict:
                 listOfEvents = []
                 listOfEvents.append(event)
@@ -568,7 +688,6 @@ def generateDictOfEvents(events):
 
     sortedDict = {}
     for eventType in dict.keys(actionDict):
-        # print(action)
         allExamplesOfAction = actionDict[eventType]
         # Vi har en dict med alle Persongruppene sykkel kan være
         eventTypeGroupsort = {'Man': [], 'Woman': [], 'Child': [], 'Group': [], 'All': []}
@@ -576,8 +695,10 @@ def generateDictOfEvents(events):
 
         for event in allExamplesOfAction:
             eventTypeGroupsort = sortedDict[eventType]
-            personType = event[2]
-
+            f_id = event[len(event)-1]
+            actionGroup = findEventColorAndDesciription(f_id)
+            personType = actionGroup[1]
+            
             entireEventList = eventTypeGroupsort['All']
             entireEventList.append(event)
             eventTypeGroupsort['All'] = entireEventList
@@ -589,10 +710,9 @@ def generateDictOfEvents(events):
             allPersonTypeEvents = dictAllEventsOfGroup[personType]
             allPersonTypeEvents.append(event)
             dictAllEventsOfGroup[personType] = allPersonTypeEvents
-    
+
     sortedDict['All'] = dictAllEventsOfGroup
     return sortedDict
-
 
 @bp.route('/createarcgis', methods=['POST'])
 def createARCGIS():
@@ -611,38 +731,72 @@ def createARCGIS():
         lowerY = float(project_values[10])
         rightX = float(project_values[11])
         upperY = float(project_values[12])
-
+        
         eventsJSON = get_events_func(request.form.get('p_id'))
         events = json.loads(eventsJSON)
 
         sortedEvents = generateDictOfEvents(events)
+
         for key in dict.keys(sortedEvents):
             innerDict = sortedEvents[key]
-            # print(key)
             for innerKey in dict.keys(innerDict):
                 foldername = key + innerKey
                 exists = doesFolderExist(foldername) # also check if changed
 
                 if exists == True: # for senere utvikling av vilkårlige ikoner
                     filename = findShapefileName(foldername)
+                    
                     shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
                     w = shp.Writer(shapeFileName)
+                    
                     w.field('Background', 'C', '40')
                     point_ID = 1
                     eventGroup = innerDict[innerKey]
                     for event in eventGroup:
-                        newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[4], event[5])
+                        newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
                         x = newCoords[0]
                         y = newCoords[1]
+                        
                         w.point(x, y)
                         w.record(str(point_ID), 'Point')
                         point_ID += 1
                     w.close()
         zip_files('shapefiles')
+        clearShapefiles()
         return sendFileToFrontend('shapefiles.zip')
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+@bp.route('addinterviewfigure', methods=['POST'])
+def addInterviewFigure():
+    if authenticateUser(request.form.get('u_id')):
+        add_int_figure = ('INSERT INTO InterviewFigures'
+            '(points, color, type)'
+            'VALUES (?,?,?)')
+        add_relation = ('INSERT INTO InterviewObjects_has_InterviewFigures (io_id, if_id) VALUES (?,?)')
+        add_int_values = (request.form.get('points'),request.form.get('color'),request.form.get('type'))
+        ief_id = query_db(add_int_figure, add_int_values, True)
+        relation_values = (request.form.get('io_id'), ief_id)
+        query_db(add_relation, relation_values, True)
+        return {}
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+def clearShapefiles():
+    filesLocation = 'behaviourmapper/static/shapefiles/'
+    for foldername in os.listdir(filesLocation):
+        exists = doesFolderExist(foldername)
+        path = filesLocation + foldername 
+        if exists == True & os.path.isdir(path):
+            filename = findShapefileName(foldername)
+            shapeFileName = filesLocation + foldername + '/' + filename
+            w = shp.Writer(shapeFileName)
+            w.field('Background', 'C', '40')
+            # w.point(0, 0)
+            # w.record(0, 'Point')
+            w.close()
 
 def doesFolderExist(folderName):
     filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
@@ -653,7 +807,6 @@ def doesFolderExist(folderName):
 def findShapefileName(folderName):
     filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
     for filename in os.listdir(filesLocation):
-        # print(filename)
         if filename.endswith((".shp", "_files")):
             return filename
 
@@ -665,6 +818,7 @@ def sendFileToFrontend(file): #path, ziph):
     except FileNotFoundError:
         abort(404)
 
+# zip only relevant files !!!
 def zip_files(typeOfFiles):
     with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
             absPath = os.path.abspath(typeOfFiles)
@@ -675,7 +829,6 @@ def zip_files(typeOfFiles):
             for filename in os.listdir(filesLocation):
                 f = os.path.join(filesLocation, filename)
                 arcname = f[len(filesLocation) + 1:]
-                # print ('zipping %s as %s' % (os.path.join(filesLocation, filename), arcname))
                 if os.path.isfile(f):
                     my_zip.write(f, arcname=arcname)
                 elif os.path.isdir(f):
