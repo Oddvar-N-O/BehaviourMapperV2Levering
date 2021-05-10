@@ -758,7 +758,6 @@ class BehaviourMapping extends React.Component {
   
   takeScreenshot() {
     if (this.state.onlyObservation) {
-      console.log("HEI")
       this.stopPointing();
       this.sendEventToDatabase();
       this.showAll();
