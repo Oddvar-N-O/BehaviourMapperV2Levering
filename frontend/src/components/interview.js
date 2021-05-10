@@ -45,7 +45,7 @@ class Interview extends React.Component {
                         placeholder="E.g. time of day, wheather conditions, special events etc." 
                         onChange={this.handleChange}
                     />
-                    <input type="submit" value="Save interview" onClick={this.props.save} className={this.state.alreadySaved ? "invisible" : "visible"}></input>
+                    {/* <input type="submit" value="Save interview" onClick={this.props.save} className={this.state.alreadySaved ? "invisible" : "visible"}></input> */}
                 </form>
                 
             </div>

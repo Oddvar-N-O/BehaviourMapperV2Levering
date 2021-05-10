@@ -7,14 +7,19 @@
         "manage" : "Manage Project",
         "logout" : "Log out",
         "web-map" : "Use Web Map",
-        "load" : "Load Map From File"
+        "load" : "Load Map From File",
+        "behaviourMapping" : "Behaviour Mapping",
+        "geographicalSurvey" : "Geographical Survey",
+        "back" : "Back"
     },
     "newProject": {
         "title" : "New Project",
         "name" : "Project Name",
         "nameRequired" : "Project Name Required",
         "desc" : "Description",
-        "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc.",
+        "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc",
+        "questions" : "Questions For Survey",
+        "questionsPlaceholder" : "Enter questions here, make a new line for each to seperate them",
         "image" : "Image",
         "imageRequired" : "Image Required",
         "go" : "Let's go!"
@@ -44,6 +49,8 @@
         "addLine": "Add Line",
         "addArea": "Add Area",
         "addPoint": "Add Point",
+        "newInterviewee": "New Interviewee",
+        "color": "Color",
         "changeMode": "Change Mode",
         "finishProject": "Finish Project"
     },
