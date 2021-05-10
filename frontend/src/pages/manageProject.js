@@ -29,6 +29,7 @@ function ManageProject() {
   const getCurrProj = (index) => {
     for (var i = 0; i < allProjects.length; i++) {
       if (allProjects[i][1] === index) {
+        console.log(allProjects[i][3])
         setCurrProj({
           "id": allProjects[i][0], 
           "name": allProjects[i][1],

@@ -628,12 +628,22 @@ class BehaviourMapping extends React.Component {
     this.setState({coords: []});
   }
 
+  findCanvasSize() {
+    let canvas = this.canvas.current;
+    let width = canvas.width;
+    let height = canvas.height;
+    console.log([width, height])
+    return [width, height]
+
+  }
+
   sendInterviewFigureToDb() {
     const data = new FormData();
     data.append('points', this.state.coords);
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
     // must change to get ie_id from state.
+    data.append('image_size', this.findCanvasSize());
     data.append('ie_id', 1);
     data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterviewfigure', {
@@ -1192,7 +1202,7 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addPoint')}</li>
                 <li className="buttonLi" onClick={this.changeMode}>{t('mapping.changeMode')}</li>
                 <li><input type="color" value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing} /></li>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><Link to={"/startpage"}><p>{t('mapping.finishProject')}</p></Link></li>
+                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishProject')}</p></li>
               </ul>
               
           </div>

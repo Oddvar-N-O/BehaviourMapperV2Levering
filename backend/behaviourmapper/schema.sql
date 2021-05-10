@@ -32,9 +32,20 @@ CREATE TABLE IF NOT EXISTS "InterviewFigures" (
 	"id"	INTEGER NOT NULL UNIQUE,
     "points" VARCHAR NULL,
     "color" VARCHAR NULL,
+    "image_size_when_created" VARCHAR NULL,
     "type" VARCHAR NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
+
+DROP TABLE IF EXISTS "Interview_has_Figures";
+
+CREATE TABLE IF NOT EXISTS "Interview_has_Figures" (
+	"ie_id"	INTEGER NOT NULL,
+	"if_id"	INTEGER NOT NULL,
+	PRIMARY KEY ("ie_id", "if_id"),
+	FOREIGN KEY("ie_id") REFERENCES [InterviewEvents](id),
+	FOREIGN KEY("if_id") REFERENCES [InterviewFigures](id)
+); 
 
 DROP TABLE IF EXISTS "InterviewEvents";
 
