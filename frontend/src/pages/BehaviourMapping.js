@@ -622,7 +622,7 @@ s
     data.append('points', this.state.coords);
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
-    // Must fix CSV export to work with these events.
+    // Must fix CSV export to work with these events. TODO
     data.append('io_id', this.state.currentInterviewObject);
     data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterviewfigure', {
@@ -637,7 +637,6 @@ s
     let scrollX = window.pageXOffset || (document.documentElement || document.body.parentNode || document.body).scroll;
     if (typeof scrollY == 'number') {
       this.setState({scrollVertical: scrollY,
-        // horizontal: this.state.scroll.horizontal,
       }, function() {});
     }
     if (typeof scrollX == 'number') {
@@ -689,10 +688,8 @@ s
     .then(result => result.blob())
     .then(images => {
       src = URL.createObjectURL(images)
-
       let img = document.createElement('img');
       img.setAttribute('id', this.state.newIconID.toString());
-      // this.addListenerToImage(img);
       img.click();
       this.setState({
         newIconID: this.state.newIconID + 1
@@ -738,7 +735,6 @@ s
   hideOrShowFunction() {
     if (this.state.hideOrShow === 'mapping.showIcons') {
       this.setState({hideOrShow: 'mapping.hideIcons'}, function() {this.showAll();});
-      // knappen forandre seg til show
     } else if (this.state.hideOrShow === 'mapping.hideIcons') {
       this.setState({hideOrShow: 'mapping.showIcons'}, function() {this.hideAll();});
     }
@@ -1019,7 +1015,6 @@ selectItemForContextMenu(e) {
     let commentsCopy = this.state.comments;
     commentsCopy[this.state.selectedEventID] = e.target.form.childNodes[1].value;
     this.setState({comments: commentsCopy});
-    // this.setState({comments: [...this.state.comments, e.target.form.childNodes[1].value]});
     this.commentElement.current.clearComment();
     this.sendCommentToDb(this.commentElement.current.state.comment);
     this.closeAddComment();
