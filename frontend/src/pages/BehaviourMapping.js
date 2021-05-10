@@ -741,6 +741,8 @@ class BehaviourMapping extends React.Component {
         arcGISfilename: value
     }, function() {})
   }
+
+
   changePosScreenshot(change) {
     let icon;
     let iconinfo;
@@ -755,9 +757,12 @@ class BehaviourMapping extends React.Component {
 
   
   takeScreenshot() {
-    this.stopPointing();
-    this.sendEventToDatabase();
-    this.showAll();
+    if (this.state.onlyObservation) {
+      console.log("HEI")
+      this.stopPointing();
+      this.sendEventToDatabase();
+      this.showAll();
+    }
     this.changePosScreenshot(0);
     var node = document.querySelector('.screenshot-div');
     domtoimage.toPng(node).then(dataURI => this.dataURItoBlob(dataURI))
@@ -1071,13 +1076,13 @@ selectItemForContextMenu(e) {
         this.setState({mapblob: image});
 
     });
-    fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
-    .then(res => res.json())
-    .then(data => {
+    // fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+    // .then(res => res.json())
+    // .then(data => {
       // if (data.length > 0) {
       //   setTimeout(() => this.loadFormerEvents(data), 500);
       // }
-    });
+    // });
 
     var firstTime = 0;
     (function(canvas, image) {
