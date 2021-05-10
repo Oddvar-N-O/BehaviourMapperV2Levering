@@ -90,19 +90,34 @@ def allowed_file(filename):
 @bp.route('/addproject', methods=['POST'])
 def addProject():
     if authenticateUser(request.form.get('u_id')):
-        add_small_project = ("INSERT INTO Project "
-            "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id)"
-            "VALUES (?,?,?,?,?,?,?,?,?,?)")
-        small_project_values = (request.form.get('name'), request.form.get('description'), 
-                            request.form.get('startdate'), request.form.get('zoom'),
-                            request.form.get('originalsize'), request.form.get('leftX'), 
-                            request.form.get('lowerY'), request.form.get('rightX'), 
-                            request.form.get('upperY'), request.form.get('u_id'))
-        p_id = query_db(add_small_project, small_project_values)
+        if request.form.get('questions') == 0:
+            addSurveyProject()
+        else:
+            add_small_project = ("INSERT INTO Project "
+                "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id)"
+                "VALUES (?,?,?,?,?,?,?,?,?,?)")
+            small_project_values = (request.form.get('name'), request.form.get('description'), 
+                                request.form.get('startdate'), request.form.get('zoom'),
+                                request.form.get('originalsize'), request.form.get('leftX'), 
+                                request.form.get('lowerY'), request.form.get('rightX'), 
+                                request.form.get('upperY'), request.form.get('u_id'))
+            p_id = query_db(add_small_project, small_project_values)
         return {"p_id": p_id}
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+def addSurveyProject():
+        add_small_project = ("INSERT INTO Project "
+            "(name, description, startdate, originalsize, zoom, leftX, lowerY, rightX, upperY, u_id, questions)"
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+        small_project_values = (request.form.get('name'), request.form.get('description'), 
+                            request.form.get('startdate'), request.form.get('zoom'),
+                            request.form.get('originalsize'), request.form.get('leftX'), 
+                            request.form.get('lowerY'), request.form.get('rightX'), 
+                            request.form.get('upperY'), request.form.get('u_id'),
+                            request.form.get('questions'))
+        p_id = query_db(add_small_project, small_project_values)
 
 @bp.route('/deleteproject', methods=['POST'])
 def deleteProject():

@@ -24,8 +24,6 @@ function useSetUserSession() {
   
 }
 
-
-
 function Startpage() {
   // useSetUserSession()
   <Authenticated>
@@ -34,15 +32,18 @@ function Startpage() {
   
   const {t} = useTranslation('common');
 
-  // State for new_project
-  const [new_project, setNewProject] = useState(false); // set state for new_project to false
-  const changeNewVisibility = () => setNewProject(!new_project); // change state for new procject (true/false)
-  const hideNewProject = () => setNewProject(false); // set state to false
+  // Decides which menu to show
+  const [startMenu, setStartMenu] = useState(true)
+  const changeStartMenuState = () => setStartMenu(!startMenu)
 
-  // State for load_project
-  const [load_project, setLoadProject] = useState(false);
-  const changeLoadVisibility = () => setLoadProject(!load_project);
-  const hideLoadProject = () => setLoadProject(false);
+  const [projectTypeMenu, setProjectTypeMenu] = useState(false)
+  const changeProjectMenuState = () => setProjectTypeMenu(!projectTypeMenu)
+  
+  const [mappingMenu, setMapping] = useState(false); 
+  const changeMappingMenuState = () => setMapping(!mappingMenu)
+
+  const [surveyMenu, setSurvey] = useState(false);
+  const changeSurveyMenuState = () => setSurvey(!surveyMenu)
 
   // Add a cleanup for session in logoutfunction.
   function logout() {
@@ -55,36 +56,68 @@ function Startpage() {
         <div className="startpage">
           <h1>Behaviour Mapper</h1>
           <div className="menu">
-            <ul id='start-menu'>
-              {/* NEW PROJECT */}
-              <li onClick={ () => { hideLoadProject(), changeNewVisibility() }}
-                className={new_project ? 'active' : 'passive'}
+
+            <ul className= {`start-menu ${startMenu ? 'visible' : 'invisible'}`}>
+              <li onClick={ () => { changeStartMenuState(), changeProjectMenuState() }}
                 >{t('startpage.new')}</li>
-              {/* LOAD PROJECT */}
-              <li onClick={ () => { hideNewProject(), changeLoadVisibility() }}
-                className={load_project ? 'active' : 'passive'}
-              ><Link to={"/manageProject"}>{t('startpage.manage')}</Link></li>
-              {/* LOG OUT */}
+              <li><Link to={"/manageProject"}>{t('startpage.manage')}</Link></li>
               <li onClick={ () => { logout() }}>{t('startpage.logout')}</li>
             </ul>
-            <ul id={new_project ? 'load-map' : 'invisible'}>
+
+            <ul className={`start-menu ${projectTypeMenu ? 'visible' : 'invisible'}`}>
+              <li onClick={ () => { changeMappingMenuState(), changeProjectMenuState() }}>{t('startpage.behaviourMapping')}</li>
+              <li onClick={ () => { changeSurveyMenuState(), changeProjectMenuState() }}>{t('startpage.geographicalSurvey')}</li>
+              <li onClick={ () => { changeStartMenuState(), changeProjectMenuState() }}>{t('startpage.back')}</li>
+            </ul>
+
+            {/* New Behaviourmapping Project */}
+            <ul className={`start-menu ${mappingMenu ? 'visible' : 'invisible'}`}>
               <Link to={{
                   pathname: "/newproject",
                   state: {
                     fromLoadMap: false,
+                    survey: false,
                     projectName: "",
                     description: "",
                 }
                 }}><li>{t('startpage.web-map')}</li></Link>
-                {/* <li>Use Template??</li> */}
                 <Link to={{
                   pathname: "/newproject",
                   state: {
                     fromLoadMap: true,
+                    survey: false,
                     projectName: "",
                     description: "",
                 }
                 }}><li>{t('startpage.load')}</li></Link>
+                <li onClick={ () => { changeMappingMenuState(), changeProjectMenuState() }}>
+                {t('startpage.back')}
+                </li>
+            </ul>
+            
+            {/* New Geographical Survey Project */}
+            <ul className={`start-menu ${surveyMenu ? 'visible' : 'invisible'}`}>
+              <Link to={{
+                  pathname: "/newproject",
+                  state: {
+                    fromLoadMap: false,
+                    survey: true,
+                    projectName: "",
+                    description: "",
+                }
+                }}><li>{t('startpage.web-map')}</li></Link>
+                <Link to={{
+                  pathname: "/newproject",
+                  state: {
+                    fromLoadMap: true,
+                    survey: true,
+                    projectName: "",
+                    description: "",
+                }
+                }}><li>{t('startpage.load')}</li></Link>
+                <li onClick={ () => { changeSurveyMenuState(), changeProjectMenuState() }}>
+                {t('startpage.back')}
+                </li>
             </ul>
           </div>
         </div>

@@ -7,14 +7,19 @@
         "manage" : "Behandle Prosjekt",
         "logout" : "Log ut",
         "web-map" : "Webbasert kart",
-        "load" : "Last opp kart"
+        "load" : "Last opp kart",
+        "behaviourMapping" : "Adferdskartlegging",
+        "geographicalSurvey" : "Geografisk Spørreundersøkelse",
+        "back" : "Tilbake"
     },
     "newProject": {
         "title" : "Nytt Prosjekt",
         "name" : "Prosjektnavn",
         "nameRequired" : "Vennligst skriv inn et prosjektnavn",
         "desc" : "Beskrivelse",
-        "descPlaceholder" : "For eksempel tidspunkt, vær, spesielle hendelser og så videre.",
+        "descPlaceholder" : "For eksempel tidspunkt, vær eller spesielle hendelser",
+        "questions" : "Spørsmål For Intervju",
+        "questionsPlaceholder" : "Skriv inn spørsmål her, avslutt med linjeskift",
         "image" : "Bilde",
         "imageRequired" : "Vennligst legg til et bilde",
         "go" : "Start!"

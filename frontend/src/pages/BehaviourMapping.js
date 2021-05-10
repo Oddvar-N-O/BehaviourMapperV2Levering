@@ -3,7 +3,6 @@ import AllIcons from '../components/AllIcons';
 import Interview from '../components/interview';
 import AddComment from '../components/AddComment';
 import ContextMenu from '../components/ContextMenu';
-import { Link } from 'react-router-dom';
 import './BehaviourMapping.css';
 import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
@@ -11,7 +10,6 @@ import domtoimage from 'dom-to-image';
 import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
 import helperImage from './images/temp.png'
-// import EventIcon from '../components/EventIcon';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -19,6 +17,7 @@ class BehaviourMapping extends React.Component {
       this.state = {
         background: 'https://www.talkwalker.com/images/2020/blog-headers/image-analysis.png',
         imageUploaded: props.location.state.imageUploaded,
+        onlyObservation: props.location.state.onlyObservation,
         iconObjects: [], 
         ourSRC: null,
         sendIconToBD: false,
@@ -44,11 +43,11 @@ class BehaviourMapping extends React.Component {
         arcGISfilename: "",
         scrollHorizontal: 0,
         scrollVertical: 0,
-        onlyObservation: true,
         drawOnCanvas: false,
         chosenColorForDrawing: '#008000',
         activateOnMouseMove: false,
         chosenDrawingEvent: undefined,
+        drawLine: false,
         addInterview: false,
         addComment: false,
         showContextMenu: false,
@@ -1049,6 +1048,7 @@ selectItemForContextMenu(e) {
     window.addEventListener('scroll', this.handleScroll);
     this.findScreenSize();
     this.initiateFormerScreenSize();
+    
     // #TODO Must add questions from state.
     this.sendInterviewObjectToDb("questions");
     window.addEventListener('resize', this.handleResize);

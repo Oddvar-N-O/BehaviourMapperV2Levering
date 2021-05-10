@@ -24,7 +24,7 @@ h1 {
     color: blue;
 }
 
-#start-menu li, #load-map li {
+.start-menu li, .load-map li {
     background-color: #ece8e8;
     list-style: none;
     padding: 6px 14px;
@@ -32,23 +32,13 @@ h1 {
     border: 1.2px solid #918D8D;
     color: #19323C;
     border-radius: 18px;
-    /* opacity: 0.85;  */
-    font-size: 30px;
+    font-size: 27px;
     text-align: center; 
     user-select: none;
-}
-
-#load-map li {
-    font-size: 3vh;
-}
-
-#start-menu li:hover, #load-map li:hover, #start-menu .active {
-    opacity: 1;
-    background-color: white;
     cursor: pointer;
 }
 
-#invisible {
+.invisible {
     display: none;
 }
 

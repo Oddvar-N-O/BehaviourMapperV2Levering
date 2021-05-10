@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS [Project] (
     upperY VARCHAR NULL,
     iconSize INTEGER DEFAULT 25,
     u_id INTEGER,
+    questions VARCHAR NULL,
     FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
 
