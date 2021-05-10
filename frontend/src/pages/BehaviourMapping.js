@@ -501,9 +501,8 @@ class BehaviourMapping extends React.Component {
   }
 
   activateDrawingOnCanvas() {
-    this.setState({activateOnMouseMove: true});
+      this.setState({activateOnMouseMove: true});
   }
-s
 
   chooseColorForDrawing(event) {
     this.setState({chosenColorForDrawing: event.target.value})
@@ -517,7 +516,7 @@ s
       }
       this.oneEigthOfCoords();
     }
-    else if (e._reactName === "onMouseMove" || e._reactName === "onTouchStart") {
+    else if (e._reactName === "onMouseMove" || e._reactName === "onTouchStart" ) {
       let currCoords = [(e.clientX - 200), (e.clientY ) ];
       this.setState({coords: [...this.state.coords, currCoords]});
     }
@@ -618,7 +617,11 @@ s
 
   sendInterviewFigureToDb() {
     const data = new FormData();
-    data.append('points', this.state.coords);
+    if (this.state.chosenDrawingEvent === "Point") {
+      data.append('points', this.state.coords[0]);
+    } else {
+      data.append('points', this.state.coords);
+    }
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
     // Must fix CSV export to work with these events. TODO
