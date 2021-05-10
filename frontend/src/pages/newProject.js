@@ -15,10 +15,12 @@ class NewProject extends React.Component {
             projectImageLegend: "newProject.image",
             redirect: false,
             fromLoadMap: props.location.state.fromLoadMap,
+            survey: props.location.state.survey,
             liColor: "#FDFFFC",
             p_id: "",
             u_id: window.sessionStorage.getItem('uID'),
             loading: false,
+            questions: "",
         }
         
         this.handleChange = this.handleChange.bind(this);
@@ -69,7 +71,6 @@ class NewProject extends React.Component {
           body: data,
         }).then(setTimeout(
             () => this.redirectToMapping(), 3000));
-        console.log('upload done')
     }
 
     redirectToMapping() {
@@ -78,69 +79,112 @@ class NewProject extends React.Component {
             state: {
                 p_id: this.state.p_id,
                 imageUploaded: true,
+                onlyObservation: !this.state.survey
             },
         })
     }
 
     setRedirect(event) {
         event.preventDefault();
-        if (this.state.fromLoadMap) {
-            if (this.state.projectName !== "" && this.uploadInput.files.length !== 0){
-                this.handleRedirect();
-            } else  {
-                if (this.state.projectName === "") {
-                    this.setState({projectNameLegend: "newProject.nameRequired"});
-                }
-                if (this.uploadInput.files.length === 0) {
-                    this.setState({projectImageLegend: "newProject.imageRequired"});
-                }
-                this.changeColor();
-            }
-        } else {
-            if (this.state.projectName !== ""){
-                this.handleRedirect();
-            } else  {
-                this.setState({projectNameLegend: "newProject.nameRequired"});
-                this.changeColor();
+        let informationMissing = false
+        if (this.state.projectName === "") {
+            this.setState({projectNameLegend: "newProject.nameRequired"})
+            informationMissing = true
+        }
+        if (this.state.fromLoadMap){
+            if (this.uploadInput.files.length === 0){
+                this.setState({projectImageLegend: "newProject.imageRequired"})
+                informationMissing = true
             }
         }
-        
+        if (this.state.survey){
+            if (this.state.questions===""){
+                if (informationMissing===false) {
+                    if (window.confirm("Do you want to continue without any questions?")){
+                        this.handleRedirect();
+                    } 
+                }
+                informationMissing = true
+            }
+        }
+        if (informationMissing) {
+            this.changeColor();
+        } else {
+            this.handleRedirect();
+        }
     }
+
     handleRedirect() {
         if (this.state.fromLoadMap){
-            const data = new FormData();
-            data.append('name', this.state.projectName);
-            data.append('description', this.state.description);
-            data.append('startdate', new Date());
-            data.append('map', this.uploadInput.files[0].name);
-            data.append('u_id', this.state.u_id);
-            
-            fetch(window.backend_url + 'addproject', {
-            method: 'POST',
-            body: data,
-            }).then((response) => {
-                response.json().then((data) => {
-                    this.setState({p_id: data.p_id[0]});
-                    this.handleUploadImage(data.p_id[0]);
-                });
+            this.redirectLoad()
+        }
+        if (!this.state.survey){
+            if (!this.state.fromLoadMap){
+                this.redirectMappingWeb()
+            }
+        }
+        if (this.state.survey){
+            if (!this.state.fromLoadMap){
+                this.redirectSurveyWeb()
+            }
+        }
+    }
+
+    redirectLoad() {
+        const data = new FormData();
+        data.append('name', this.state.projectName);
+        data.append('description', this.state.description);
+        data.append('startdate', new Date());
+        data.append('map', this.uploadInput.files[0].name);
+        data.append('u_id', this.state.u_id);
+        if (this.state.survey){
+            data.append('questions', this.state.questions)
+          } else {
+            data.append('questions', 0)
+          }
+        fetch(window.backend_url + 'addproject', {
+        method: 'POST',
+        body: data,
+        }).then((response) => {
+            response.json().then((data) => {
+                this.setState({p_id: data.p_id[0]});
+                this.handleUploadImage(data.p_id[0]);
             });
-        } else {
-            this.props.history.push({
-                pathname: '/chooseImage',
-                state: {
-                    projectName: this.state.projectName,
-                    description: this.state.description,
-                    u_id : this.state.u_id,
-                },
-            });
-        }  
+        });
+    }
+
+    redirectMappingWeb() {
+        this.props.history.push({
+            pathname: '/chooseImage',
+            state: {
+                projectName: this.state.projectName,
+                description: this.state.description,
+                survey: this.state.survey,
+                u_id : this.state.u_id,
+                questions : 0,
+                onlyObservation : true,
+            },
+        });
+    }
+
+    redirectSurveyWeb() {
+        this.props.history.push({
+            pathname: '/chooseImage',
+            state: {
+                projectName: this.state.projectName,
+                description: this.state.description,
+                survey: this.state.survey,
+                u_id : this.state.u_id,
+                questions : this.state.questions,
+                onlyObservation : false,
+            },
+        });
     }
 
     Loading() {
         if (this.this.state.loading) {
             return <img className="loading" src="https://i.gifer.com/VAyR.gif" alt=""></img>
         }
-        return <div>hei</div>
     }
 
     render() {
@@ -171,23 +215,35 @@ class NewProject extends React.Component {
                                 <br/>
                                 <legend>{t('newProject.desc')}</legend>
                                 <textarea 
-                                    id="description"
+                                    className={this.state.survey ? 'survey-description' : 'mapping-description'}
                                     name="description" 
                                     value={this.state.description} 
                                     placeholder={t('newProject.descPlaceholder')} 
                                     onChange={this.handleChange}
                                 />
+                                <br/>
+                                <div className={this.state.survey ? 'questionsField' : 'invisible'}>
+                                    <legend>{t('newProject.questions')}</legend>
+                                    <textarea 
+                                        className="questions"
+                                        name="questions" 
+                                        value={this.state.questions} 
+                                        placeholder={t('newProject.questionsPlaceholder')} 
+                                        onChange={this.handleChange}
+                                    />
+                                </div>
+                            </form>
+                        
+                            <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
+                                <legend>{t(this.state.projectImageLegend)}</legend>
+                                <input 
+                                    ref={(ref) => { this.uploadInput = ref; }} 
+                                    type="file"  
+                                    className='file-button' 
+                                    onChange={this.imageChosen}
+                                />
                             </form>
                         </div>
-                        <form className= { this.state.fromLoadMap ? 'file-management' : 'hide-file-management'}>
-                            <legend>{t(this.state.projectImageLegend)}</legend>
-                            <input 
-                                ref={(ref) => { this.uploadInput = ref; }} 
-                                type="file"  
-                                className='file-button' 
-                                onChange={this.imageChosen}
-                            />
-                        </form>
                         <ul>
                             <li onClick={ (e) => {
                                 this.setRedirect(e);     

@@ -17,10 +17,12 @@ class ChooseImage extends React.Component {
   constructor(props) {
       super(props)
       this.state = {
-        projectName: props.location.state.projectName,
-        description: props.location.state.description,
         p_id: "",
         u_id: window.sessionStorage.getItem('uID'),
+        survey: props.location.state.survey,
+        questions: props.location.state.questions,
+        projectName: props.location.state.projectName,
+        description: props.location.state.description,
       }
       this.map = new Map({
         target: null,
@@ -49,6 +51,11 @@ class ChooseImage extends React.Component {
     data.append('rightX', centerCoordinates[2]);
     data.append('upperY', centerCoordinates[3]);
     data.append('u_id', this.state.u_id);
+    if (this.state.survey){
+      data.append('questions', this.state.questions)
+    } else {
+      data.append('questions', 0)
+    }
     fetch(window.backend_url + 'addproject', {
     method: 'POST',
     body: data,
@@ -104,15 +111,18 @@ class ChooseImage extends React.Component {
       }); 
   }
 
-  redirectToMapping() {
+  redirectToMapping() { 
     this.props.history.push({
       pathname: '/mapping',
       state: {
           p_id: this.state.p_id,
           imageUploaded: false,
+          onlyObservation: !this.state.survey,
       },
     });
+    
   }
+  
   
   componentDidMount() {
     this.map.setTarget("choose-image-map");
@@ -135,6 +145,7 @@ class ChooseImage extends React.Component {
                     fromLoadMap: false,
                     projectName: this.state.projectName,
                     description: this.state.description,
+                    survey: this.state.survey
                 }
               }}>
                 <BiIcons.BiArrowBack className="back-icon"/>

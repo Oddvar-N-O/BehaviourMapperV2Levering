@@ -1,3 +1,5 @@
 id,action,group_name,direction,center_coordinate,image_size_when_created,created,comment,f_id,description,color
-8,Bike,Man,undefined,"272,366","830,966",Wed Apr 28 2021 13:53:14 GMT+0200 (sentraleuropeisk sommertid),r32r23,2,bike,blue
-9,Feeding birds,Man,undefined,"391,357","830,966",Wed Apr 28 2021 13:53:21 GMT+0200 (sentraleuropeisk sommertid),,3,feeding birds,blue
+4,,,rotate(-193deg),"539,256","1107,966",Mon May 10 2021 13:49:51 GMT+0200 (sentraleuropeisk sommertid),,2,bike,blue
+5,,,rotate(-154deg),"463,420","1107,966",Mon May 10 2021 13:49:54 GMT+0200 (sentraleuropeisk sommertid),,3,feeding birds,blue
+6,,,rotate(81deg),"761,206","1107,966",Mon May 10 2021 13:49:59 GMT+0200 (sentraleuropeisk sommertid),,4,scooter,blue
+7,,,rotate(81deg),"761,206","1107,966",Mon May 10 2021 13:49:59 GMT+0200 (sentraleuropeisk sommertid),,4,scooter,blue
