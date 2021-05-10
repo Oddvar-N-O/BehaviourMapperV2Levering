@@ -22,7 +22,7 @@ function ManageProject() {
     var fetchstring = window.backend_url + `getproject?u_id=${u_id}`
     fetch(fetchstring).then(res => res.json())
     .then(data => {
-      setAllProjects(data);
+      setAllProjects(data.reverse());
     });
   }, [u_id]);
 

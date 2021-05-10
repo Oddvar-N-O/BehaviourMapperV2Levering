@@ -10,6 +10,7 @@ import domtoimage from 'dom-to-image';
 import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
 import helperImage from './images/temp.png'
+import Startpage from './startpage';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -812,7 +813,7 @@ finishProject() {
     setTimeout(() => {
     fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
     setTimeout(() => {
-        window.location.href = window.backend_url + "startpage"
+      this.props.history.push({pathname: "/startpage"})
       }, 1500);
     }, 200);
   }
