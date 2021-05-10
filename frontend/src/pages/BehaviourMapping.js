@@ -27,8 +27,6 @@ class BehaviourMapping extends React.Component {
         ourIconID: 0,
         ourIconCoord: {x: 0, y: 0, degree: 0,},
         ourMouseCoord: {x: 0, y: 0,},
-        ourEventName: null,
-        ourEventGroup: null,
         selectedEventID: null,
         
         // Perhaps collect all these into one object at a late time
@@ -114,9 +112,6 @@ class BehaviourMapping extends React.Component {
     }
 
     data.append('p_id', this.state.p_id);
-    data.append('action', this.state.ourEventName);
-    data.append('group', this.state.ourEventGroup);
-
     data.append('direction', this.state.ourIconCoord.degree);
     data.append('center_coordinate', coordinates);
     data.append('created', new Date());
@@ -170,8 +165,8 @@ class BehaviourMapping extends React.Component {
           break;
       }
       let innerHTML = descr[0] + ": " + descr[1];
-      this.setState({ourEventName: descr[0]}, function() {});
-      this.setState({ourEventGroup: descr[1]}, function() {});    
+      // this.setState({ourEventName: descr[0]}, function() {});
+      // this.setState({ourEventGroup: descr[1]}, function() {});    
       return innerHTML; 
     }
   }
@@ -226,7 +221,7 @@ class BehaviourMapping extends React.Component {
 
   placeIcon(event) {
     this.findScreenSize()
-    console.log('PI: ' + this.state.ourEventName + ' ' + this.state.ourEventGroup);
+    // console.log('PI: ' + this.state.ourEventName + ' ' + this.state.ourEventGroup);
     var img = document.createElement('img');
     img.src = this.state.ourSRC;
     img.classList.add('icon');
@@ -247,8 +242,11 @@ class BehaviourMapping extends React.Component {
       newIconID: this.state.newIconID + 1
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
-    let coordinates = [event.clientX - 200 - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
-
+    let coordinates = [event.clientX - 200, event.clientY];
+    // = [event.clientX - 200 - (this.state.eventSize / 2), event.clientY - (this.state.eventSize / 2)];
+    console.log('EVENT X+Y: ' + event.clientX + ' ' + event.clientY);
+    console.log('COORD: ' + coordinates);
+    console.log()
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
@@ -258,8 +256,8 @@ class BehaviourMapping extends React.Component {
       coordinates[1] = coordinates[1] + scrollVertical;
     }
 
-    img.style.left = coordinates[0] + 200 +'px';
-    img.style.top =  coordinates[1] +'px';
+    img.style.left = coordinates[0] + 200 - (this.state.eventSize / 2) +'px';
+    img.style.top =  coordinates[1] - (this.state.eventSize / 2) +'px';
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
     this.createIconObject(coordinates, imageSizeOnCreation, img.getAttribute('id'));
     this.setState({
@@ -679,15 +677,15 @@ class BehaviourMapping extends React.Component {
       iconinfo = this.state.iconObjects[i];
       icon = document.getElementById(iconinfo.id);
       let coord = iconinfo.originalCoord;
-      icon.style.left = (coord[0] + change) + 'px'
-      icon.style.top = (coord[1]) + 'px'
+      icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+      icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
     }
   }
 
   
   takeScreenshot() {
     this.stopPointing();
-    // event.preventDefault();
+    this.sendEventToDatabase();
     this.showAll();
     this.changePosScreenshot(0);
     var node = document.querySelector('.screenshot-div');
@@ -736,13 +734,19 @@ finishProject() {
   if (window.confirm("This action will end the mapping, and is irreversible. Continue?")) {
     let time = String(new Date());
   this.takeScreenshot();
-  fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+  // this.sendEventSizeToProject();
+  fetch(window.backend_url + `updateiconsize?p_id=${this.state.p_id}&iconSize=${this.state.eventSize}`);
   setTimeout(() => {
-      window.location.href = "http://localhost:3000/behaviourmapper/startpage"
-      // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
-    }, 1500);
+    fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+    setTimeout(() => {
+        window.location.href = "http://localhost:3000/behaviourmapper/startpage"
+        // window.location.href = "https://www.ux.uis.no/behaviourmapper/startpage"
+      }, 1500);
+    }, 200);
   }
 }
+
+// sendEventSizeToProject() {}
 
 changeSizeOfIcons(event) {
   if (event.target.textContent === "+") {

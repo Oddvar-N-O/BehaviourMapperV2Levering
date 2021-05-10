@@ -1,5 +1,0 @@
-include behaviourmapper/schema.sql
-include config.py
-include requirements.txt
-graft behaviourmapper/static
-global-exclude *.pyc

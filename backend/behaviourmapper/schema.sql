@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS [Project] (
     lowerY VARCHAR NULL,
     rightX VARCHAR NULL,
     upperY VARCHAR NULL,
+    iconSize INTEGER DEFAULT 25,
     u_id INTEGER,
     FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
@@ -55,8 +56,6 @@ DROP TABLE IF EXISTS [Event];
 
 CREATE TABLE IF NOT EXISTS [Event] (
      "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-     "action" VARCHAR NULL,
-     "group_name" VARCHAR NULL, 
      "direction" DECIMAL NULL, 
      "center_coordinate" VARCHAR NULL,
      "image_size_when_created" VARCHAR NULL, 
