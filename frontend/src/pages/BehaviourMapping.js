@@ -1188,8 +1188,6 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
-                  {/* <li><br/><br/></li>
-                  <li><h2>{t('mapping.favorites')}</h2></li> */}
                 </ul>
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
