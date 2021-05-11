@@ -10,7 +10,6 @@ import domtoimage from 'dom-to-image';
 import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
 import helperImage from './images/temp.png'
-import Startpage from './startpage';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -611,7 +610,6 @@ class BehaviourMapping extends React.Component {
     let canvas = this.canvas.current;
     let width = canvas.width;
     let height = canvas.height;
-    console.log([width, height])
     return [width, height]
 
   }
@@ -837,24 +835,27 @@ changeSizeOfIcons(event) {
     this.setState({eventSize: this.state.eventSize + 5}, function () {
       for (var i=0; i<this.state.newIconID; i++) {
         let event = document.getElementById(i.toString());
-        event.style.height = this.state.eventSize + "px";
-        event.style.width = this.state.eventSize + "px";
-        event.style.left = (parseFloat(event.style.left) -2.5) +'px';
-        event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+        if (event !== null) {
+          event.style.height = this.state.eventSize + "px";
+          event.style.width = this.state.eventSize + "px";
+          event.style.left = (parseFloat(event.style.left) -2.5) +'px';
+          event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+        }
       }
     })
   } else if (event.target.textContent === "-") {
-    if (this.state.eventSize > 0 ) {
+    if (this.state.eventSize > 5 ) {
       this.setState({eventSize: this.state.eventSize - 5}, function () {
         for (var j=0; j<this.state.newIconID; j++) {
           let event = document.getElementById(j.toString());
-          event.style.height = this.state.eventSize + "px";
-          event.style.width = this.state.eventSize + "px";
-          event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
-          event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+          if (event !== null) {
+            event.style.height = this.state.eventSize + "px";
+            event.style.width = this.state.eventSize + "px";
+            event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
+            event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+          }
         }
-    })
-      
+    })  
     }
   }
 }
@@ -950,9 +951,6 @@ selectItemForContextMenu(e) {
         body: data,
       })
 
-      if (this.state.newIconID > 0) {
-        this.setState({newIconID: this.state.newIconID - 1}, function() {});
-      }
       if (this.state.sendIconToBD === true) {
         this.setState({sendIconToBD: false}, function() {});
       }  
@@ -1002,6 +1000,7 @@ selectItemForContextMenu(e) {
 
   addComment() {
     this.stopPointing();
+    this.setState({actionID: 1}, function() {})
     let whichEvent = this.state.selectedEventID
     if (this.state.comments[whichEvent] !== undefined) {
       this.commentElement.current.setState({alreadySaved: true});
@@ -1036,7 +1035,7 @@ selectItemForContextMenu(e) {
     data.append('comment', comment);
     data.append('p_id', this.state.p_id);
     data.append('u_id', this.state.u_id);
-    data.append('whichEvent', this.state.selectedEventID);
+    data.append('whichEvent', this.findIconObjectOfOurID());
     fetch(window.backend_url + 'updateeventwithcomment', {
       method: 'POST',
       body: data,
