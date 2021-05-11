@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS "InterviewFigures" (
 	"id"	INTEGER NOT NULL UNIQUE,
     "points" VARCHAR NULL,
     "color" VARCHAR NULL,
+    "image_size_when_created" VARCHAR NULL,
     "type" VARCHAR NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );

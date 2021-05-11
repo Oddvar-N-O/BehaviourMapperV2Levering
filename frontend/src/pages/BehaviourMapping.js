@@ -608,6 +608,15 @@ class BehaviourMapping extends React.Component {
     this.setState({coords: []});
   }
 
+  findCanvasSize() {
+    let canvas = this.canvas.current;
+    let width = canvas.width;
+    let height = canvas.height;
+    console.log([width, height])
+    return [width, height]
+
+  }
+
   sendInterviewFigureToDb() {
     const data = new FormData();
     if (this.state.chosenDrawingEvent === "Point") {
@@ -617,7 +626,8 @@ class BehaviourMapping extends React.Component {
     }
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
-    // Must fix CSV export to work with these events. TODO
+    // must change to get ie_id from state.
+    data.append('image_size', this.findCanvasSize());
     data.append('io_id', this.state.currentInterviewObject);
     data.append('u_id', this.state.u_id);
     fetch(window.backend_url + 'addinterviewfigure', {

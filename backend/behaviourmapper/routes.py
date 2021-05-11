@@ -498,7 +498,8 @@ def getElementXandY(element):
     return intCoord
 
 def findNewCoordinates(leftX, lowerY, rightX, upperY, imgCoordinates, screenSize):
-    imgCoordinates = getElementXandY(imgCoordinates)
+    if type(imgCoordinates) == str:
+        imgCoordinates = getElementXandY(imgCoordinates)
     screenSize = getElementXandY(screenSize)
     startPoint = [leftX, upperY] 
 
@@ -657,6 +658,8 @@ def clearInterviewObjectsCSVs():
 
 
 def findEventColorAndDesciription(f_id):
+    if f_id == '':
+        return None
     get_DescCol_sql = ("SELECT description, color FROM Figures WHERE id=?")
     query_res = query_db(get_DescCol_sql, (f_id,), True)
     res = ['empty', 'space']
@@ -669,6 +672,8 @@ def findEventColorAndDesciription(f_id):
         res[1] = 'Child'
     elif query_res[1] == 'yellow':
         res[1] = 'Group'
+    else:
+        return None
     return res
 
 def generateDictOfEvents(events):
@@ -678,23 +683,23 @@ def generateDictOfEvents(events):
     for event in events:
         f_id = event[len(event)-1]
         actionGroup = findEventColorAndDesciription(f_id)
-        if type(event) == list:
-            action = actionGroup[0]
-            if action not in actionDict:
-                listOfEvents = []
-                listOfEvents.append(event)
-                actionDict[action] = listOfEvents
-            elif action in actionDict:
-                existingListOfEvents = actionDict[action]
-                existingListOfEvents.append(event)
-                actionDict[action] = existingListOfEvents
+        if actionGroup != None:
+            if type(event) == list:
+                action = actionGroup[0]
+                if action not in actionDict:
+                    listOfEvents = []
+                    listOfEvents.append(event)
+                    actionDict[action] = listOfEvents
+                elif action in actionDict:
+                    existingListOfEvents = actionDict[action]
+                    existingListOfEvents.append(event)
+                    actionDict[action] = existingListOfEvents
 
     dictAllEventsOfGroup = {'Events': events, 'Man': [], 'Woman': [], 'Child': [], 'Group': []}
 
     sortedDict = {}
     for eventType in dict.keys(actionDict):
         allExamplesOfAction = actionDict[eventType]
-        # Vi har en dict med alle Persongruppene sykkel kan være
         eventTypeGroupsort = {'Man': [], 'Woman': [], 'Child': [], 'Group': [], 'All': []}
         sortedDict[eventType] = eventTypeGroupsort
 
@@ -766,21 +771,134 @@ def createARCGIS():
                         w.record(str(point_ID), 'Point')
                         point_ID += 1
                     w.close()
+        
+        sortedInterviewFiguresJSON = getInterviewFiguresSorted(pid)
+        sortedInterviewFigures = json.loads(sortedInterviewFiguresJSON)
+
+        for objectType in dict.keys(sortedInterviewFigures):
+            innerDict = sortedInterviewFigures[objectType]
+            
+            for context in dict.keys(innerDict):
+                foldername = objectType + context
+                exists = doesFolderExist(foldername)
+                if exists == True: # for senere utvikling av vilkårlige ikoner
+                    filename = findShapefileName(foldername)
+
+                    shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
+                    dictObjectByContext = innerDict[context]
+                    w = shp.Writer(shapeFileName)
+                    w.field('Background', 'C', '40')
+                    point_ID = 0
+
+                    for drawnObject in dictObjectByContext:
+                        coordinateList = drawnObject[1]
+                        floatCoordinateList = getElementXandY(drawnObject[1])
+                        pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
+                        screenSizeWhenCreated = drawnObject[3]
+                        for i in range(len(pairsOfCoordinates)):
+                            # so far so good
+                            coordinates = pairsOfCoordinates[i]
+                            newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)                        
+                            pairsOfCoordinates[i] = newCoords
+                        if objectType == 'Line':
+                            w.line([pairsOfCoordinates])
+                            w.record(str(point_ID), str(objectType))
+                        elif objectType == 'Area':
+                            w.poly([pairsOfCoordinates])
+                            w.record(str(point_ID), str(objectType))
+                        elif objectType == 'Point':
+                            coord = pairsOfCoordinates[0]
+                            w.point(coord[0], coord[1])
+                            w.record(str(point_ID), str(objectType))
+                        point_ID += 1
+                           
+                    w.close()
         zip_files('shapefiles')
-        clearShapefiles()
+        # clearShapefiles()
         return sendFileToFrontend('shapefiles.zip')
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
+def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
+    allCoords = []
+    
+    cordNum = 0
+    pairXY = []
+    for coord in listOfCoordinates:
+        pairXY.append(coord)
+        cordNum += 1
+        if cordNum == 2:
+            allCoords.append(pairXY)
+            pairXY = []
+            cordNum = 0
+        
+    return allCoords
+
+
+def getInterviewFiguresSorted(p_id):
+    try:         
+        int(p_id)    
+    except:         
+        raise InvalidUsage("Bad arg", status_code=400)
+
+    get_InterviewID_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
+    io_id = query_db(get_InterviewID_sql, (str(p_id),), True)
+
+    get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
+    query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
+    query_if_ids = query_if_ids[:-1]
+
+    if_ids = []
+    for if_id in query_if_ids:
+
+        if_ids.append(if_id[0])
+
+    get_figure_sql = ("SELECT * FROM InterviewFigures WHERE id=?")
+
+
+    dictAllInterviewFigureTypes = {}
+    for if_id in if_ids:
+        query_figure = query_db(get_figure_sql, (str(if_id),), True)
+        emotionalContext = findEmotionalContext(query_figure[2])
+
+        if query_figure[-1] not in dictAllInterviewFigureTypes:
+            dictByContext = {'Positive': [], 'Negative': [], 'Neutral': []}
+
+            objectInContext = dictByContext[emotionalContext]
+            objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
+            dictByContext[emotionalContext] = objectInContext
+
+            dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
+        else:
+            innerDict = dictAllInterviewFigureTypes[query_figure[-1]]
+                        
+            objectInContext = innerDict[emotionalContext]
+            objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
+            innerDict[emotionalContext] = objectInContext
+            dictAllInterviewFigureTypes[query_figure[-1]] = innerDict
+    
+    return json.dumps(dictAllInterviewFigureTypes)
+
+def findEmotionalContext(color):
+    context = None
+    if color == "#008000":
+        context = 'Positive'
+    elif color == "#ff0000":
+        context = 'Negative'
+    elif color == "#000000":
+        context = 'Neutral'
+    return context
+
 @bp.route('addinterviewfigure', methods=['POST'])
 def addInterviewFigure():
     if authenticateUser(request.form.get('u_id')):
         add_int_figure = ('INSERT INTO InterviewFigures'
-            '(points, color, type)'
-            'VALUES (?,?,?)')
+            '(points, color, image_size_when_created, type)'
+            'VALUES (?,?,?,?)')
         add_relation = ('INSERT INTO InterviewObjects_has_InterviewFigures (io_id, if_id) VALUES (?,?)')
-        add_int_values = (request.form.get('points'),request.form.get('color'),request.form.get('type'))
+        
+        add_int_values = (request.form.get('points'),request.form.get('color'),request.form.get('image_size'),request.form.get('type'))
         ief_id = query_db(add_int_figure, add_int_values, True)
         relation_values = (request.form.get('io_id'), ief_id)
         query_db(add_relation, relation_values, True)
