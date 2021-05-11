@@ -756,8 +756,11 @@ class BehaviourMapping extends React.Component {
       iconinfo = this.state.iconObjects[i];
       icon = document.getElementById(iconinfo.id);
       let coord = iconinfo.originalCoord;
-      icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
-      icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      if (icon != null) {
+        icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+        icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      }
+      
     }
   }
 
