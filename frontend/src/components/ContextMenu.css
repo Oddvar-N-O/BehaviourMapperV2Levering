@@ -1,4 +1,18 @@
-.context-menu {
+.context-menu h2 {
+    position: absolute;
+    left: 27.5vw;
+    top: 0px;
+    background-color: #ece8e8;
+    font-size: 3em;
+    min-width: 500px;
+    border-radius: 5px;
+    color: #222020;
+    z-index: 3;
+    width: 45vw;
+    /* opacity: 0.87; */
+}
+
+.events {
     position: absolute;
     left: 27.5vw;
     top: 13.5vh;
@@ -9,9 +23,9 @@
     color: #ece8e8;
     z-index: 4;
 }
-.context-menu .icon-select {
+.events .icon-select {
     position: static;
 }
-.context-menu h2 {
+/* .context-menu h2 {
     border-bottom: 0.9px #918D8D solid;
-}
+} */
