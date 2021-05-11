@@ -10,7 +10,6 @@ import domtoimage from 'dom-to-image';
 import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
 import helperImage from './images/temp.png'
-import Startpage from './startpage';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -954,10 +953,7 @@ selectItemForContextMenu(e) {
         method: 'POST',
         body: data,
       })
-
-      if (this.state.newIconID > 0) {
-        this.setState({newIconID: this.state.newIconID - 1}, function() {});
-      }
+      
       if (this.state.sendIconToBD === true) {
         this.setState({sendIconToBD: false}, function() {});
       }  
