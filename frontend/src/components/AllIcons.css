@@ -29,7 +29,7 @@
 }
 
 .icon-select .gender-select li{
-    text-align: center;
+    /* text-align: justify; */
     margin-top: 0;
     padding: 7px 0 9px;
 }
@@ -88,4 +88,9 @@
 .sidebar .icon-select li {
     border-bottom: none;
     
+}
+
+.icon-select .selected, .icon-select .not-selected {
+    width: 23.4%;
+    text-align: center;
 }
