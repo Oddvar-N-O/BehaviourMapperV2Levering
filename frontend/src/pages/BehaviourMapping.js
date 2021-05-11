@@ -12,6 +12,9 @@ import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
 import mappingNorsk from './images/mappingNorsk.png'
 import mappingEnglish from './images/mappingEnglish.png'
+import surveyNorsk from './images/surveyNorsk.png'
+import surveyEnglish from './images/surveyEnglish.png'
+
 
 
 class BehaviourMapping extends React.Component {
@@ -1239,13 +1242,25 @@ selectItemForContextMenu(e) {
             <div className="help" onClick={this.showHelperImage}>
               <AiIcons.AiOutlineQuestionCircle/>
             </div>
-            <div className={this.state.showHelperImage ? "helper-image-background" : "invisible"}
-            onClick={this.showHelperImage} ></div>
-            <img onClick={this.showHelperImage} 
-            className={this.state.showHelperImage ? "helper-image" : "invisible"} 
-            src={i18next.languages[0] === "en" ? mappingEnglish : mappingNorsk} 
-            alt="HelperImage">
-            </img>
+            <div className={this.state.onlyObservation? "mapping-helper-image-wrapper" : "invisible"}>
+              <div className={this.state.showHelperImage ? "helper-image-background" : "invisible"}
+              onClick={this.showHelperImage} ></div>
+              <img onClick={this.showHelperImage} 
+              className={this.state.showHelperImage ? "helper-image" : "invisible"} 
+              src={i18next.languages[0] === "en" ? mappingEnglish : mappingNorsk} 
+              alt="HelperImage">
+              </img>
+            </div>
+            <div className={this.state.onlyObservation? "invisible" : "mapping-helper-image-wrapper"}>
+              <div className={this.state.showHelperImage ? "helper-image-background" : "invisible"}
+              onClick={this.showHelperImage} ></div>
+              <img onClick={this.showHelperImage} 
+              className={this.state.showHelperImage ? "helper-image" : "invisible"} 
+              src={i18next.languages[0] === "en" ? surveyEnglish : surveyNorsk} 
+              alt="HelperImage">
+              </img>
+            </div>
+
         </div>
       </Authenticated>
     );
