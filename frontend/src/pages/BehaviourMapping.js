@@ -7,9 +7,12 @@ import './BehaviourMapping.css';
 import classNames from 'classnames';
 import { Authenticated } from './auth/AuthContext';
 import domtoimage from 'dom-to-image';
+import i18next from 'i18next';
 import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
-import helperImage from './images/temp.png'
+import mappingNorsk from './images/mappingNorsk.png'
+import mappingEnglish from './images/mappingEnglish.png'
+
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -1237,7 +1240,13 @@ selectItemForContextMenu(e) {
             <div className="help" onClick={this.showHelperImage}>
               <AiIcons.AiOutlineQuestionCircle/>
             </div>
-            <img onClick={this.showHelperImage} className={this.state.showHelperImage ? "helper-image" : "invisible"} src={helperImage} alt="HelperImage"></img>
+            <div className={this.state.showHelperImage ? "helper-image-background" : "invisible"}
+            onClick={this.showHelperImage} ></div>
+            <img onClick={this.showHelperImage} 
+            className={this.state.showHelperImage ? "helper-image" : "invisible"} 
+            src={i18next.languages[0] === "en" ? mappingEnglish : mappingNorsk} 
+            alt="HelperImage">
+            </img>
         </div>
       </Authenticated>
     );
