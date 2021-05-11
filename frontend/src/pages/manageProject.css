@@ -7,16 +7,17 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 80vw;
-    height: 80vh;
+    width: 800px;
+    height: 600px;
     min-width: 600px;
     min-height: 600px;
-    margin-top: 12vh;
+    margin-top: 8vh;
     background-color: #292828;
     color: #ece8e8;
     border-radius: 5px;
     box-shadow: 2px 2px 4px #161616;
 }
+
 #opplastetKart {
     min-width: 300px;
     min-height: 300px;
@@ -34,6 +35,12 @@
     color: #ece8e8;
     padding: 1vh;
 }
+#load-project h1 {
+    font-size: 34px;
+    padding-top: 36px;  
+    max-width: 82%;  
+}
+
 .projectName {
     font-size: 3vh;
 }
@@ -53,8 +60,8 @@
     height: 80%;
 }
 #load-project .close-icon { 
-    top: 13vh;
-    left: 85vw;
+    top: 9vh;
+    left: calc(50vw + 362px)
 }
 .sidebarLP {
     display: flex;
@@ -62,6 +69,7 @@
     order: 0;
     background-color: rgb(34, 34, 34);
     height: 100%;
+    overflow: auto;
 }
 .sidebarLP ul {
     display: flex;
@@ -72,6 +80,7 @@
 .sidebarLP li{
     padding: 1.5vh;
     border-bottom: 2px #58A4B0 solid;
+    cursor: pointer;
 }
 .sidebarLP li:hover{
     background-color: rgb(52, 52, 66);
@@ -99,4 +108,9 @@
 
 #iconList {
     width: 200px;
+}
+
+#load-project .manage-button {
+    font-size: 16px;
+    padding: 9px;
 }
