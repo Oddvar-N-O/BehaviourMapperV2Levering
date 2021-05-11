@@ -953,7 +953,7 @@ selectItemForContextMenu(e) {
         method: 'POST',
         body: data,
       })
-      
+
       if (this.state.sendIconToBD === true) {
         this.setState({sendIconToBD: false}, function() {});
       }  
@@ -998,6 +998,7 @@ selectItemForContextMenu(e) {
 
   addComment() {
     this.stopPointing();
+    this.setState({actionID: 1}, function() {})
     let whichEvent = this.state.selectedEventID
     if (this.state.comments[whichEvent] !== undefined) {
       this.commentElement.current.setState({alreadySaved: true});
@@ -1005,7 +1006,9 @@ selectItemForContextMenu(e) {
       if (!this.state.addComment) {
         this.setState({addComment: !this.state.addComment});
       }
+      console.log("HERJEHDEWKHFKJEW")
     } else if (whichEvent !== null) {
+      console.log(whichEvent)
       this.commentElement.current.clearComment();
       this.commentElement.current.setState({alreadySaved: false})
       this.setState({addComment: !this.state.addComment});
@@ -1032,7 +1035,7 @@ selectItemForContextMenu(e) {
     data.append('comment', comment);
     data.append('p_id', this.state.p_id);
     data.append('u_id', this.state.u_id);
-    data.append('whichEvent', this.state.selectedEventID);
+    data.append('whichEvent', this.findIconObjectOfOurID());
     fetch(window.backend_url + 'updateeventwithcomment', {
       method: 'POST',
       body: data,
