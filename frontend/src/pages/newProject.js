@@ -21,6 +21,8 @@ class NewProject extends React.Component {
             u_id: window.sessionStorage.getItem('uID'),
             loading: false,
             questions: "",
+            lowerLeftCorner: "",
+            upperRightCorner: "",
         }
         
         this.handleChange = this.handleChange.bind(this);
@@ -29,13 +31,17 @@ class NewProject extends React.Component {
         this.imageChosen = this.imageChosen.bind(this);
         this.redirectToMapping = this.redirectToMapping.bind(this);
         this.Loading = this.Loading.bind(this)
+        this.findIntegerCoordinates = this.findIntegerCoordinates.bind(this)
     }
 
     handleChange(event) { 
         const {name, value} = event.target;
+        console.log('n: ' + name)
+        console.log('v: ' + value)
         this.setState({
             [name]: value
         }, function() {})
+        // console.log('StateVerd: ' + this.state.lowerLeftCorner + ' ' + this.state.upperRightCorner)
         if (this.state.projectNameLegend === "newProject.nameRequired" && event.target.id === "project-name") {
             this.setState({projectNameLegend: "newProject.name"}, () => {
                 this.changeColor();
@@ -97,6 +103,18 @@ class NewProject extends React.Component {
                 informationMissing = true
             }
         }
+        if (this.state.fromLoadMap){
+            console.log('yes')
+            if (this.state.lowerLeftCorner==="" || this.state.upperRightCorner===""){
+                console.log('empty')
+                if (informationMissing===false) {
+                    if (window.confirm("If you do not add coordinates you cannot download shapefiles")){
+                        this.handleRedirect();
+                    } 
+                }
+                informationMissing = true
+            }
+        }
         if (this.state.survey){
             if (this.state.questions===""){
                 if (informationMissing===false) {
@@ -130,11 +148,30 @@ class NewProject extends React.Component {
         }
     }
 
+    findIntegerCoordinates(coord) {
+        coord = coord.split(",");
+        coord[0] = parseInt(coord[0], 10);
+        coord[1] = parseInt(coord[1], 10);
+        return coord;
+      }
+
     redirectLoad() {
         const data = new FormData();
+        console.log(this.state.lowerLeftCorner)
+        console.log(this.state.upperRightCorner)
+
+        let lowerLeftCorner = this.findIntegerCoordinates(this.state.lowerLeftCorner)
+        let upperRightCorner = this.findIntegerCoordinates(this.state.upperRightCorner)
+        console.log('LLC: ' + lowerLeftCorner)
+        console.log('URC: ' + upperRightCorner)
+
         data.append('name', this.state.projectName);
         data.append('description', this.state.description);
         data.append('startdate', new Date());
+        data.append('leftX',  lowerLeftCorner[0]);
+        data.append('lowerY', lowerLeftCorner[1]);
+        data.append('rightX', upperRightCorner[0]);
+        data.append('upperY', upperRightCorner[0]);
         data.append('map', this.uploadInput.files[0].name);
         data.append('u_id', this.state.u_id);
         if (this.state.survey){
@@ -232,6 +269,27 @@ class NewProject extends React.Component {
                                         onChange={this.handleChange}
                                     />
                                 </div>
+                            </form>
+                            <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
+                                Set Shapefile Coordinates
+                                <label className="label">
+                                    Lower Left Corner:
+                                    <input type="text"
+                                        name="lowerLeftCorner" 
+                                        value={this.state.lowerLeftCorner} 
+                                        placeholder=" X, Y"
+                                        onChange={this.handleChange}
+                                    />
+                                </label>
+                                <label className="label">
+                                    Upper Right Corner:
+                                    <input type="text"
+                                        name="upperRightCorner"
+                                        value={this.state.upperRightCorner}
+                                        placeholder=" X, Y"
+                                        onChange={this.handleChange}
+                                    />
+                                </label>
                             </form>
                         
                             <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
