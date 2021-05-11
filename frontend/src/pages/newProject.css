@@ -175,3 +175,11 @@ input, textarea {
 .invisible {
     display: none !important;
 }
+
+/*FormWindow*/
+
+.label {
+    font-size: 15px;
+    margin-right: 5px;
+    margin-bottom: 1px;
+}
