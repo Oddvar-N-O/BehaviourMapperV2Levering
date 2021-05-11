@@ -1,7 +1,3 @@
-
-
-DROP TABLE IF EXISTS [Project];
-
 CREATE TABLE IF NOT EXISTS [Project] (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR NOT NULL,
@@ -21,15 +17,12 @@ CREATE TABLE IF NOT EXISTS [Project] (
     questions VARCHAR NULL,
     FOREIGN KEY (u_id) REFERENCES "Users"(openid)
 );
-DROP TABLE IF EXISTS "Users" ;
 
 CREATE TABLE IF NOT EXISTS "Users" (
 	"openid"    VARCHAR NULL UNIQUE,
     "email" VARCHAR NULL,
 	PRIMARY KEY("openid")
 );
-
-DROP TABLE IF EXISTS "InterviewFigures";
 
 CREATE TABLE IF NOT EXISTS "InterviewFigures" (
 	"id"	INTEGER NOT NULL UNIQUE,
@@ -39,8 +32,6 @@ CREATE TABLE IF NOT EXISTS "InterviewFigures" (
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
-DROP TABLE IF EXISTS "InterviewObjects";
-
 CREATE TABLE IF NOT EXISTS "InterviewObjects" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"interview"	VARCHAR NULL,
@@ -48,8 +39,6 @@ CREATE TABLE IF NOT EXISTS "InterviewObjects" (
     FOREIGN KEY (p_id) REFERENCES "Project"(id)
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
-
-DROP TABLE IF EXISTS "Figures";
 
 CREATE TABLE IF NOT EXISTS "Figures" (
 	"id"	INTEGER NOT NULL UNIQUE,
@@ -60,8 +49,6 @@ CREATE TABLE IF NOT EXISTS "Figures" (
 	"other_attributes"	INTEGER NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
-
-DROP TABLE IF EXISTS [Event];
 
 CREATE TABLE IF NOT EXISTS [Event] (
      "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -74,8 +61,6 @@ CREATE TABLE IF NOT EXISTS [Event] (
      FOREIGN KEY (f_id) REFERENCES [Figures](id)
 );
 
-DROP TABLE IF EXISTS "Project_has_Event";
-
 CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 	"p_id"	INTEGER NOT NULL,
 	"e_id"	INTEGER NOT NULL,
@@ -83,8 +68,6 @@ CREATE TABLE IF NOT EXISTS "Project_has_Event" (
 	FOREIGN KEY("p_id") REFERENCES [Project](id),
 	FOREIGN KEY("e_id") REFERENCES [Event](id)
 ); 
-
-DROP TABLE IF EXISTS "InterviewObjects_has_InterviewFigures";
 
 CREATE TABLE IF NOT EXISTS "InterviewObjects_has_InterviewFigures" (
 	"io_id"	INTEGER NOT NULL,
