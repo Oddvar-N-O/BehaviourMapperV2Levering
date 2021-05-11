@@ -399,7 +399,7 @@ def addSizeToProject():
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
-    
+
 """
 Use POST for destructive actions such as creation (I'm aware of the irony),
 editing, and deletion, because you can't hit a POST action in the address
@@ -834,6 +834,7 @@ def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
             cordNum = 0
         
     return allCoords
+
 
 
 def getInterviewFiguresSorted(p_id):
