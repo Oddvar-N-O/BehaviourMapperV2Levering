@@ -1188,9 +1188,10 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
-                  <li><h2>{t('mapping.favorites')}</h2></li>
+                  {/* <li><br/><br/></li>
+                  <li><h2>{t('mapping.favorites')}</h2></li> */}
                 </ul>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
+                <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
               <ul className={interviewLiClassList}>
@@ -1207,7 +1208,7 @@ selectItemForContextMenu(e) {
                     <option value="#000000">Black</option>
                   </select>
                 </li>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishProject')}</p></li>
+                <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
               </ul>
               
           </div>
