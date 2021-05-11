@@ -3,11 +3,6 @@ import AllIcons from '../components/AllIcons';
 import './ContextMenu.css'
 
 class ContextMenu extends React.Component {
-    constructor() {
-        super()
-    };
-
-
     render () {
         return (
             <div className='context-menu'>
