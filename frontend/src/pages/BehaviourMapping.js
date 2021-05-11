@@ -1137,7 +1137,6 @@ selectItemForContextMenu(e) {
       'visible': !this.state.onlyObservation
     });
     let interviewLiClassList = classNames({
-      'interview-sidebar-li': true,
       'invisible': this.state.onlyObservation,
       'visible': !this.state.onlyObservation
     });
@@ -1195,13 +1194,13 @@ selectItemForContextMenu(e) {
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
-              <ul className={interviewLiClassList}>
+              <ul id="interview-sidebar-li" className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.newInterviewee}>{t('mapping.newInterviewee')}</li>
                 <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addLine')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addArea')}</li>
                 <li className="buttonLi" onClick={this.whichDrawingFunction}>{t('mapping.addPoint')}</li>
-                <li>
+                <li className="select">
                   <label>{t('mapping.color')}</label>
                   <select value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing}>
                     <option value="#008000">Green</option>
