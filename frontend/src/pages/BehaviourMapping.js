@@ -1070,11 +1070,11 @@ selectItemForContextMenu(e) {
     this.initiateFormerScreenSize();
     if (!this.state.onlyObservation) {
       fetch(window.backend_url + `getquestionsfromproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projectQuestions: data.questions});
-      this.sendInterviewObjectToDb(data.questions);
-    });
+      .then(res => res.json())
+      .then(data => {
+        this.setState({projectQuestions: data.questions});
+        this.sendInterviewObjectToDb(data.questions);
+      });
     }
     
     window.addEventListener('resize', this.handleResize);
