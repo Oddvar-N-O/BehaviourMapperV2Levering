@@ -102,8 +102,8 @@ function ManageProject() {
   }
 
   return ( // id="container"
-        <div id="load-project">
-          <div className="load-project-box">
+        <div className="manage-project">
+          <div className="manage-project-box">
             <Link to="/startpage" className="close-icon">
               <AiIcons.AiOutlineClose />
             </Link>

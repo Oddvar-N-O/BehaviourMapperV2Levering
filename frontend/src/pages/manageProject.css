@@ -1,16 +1,14 @@
-#load-project {
+.manage-project {
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.load-project-box {
+.manage-project-box {
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 800px;
     height: 600px;
-    min-width: 600px;
-    min-height: 600px;
     margin-top: 8vh;
     background-color: #292828;
     color: #ece8e8;
@@ -19,11 +17,12 @@
 }
 
 #opplastetKart {
-    min-width: 300px;
-    min-height: 300px;
-    max-width: 500px;
-    max-height: 500px;
+    height: 300px;
+    width: auto;
+    max-width: 530px;
+    padding: 40px 0 60px 0;
 }
+
 .icon {
     color: #ece8e8;
     position:absolute;
@@ -31,11 +30,11 @@
     height: 50px;
     z-index: 3;
 }
-#load-project h1, #load-project p, #load-project img{
+.manage-project h1, .manage-project p, .manage-project img{
     color: #ece8e8;
     padding: 1vh;
 }
-#load-project h1 {
+.manage-project h1 {
     font-size: 34px;
     padding-top: 36px;  
     max-width: 82%;  
@@ -44,7 +43,7 @@
 .projectName {
     font-size: 3vh;
 }
-#load-project button {
+.manage-project button {
     background-color: #F3F7F0;
     padding: 1vh 2vh;
     margin: 7.5px;
@@ -59,7 +58,7 @@
     width: 100%;
     height: 80%;
 }
-#load-project .close-icon { 
+.manage-project .close-icon { 
     top: 9vh;
     left: calc(50vw + 362px)
 }
@@ -96,8 +95,6 @@
     align-items: center;
 }
 
-/*LOADPROJECT 2*/
-
 .buttonLi{
     margin-top: 0px;
     color: #ece8e8;
@@ -110,7 +107,20 @@
     width: 200px;
 }
 
-#load-project .manage-button {
+.manage-project .manage-button {
     font-size: 16px;
     padding: 9px;
 }
+
+.projectName {
+    font-size: 18px;
+}
+
+@media screen and (max-width: 800px) {
+    .manage-project-box, .manage-project {width: 100vw;}
+    .new-project h2 {font-size: 10vw;}
+    .manage-project .close-icon {left: 95vw;}
+    .manage-project .manage-button {
+        font-size: 2vw;
+    }
+  }
