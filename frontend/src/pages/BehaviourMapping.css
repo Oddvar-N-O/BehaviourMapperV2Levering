@@ -162,8 +162,6 @@
     width: calc(100vw - 200px);
     min-height: 300px;
     min-width: 400px;
-    /* height: 600px;
-    width: 600px;*/
     order: 3;
 }
 .uploaded-map-image {
@@ -171,6 +169,67 @@
     width: auto;
     order: 3;
 }
+.sidebar .select {
+    margin-top: 0;
+}
+#interview-sidebar-li{
+    position: relative;
+    width: 200px;
+    height: 100vh;
+    overflow: hidden;
+}
+/* CSS for select copied from https://codepen.io/raubaca/pen/VejpQP */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    outline: 0;
+    box-shadow: none;
+    border: 0 !important;
+    background: #222020;
+    background-image: none;
+  }
+  /* Remove IE arrow */
+  select::-ms-expand {
+    display: none;
+  }
+  /* Custom Select */
+  .select {
+    position: relative;
+    display: flex;
+    width: 20em;
+    height: 3em;
+    line-height: 3;
+    background: #222020;
+    overflow: hidden;
+    border-radius: .25em;
+  }
+  select {
+    flex: 1;
+    padding: 0 2em;
+    color: #ece8e8;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  /* Arrow */
+  .select::after {
+    content: '\25BC';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0 1em;
+    background: #222020;
+    cursor: pointer;
+    pointer-events: none;
+    -webkit-transition: .25s all ease;
+    -o-transition: .25s all ease;
+    transition: .25s all ease;
+  }
+  /* Transition */
+  .select:hover::after {
+    color: #58A4B0;
+  }
 
 #canvas {
     border: 1px solid black;

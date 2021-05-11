@@ -20,6 +20,9 @@
         "descPlaceholder" : "For eksempel tidspunkt, vær eller spesielle hendelser",
         "questions" : "Spørsmål For Intervju",
         "questionsPlaceholder" : "Skriv inn spørsmål her, avslutt med linjeskift",
+        "setShapefileCoords" : "Sett Shapefil Koordinater",
+        "shpLowerLeft" : "Nedre Venstre Hjørne:",
+        "shpUpperRight" : "Øvre Høyre Hjørne:",
         "image" : "Bilde",
         "imageRequired" : "Vennligst legg til et bilde",
         "go" : "Start!"

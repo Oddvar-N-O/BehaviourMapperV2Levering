@@ -20,6 +20,9 @@
         "descPlaceholder" : "E.g. time of day, wheather conditions, special events etc",
         "questions" : "Questions For Survey",
         "questionsPlaceholder" : "Enter questions here, make a new line for each to seperate them",
+        "setShapefileCoords" : "Set Shapefile Coordinates",
+        "shpLowerLeft" : "Lower Left Corner:",
+        "shpUpperRight" : "Upper Right Corner:",
         "image" : "Image",
         "imageRequired" : "Image Required",
         "go" : "Let's go!"

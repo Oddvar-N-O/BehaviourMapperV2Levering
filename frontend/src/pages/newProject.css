@@ -38,7 +38,7 @@
 }
 
 .new-project-box-upload {
-    height: 570px;
+    height: 660px;
 }
 
  #heading-and-form {
@@ -110,6 +110,9 @@ input, textarea {
 .questionsField {
     width: 100%;
 }
+.file-management p {
+    margin-bottom: 5px;
+}
 
 /* BUTTON */
 
@@ -174,4 +177,12 @@ input, textarea {
 
 .invisible {
     display: none !important;
+}
+
+/*FormWindow*/
+
+.label {
+    font-size: 15px;
+    margin-right: 5px;
+    margin-bottom: 1px;
 }
