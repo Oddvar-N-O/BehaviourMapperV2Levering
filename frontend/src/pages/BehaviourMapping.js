@@ -839,24 +839,27 @@ changeSizeOfIcons(event) {
     this.setState({eventSize: this.state.eventSize + 5}, function () {
       for (var i=0; i<this.state.newIconID; i++) {
         let event = document.getElementById(i.toString());
-        event.style.height = this.state.eventSize + "px";
-        event.style.width = this.state.eventSize + "px";
-        event.style.left = (parseFloat(event.style.left) -2.5) +'px';
-        event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+        if (event !== null) {
+          event.style.height = this.state.eventSize + "px";
+          event.style.width = this.state.eventSize + "px";
+          event.style.left = (parseFloat(event.style.left) -2.5) +'px';
+          event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+        }
       }
     })
   } else if (event.target.textContent === "-") {
-    if (this.state.eventSize > 0 ) {
+    if (this.state.eventSize > 5 ) {
       this.setState({eventSize: this.state.eventSize - 5}, function () {
         for (var j=0; j<this.state.newIconID; j++) {
           let event = document.getElementById(j.toString());
-          event.style.height = this.state.eventSize + "px";
-          event.style.width = this.state.eventSize + "px";
-          event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
-          event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+          if (event !== null) {
+            event.style.height = this.state.eventSize + "px";
+            event.style.width = this.state.eventSize + "px";
+            event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
+            event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+          }
         }
-    })
-      
+    })  
     }
   }
 }
