@@ -236,7 +236,6 @@ class BehaviourMapping extends React.Component {
     this.setState({selectedEventID: null});
 
     img.addEventListener('click', () => {
-      this.setState({selectedEventID: img.getAttribute('id')}, function() {});
       this.showChosenIcon(img.getAttribute('id'));
     });
     
@@ -626,7 +625,6 @@ class BehaviourMapping extends React.Component {
     }
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
-    // must change to get ie_id from state.
     data.append('image_size', this.findCanvasSize());
     data.append('io_id', this.state.currentInterviewObject);
     data.append('u_id', this.state.u_id);
@@ -973,22 +971,27 @@ selectItemForContextMenu(e) {
   }
 
 
-  showChosenIcon() {
+  showChosenIcon(thisEvent) {
+    this.setState({selectedEventID: thisEvent});
     this.setState({actionID: null});
     let iconObject;
     let icon;
     for (let i=0; i<this.state.iconObjects.length; i++) {
-      
       iconObject = this.state.iconObjects[i]
       icon = document.getElementById(iconObject.id);
       if (icon != null) {
         if (iconObject.id === this.state.selectedEventID) {
-          icon.style.border = '4px solid red';
-          icon.style.border = 'block';
-        } else {
+          if (icon.style.border === '4px solid red'){
+            icon.style.border = 'none';
+            this.setState({selectedEventID: null});
+          } else {
+            icon.style.border = '4px solid red';
+            icon.style.border = 'block';
+          }
+        } 
+        else {
           icon.style.border = 'none';
         }
-      } else {
       }
     }
   }
