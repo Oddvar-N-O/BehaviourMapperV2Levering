@@ -271,9 +271,18 @@ class NewProject extends React.Component {
                                 </div>
                             </form>
                             <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
-                                Set Shapefile Coordinates
+                                <legend>{t(this.state.projectImageLegend)}</legend>
+                                <input 
+                                    ref={(ref) => { this.uploadInput = ref; }} 
+                                    type="file"  
+                                    className='file-button' 
+                                    onChange={this.imageChosen}
+                                />
+                            </form>
+                            <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
+                                <p>{t('newProject.setShapefileCoords')}</p>
                                 <label className="label">
-                                    Lower Left Corner:
+                                    {t('newProject.shpLowerLeft')}<br/>
                                     <input type="text"
                                         name="lowerLeftCorner" 
                                         value={this.state.lowerLeftCorner} 
@@ -282,7 +291,7 @@ class NewProject extends React.Component {
                                     />
                                 </label>
                                 <label className="label">
-                                    Upper Right Corner:
+                                    {t('newProject.shpUpperRight')}<br/>
                                     <input type="text"
                                         name="upperRightCorner"
                                         value={this.state.upperRightCorner}
@@ -290,16 +299,6 @@ class NewProject extends React.Component {
                                         onChange={this.handleChange}
                                     />
                                 </label>
-                            </form>
-                        
-                            <form className= {this.state.fromLoadMap ? 'file-management' : 'invisible'}>
-                                <legend>{t(this.state.projectImageLegend)}</legend>
-                                <input 
-                                    ref={(ref) => { this.uploadInput = ref; }} 
-                                    type="file"  
-                                    className='file-button' 
-                                    onChange={this.imageChosen}
-                                />
                             </form>
                         </div>
                         <ul>

@@ -38,7 +38,7 @@
 }
 
 .new-project-box-upload {
-    height: 570px;
+    height: 660px;
 }
 
  #heading-and-form {
@@ -109,6 +109,9 @@ input, textarea {
 
 .questionsField {
     width: 100%;
+}
+.file-management p {
+    margin-bottom: 5px;
 }
 
 /* BUTTON */
