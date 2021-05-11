@@ -611,7 +611,6 @@ class BehaviourMapping extends React.Component {
     let canvas = this.canvas.current;
     let width = canvas.width;
     let height = canvas.height;
-    console.log([width, height])
     return [width, height]
 
   }
@@ -1006,9 +1005,7 @@ selectItemForContextMenu(e) {
       if (!this.state.addComment) {
         this.setState({addComment: !this.state.addComment});
       }
-      console.log("HERJEHDEWKHFKJEW")
     } else if (whichEvent !== null) {
-      console.log(whichEvent)
       this.commentElement.current.clearComment();
       this.commentElement.current.setState({alreadySaved: false})
       this.setState({addComment: !this.state.addComment});

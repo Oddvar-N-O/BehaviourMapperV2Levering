@@ -620,7 +620,7 @@ def writeInterviewObjectFiguresToCSV(interview_object_with_figure_ids):
                         'id':figure_data[0], 
                         'points': figure_data[1],
                         'color': figure_data[2],
-                        'type': figure_data[3]
+                        'type': figure_data[4]
                     })
     fieldnames = ['id','points', 'color', 'type']
     with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjectFigures.csv"), 'w+') as f:
