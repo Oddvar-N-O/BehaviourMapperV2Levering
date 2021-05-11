@@ -579,7 +579,7 @@ def writeEventsToCSV(all_events_fromdb):
                 'f_id': data[6],
                 'description': figure[0],
                 'color': figure[1]})
-    event_fieldnames = ['id', 'action', 'group_name', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
+    event_fieldnames = ['id', 'direction', 'center_coordinate', 'image_size_when_created', 'created', 'comment', 'f_id', 'description', 'color']
     with open(os.path.join(Config.CSVFILES_FOLDER, "events.csv"), 'w+') as f:
         writer = csv.DictWriter(f, event_fieldnames)
         writer.writeheader()
@@ -620,7 +620,7 @@ def writeInterviewObjectFiguresToCSV(interview_object_with_figure_ids):
                         'id':figure_data[0], 
                         'points': figure_data[1],
                         'color': figure_data[2],
-                        'type': figure_data[3]
+                        'type': figure_data[4]
                     })
     fieldnames = ['id','points', 'color', 'type']
     with open(os.path.join(Config.CSVFILES_FOLDER, "interviewObjectFigures.csv"), 'w+') as f:

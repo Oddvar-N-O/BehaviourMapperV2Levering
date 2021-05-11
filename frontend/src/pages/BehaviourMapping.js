@@ -10,7 +10,6 @@ import domtoimage from 'dom-to-image';
 import { withTranslation } from 'react-i18next';
 import * as AiIcons from 'react-icons/ai';
 import helperImage from './images/temp.png'
-import Startpage from './startpage';
 
 class BehaviourMapping extends React.Component {
   constructor(props) {
@@ -236,7 +235,6 @@ class BehaviourMapping extends React.Component {
     this.setState({selectedEventID: null});
 
     img.addEventListener('click', () => {
-      this.setState({selectedEventID: img.getAttribute('id')}, function() {});
       this.showChosenIcon(img.getAttribute('id'));
     });
     
@@ -612,7 +610,6 @@ class BehaviourMapping extends React.Component {
     let canvas = this.canvas.current;
     let width = canvas.width;
     let height = canvas.height;
-    console.log([width, height])
     return [width, height]
 
   }
@@ -626,7 +623,6 @@ class BehaviourMapping extends React.Component {
     }
     data.append('color', this.state.chosenColorForDrawing);
     data.append('type', this.state.chosenDrawingEvent);
-    // must change to get ie_id from state.
     data.append('image_size', this.findCanvasSize());
     data.append('io_id', this.state.currentInterviewObject);
     data.append('u_id', this.state.u_id);
@@ -760,8 +756,11 @@ class BehaviourMapping extends React.Component {
       iconinfo = this.state.iconObjects[i];
       icon = document.getElementById(iconinfo.id);
       let coord = iconinfo.originalCoord;
-      icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
-      icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      if (icon != null) {
+        icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+        icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      }
+      
     }
   }
 
@@ -839,24 +838,27 @@ changeSizeOfIcons(event) {
     this.setState({eventSize: this.state.eventSize + 5}, function () {
       for (var i=0; i<this.state.newIconID; i++) {
         let event = document.getElementById(i.toString());
-        event.style.height = this.state.eventSize + "px";
-        event.style.width = this.state.eventSize + "px";
-        event.style.left = (parseFloat(event.style.left) -2.5) +'px';
-        event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+        if (event !== null) {
+          event.style.height = this.state.eventSize + "px";
+          event.style.width = this.state.eventSize + "px";
+          event.style.left = (parseFloat(event.style.left) -2.5) +'px';
+          event.style.top =  (parseFloat(event.style.top) -2.5) +'px';
+        }
       }
     })
   } else if (event.target.textContent === "-") {
-    if (this.state.eventSize > 0 ) {
+    if (this.state.eventSize > 5 ) {
       this.setState({eventSize: this.state.eventSize - 5}, function () {
         for (var j=0; j<this.state.newIconID; j++) {
           let event = document.getElementById(j.toString());
-          event.style.height = this.state.eventSize + "px";
-          event.style.width = this.state.eventSize + "px";
-          event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
-          event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+          if (event !== null) {
+            event.style.height = this.state.eventSize + "px";
+            event.style.width = this.state.eventSize + "px";
+            event.style.left = (parseFloat(event.style.left) + 2.5) +'px';
+            event.style.top =  (parseFloat(event.style.top) + 2.5) +'px';
+          }
         }
-    })
-      
+    })  
     }
   }
 }
@@ -952,9 +954,6 @@ selectItemForContextMenu(e) {
         body: data,
       })
 
-      if (this.state.newIconID > 0) {
-        this.setState({newIconID: this.state.newIconID - 1}, function() {});
-      }
       if (this.state.sendIconToBD === true) {
         this.setState({sendIconToBD: false}, function() {});
       }  
@@ -973,22 +972,27 @@ selectItemForContextMenu(e) {
   }
 
 
-  showChosenIcon() {
+  showChosenIcon(thisEvent) {
+    this.setState({selectedEventID: thisEvent});
     this.setState({actionID: null});
     let iconObject;
     let icon;
     for (let i=0; i<this.state.iconObjects.length; i++) {
-      
       iconObject = this.state.iconObjects[i]
       icon = document.getElementById(iconObject.id);
       if (icon != null) {
         if (iconObject.id === this.state.selectedEventID) {
-          icon.style.border = '4px solid red';
-          icon.style.border = 'block';
-        } else {
+          if (icon.style.border === '4px solid red'){
+            icon.style.border = 'none';
+            this.setState({selectedEventID: null});
+          } else {
+            icon.style.border = '4px solid red';
+            icon.style.border = 'block';
+          }
+        } 
+        else {
           icon.style.border = 'none';
         }
-      } else {
       }
     }
   }
@@ -999,6 +1003,7 @@ selectItemForContextMenu(e) {
 
   addComment() {
     this.stopPointing();
+    this.setState({actionID: 1}, function() {})
     let whichEvent = this.state.selectedEventID
     if (this.state.comments[whichEvent] !== undefined) {
       this.commentElement.current.setState({alreadySaved: true});
@@ -1033,7 +1038,7 @@ selectItemForContextMenu(e) {
     data.append('comment', comment);
     data.append('p_id', this.state.p_id);
     data.append('u_id', this.state.u_id);
-    data.append('whichEvent', this.state.selectedEventID);
+    data.append('whichEvent', this.findIconObjectOfOurID());
     fetch(window.backend_url + 'updateeventwithcomment', {
       method: 'POST',
       body: data,
@@ -1186,9 +1191,8 @@ selectItemForContextMenu(e) {
                 <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
                 <li className="buttonLi" onClick={this.changeShowContextMenu}>{t('mapping.chooseFavorite')}</li>
                 <ul id="favorite-icon-list">
-                  <li><h2>{t('mapping.favorites')}</h2></li>
                 </ul>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
+                <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
                 
               </ul>
               <ul className={interviewLiClassList}>
@@ -1205,7 +1209,7 @@ selectItemForContextMenu(e) {
                     <option value="#000000">Black</option>
                   </select>
                 </li>
-                <li className="buttonLi finishProjectLi" onClick={this.finishProject}><p>{t('mapping.finishProject')}</p></li>
+                <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
               </ul>
               
           </div>

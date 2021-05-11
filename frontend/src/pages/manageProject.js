@@ -102,8 +102,8 @@ function ManageProject() {
   }
 
   return ( // id="container"
-        <div id="load-project">
-          <div className="load-project-box">
+        <div className="manage-project">
+          <div className="manage-project-box">
             <Link to="/startpage" className="close-icon">
               <AiIcons.AiOutlineClose />
             </Link>
@@ -112,14 +112,14 @@ function ManageProject() {
               <h1>{currProj["name"]}</h1>
               <p>{t('manageProject.description')} {currProj["description"]}</p>
               <img alt={'Screenshot av kartet til '+ currProj["name"] + '.'} src={currImage} id='opplastetKart' />
-              <div id="manage-buttons">
-              <button onClick={exportZipFiles}>
+              <div className="manage-buttons">
+              <button className="manage-button" onClick={exportZipFiles}>
               {t('manageProject.exportShapefiles')}
               </button>
-              <button onClick={exportZipFiles}>
+              <button className="manage-button" onClick={exportZipFiles}>
               {t('manageProject.exportToCsv')}
               </button>
-              <button onClick={deleteProject}>
+              <button className="manage-button" onClick={deleteProject}>
               {t('manageProject.delete')}
               </button>
               </div>
