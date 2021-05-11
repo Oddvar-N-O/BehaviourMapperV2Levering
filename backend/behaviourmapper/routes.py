@@ -814,7 +814,7 @@ def createARCGIS():
                            
                     w.close()
         zip_files('shapefiles')
-        # clearShapefiles()
+        clearShapefiles()
         return sendFileToFrontend('shapefiles.zip')
     else:
         logger.info("Not logged in.")
