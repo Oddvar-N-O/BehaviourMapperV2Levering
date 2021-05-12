@@ -33,13 +33,13 @@ class Interview extends React.Component {
         return (
             <div className="interview-box">
                 <div className="interview-box-heading">
-                    <h2>{t(interview.interview)}</h2>
+                    <h2>{t('interview.interview')}</h2>
                     <div className="x" onClick={this.props.close}>
                         <AiIcons.AiOutlineClose/>
                     </div>
                 </div>
                 <form>
-                    <legend>{t(interview.notes)}</legend> 
+                    <legend>{t('interview.notes')}</legend> 
                     <textarea 
                         id="interview"
                         name="interview" 
