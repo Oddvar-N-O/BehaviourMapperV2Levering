@@ -67,6 +67,10 @@
         "notes": "Notater",
         "update": "Oppdater Kommentar",
         "save": "Lagre Kommentar"
+    },
+    "interview": {
+        "interview": "Intervju",
+        "notes": "Notater"
     }
 
 }

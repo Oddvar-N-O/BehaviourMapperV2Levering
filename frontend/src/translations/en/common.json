@@ -67,5 +67,9 @@
         "notes": "Notes",
         "update": "Update Comment",
         "save": "Save Comment"
+    },
+    "interview": {
+        "interview": "Interview",
+        "notes": "Notes"
     }
 }
