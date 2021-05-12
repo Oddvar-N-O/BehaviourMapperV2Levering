@@ -791,7 +791,7 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
                 filename = findFileName(path, foldername)
 
             eventGroup = innerDict[innerKey]
-            if len(eventGroup) != 0:
+            if len(eventGroup) != 0 and filename != None:
                 # if exists == False: 
                 #   makeFolder(path, foldername)
                 shapeFileName = 'behaviourmapper/static/shapefiles/' + str(foldername) + '/' + str(filename)

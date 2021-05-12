@@ -4,16 +4,12 @@
     ErrorLog     /home/map/w3/behaviourmapper.ux.uis.no/error.log
     TransferLog  /home/map/w3/behaviourmapper.ux.uis.no/access.log
      <Directory /home/stud/oddvarno/public_html/venv/lib/python3.6/site-packages/behaviourmapper/static/>
-        #Require all granted
-        Require ip 152.94.
-        Require ip 92.220.162.16
+        Require all granted
     </Directory>
     <Directory  /home/stud/oddvarno/public_html/venv/lib/python3.6/site-packages/behaviourmapper>
         WSGIApplicationGroup %{GLOBAL}
         <Files behaviourmapper.wsgi>
-            #Require all granted
-            Require ip 152.94.
-            Require ip 92.220.162.16
+            Require all granted
         </Files>
     </Directory>
     WSGIDaemonProcess behaviourmapper.ux.uis.no python-home=/home/stud/oddvarno/public_html/venv
