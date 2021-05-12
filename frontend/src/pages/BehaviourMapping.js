@@ -1068,7 +1068,6 @@ selectItemForContextMenu(e) {
   componentWillUnmount() {
     document.removeEventListener('scroll', this.handleScroll);
     document.removeEventListener('resize', this.handleResize);
-    // document.removeEventListener('scroll', this.handleScroll);
   }
 
   componentDidMount() {
@@ -1113,10 +1112,6 @@ selectItemForContextMenu(e) {
     let canvas = this.canvas.current;
     let image = this.myImage.current;
     this.drawCanvasMap(canvas, image);
-  }
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize);
-    window.removeEventListener('scroll', this.handleScroll);
   }
 
   drawCanvasMap(canvas, image) {
