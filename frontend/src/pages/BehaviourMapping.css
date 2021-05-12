@@ -147,6 +147,8 @@
     flex-wrap: wrap;
     font-size: 48%;
     text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 
 /*ModImg*/

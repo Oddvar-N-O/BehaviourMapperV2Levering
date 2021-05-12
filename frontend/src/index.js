@@ -10,8 +10,8 @@ import common_no from "./translations/no/common.json";
 import common_en from "./translations/en/common.json";
 
 // Switch these to toggle between development and production
-// window.backend_url = "http://localhost:5000/behaviourmapper/"
-window.backend_url = "https://behaviourmapper.ux.uis.no/"
+window.backend_url = "http://localhost:5000/behaviourmapper/"
+// window.backend_url = "https://behaviourmapper.ux.uis.no/"
 
 i18next.init({
   interpolation: { escapeValue: false },  // React already does escaping

@@ -17,10 +17,10 @@
 }
 
 #opplastetKart {
-    height: 300px;
+    height: 340px;
     width: auto;
     max-width: 530px;
-    padding: 40px 0 60px 0;
+    padding: 38px 0;
 }
 
 .icon {
@@ -32,7 +32,7 @@
 }
 .manage-project h1, .manage-project p, .manage-project img{
     color: #ece8e8;
-    padding: 1vh;
+    padding: 4px;
 }
 .manage-project h1 {
     font-size: 34px;
@@ -40,9 +40,9 @@
     max-width: 82%;  
 }
 
-.projectName {
+/* .projectName {
     font-size: 3vh;
-}
+} */
 .manage-project button {
     background-color: #F3F7F0;
     padding: 1vh 2vh;
@@ -123,4 +123,5 @@
     .manage-project .manage-button {
         font-size: 2vw;
     }
+    #opplastetKart {height: 48vh;}
   }
