@@ -1,10 +1,11 @@
 import json
 import logging
 import os
+import shutil
 import zipfile
 import csv
 from datetime import date, datetime
-from time import time
+from time import time, sleep
 
 import shapefile as shp
 from flask import (Blueprint, Flask, abort, current_app, flash, g, redirect,
@@ -46,7 +47,7 @@ def login():
         if os.getenv('FLASK_ENV') == "development":
             return redirect('http://localhost:3000/behaviourmapper/startpage')   
         else:
-           return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
+            return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
 
@@ -737,88 +738,117 @@ def createARCGIS():
         get_proj_sql = ("SELECT * FROM Project WHERE id=?")
         pid = (request.form.get('p_id'))
         project_values = query_db(get_proj_sql, (str(pid),), True)
+
         leftX = float(project_values[9])
         lowerY = float(project_values[10])
         rightX = float(project_values[11])
         upperY = float(project_values[12])
+
+        geografiskSpørreundersøkelse = project_values[15]
+        path = ""
+
+        if geografiskSpørreundersøkelse != "0": # CHANGE THIS TO NONE LATER
+            sortedInterviewObjectsJSON = getInterviewFiguresSorted(pid)
+            sortedInterviewObjects = json.loads(sortedInterviewObjectsJSON)
+            for i in range(len(sortedInterviewObjects)):
+                interviewObjectDict = sortedInterviewObjects[i]
+                writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, i)
+                sleep(1)
+            zip_files('geographicQuestioning')
+            clearFolders('geographicQuestioning')
+            return sendFileToFrontend('geographicQuestioning.zip')
         
-        eventsJSON = get_events_func(request.form.get('p_id'))
-        events = json.loads(eventsJSON)
 
-        sortedEvents = generateDictOfEvents(events)
 
-        for key in dict.keys(sortedEvents):
-            innerDict = sortedEvents[key]
-            for innerKey in dict.keys(innerDict):
-                foldername = key + innerKey
-                exists = doesFolderExist(foldername) # also check if changed
+        if geografiskSpørreundersøkelse == "0": # CHANGE THIS TO NONE LATER
+            eventsJSON = get_events_func(pid)
+            events = json.loads(eventsJSON)
+            sortedEvents = generateDictOfEvents(events)
+            writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
+            zip_files('shapefiles')
+            clearFolders('shapefiles')
+            return sendFileToFrontend('shapefiles.zip')
 
-                if exists == True: # for senere utvikling av vilkårlige ikoner
-                    filename = findShapefileName(foldername)
-                    
-                    shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
-                    w = shp.Writer(shapeFileName)
-                    
-                    w.field('Background', 'C', '40')
-                    point_ID = 1
-                    eventGroup = innerDict[innerKey]
-                    for event in eventGroup:
-                        newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
-                        x = newCoords[0]
-                        y = newCoords[1]
-                        
-                        w.point(x, y)
-                        w.record(str(point_ID), 'Point')
-                        point_ID += 1
-                    w.close()
-        
-        sortedInterviewFiguresJSON = getInterviewFiguresSorted(pid)
-        sortedInterviewFigures = json.loads(sortedInterviewFiguresJSON)
-
-        for objectType in dict.keys(sortedInterviewFigures):
-            innerDict = sortedInterviewFigures[objectType]
-            
-            for context in dict.keys(innerDict):
-                foldername = objectType + context
-                exists = doesFolderExist(foldername)
-                if exists == True: # for senere utvikling av vilkårlige ikoner
-                    filename = findShapefileName(foldername)
-
-                    shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
-                    dictObjectByContext = innerDict[context]
-                    w = shp.Writer(shapeFileName)
-                    w.field('Background', 'C', '40')
-                    point_ID = 0
-
-                    for drawnObject in dictObjectByContext:
-                        coordinateList = drawnObject[1]
-                        floatCoordinateList = getElementXandY(drawnObject[1])
-                        pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
-                        screenSizeWhenCreated = drawnObject[3]
-                        for i in range(len(pairsOfCoordinates)):
-                            # so far so good
-                            coordinates = pairsOfCoordinates[i]
-                            newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)                        
-                            pairsOfCoordinates[i] = newCoords
-                        if objectType == 'Line':
-                            w.line([pairsOfCoordinates])
-                            w.record(str(point_ID), str(objectType))
-                        elif objectType == 'Area':
-                            w.poly([pairsOfCoordinates])
-                            w.record(str(point_ID), str(objectType))
-                        elif objectType == 'Point':
-                            coord = pairsOfCoordinates[0]
-                            w.point(coord[0], coord[1])
-                            w.record(str(point_ID), str(objectType))
-                        point_ID += 1
-                           
-                    w.close()
-        zip_files('shapefiles')
-        clearShapefiles()
-        return sendFileToFrontend('shapefiles.zip')
+        return "empty file"
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
+    path = Config.SHAPEFILES_FOLDER
+    for key in dict.keys(sortedEvents):
+        innerDict = sortedEvents[key]
+        for innerKey in dict.keys(innerDict):
+            foldername = key + innerKey
+            exists = doesFolderExist(path, foldername) # also check if changed
+            eventGroup = innerDict[innerKey]
+            if len(eventGroup) != 0:
+                if exists == False: 
+                    makeFolder(path, foldername)
+
+                filename = foldername + 'SHP'
+                shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
+                w = shp.Writer(shapeFileName)
+                
+                w.field('Background', 'C', '40')
+                point_ID = 1
+                
+                for event in eventGroup:
+                    newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
+                    x = newCoords[0]
+                    y = newCoords[1]
+                    w.point(x, y)
+                    w.record(str(point_ID), 'Point')
+                    point_ID += 1
+                w.close()
+
+
+def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, interviewObjectNumber):
+    path = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    for objectType in dict.keys(interviewObjectDict):
+        innerDict = interviewObjectDict[objectType]
+        for context in dict.keys(innerDict):
+            foldername = objectType + context
+            exists = doesFolderExist(path, foldername)
+            if exists == False: 
+                makeFolder(path, foldername)
+
+            dictObjectByContext = innerDict[context]
+            point_ID = 0
+
+            shapeFileName = 'behaviourmapper/static/geographicQuestioningFolder/' + foldername + '/' + foldername + '_InterviewObjectNumber_' + str(interviewObjectNumber)
+            if dictObjectByContext != []:
+                w = shp.Writer(shapeFileName)
+                w.field('Background', 'C', '40')
+            for i in range(len(dictObjectByContext)):
+
+                drawnObject = dictObjectByContext[i]
+
+                coordinateList = drawnObject[1]
+                floatCoordinateList = getElementXandY(drawnObject[1])
+                pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
+                screenSizeWhenCreated = drawnObject[3]
+                for j in range(len(pairsOfCoordinates)):
+                    coordinates = pairsOfCoordinates[j]
+                    newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)
+                    pairsOfCoordinates[j] = newCoords
+                if objectType == 'Line':
+                    w.line([pairsOfCoordinates])
+                    w.record(str(point_ID), str(objectType))
+                elif objectType == 'Area':
+                    w.poly([pairsOfCoordinates])
+                    w.record(str(point_ID), str(objectType))
+                elif objectType == 'Point':
+                    coord = pairsOfCoordinates[0]
+                    w.point(coord[0], coord[1])
+                    w.record(str(point_ID), str(objectType))
+                point_ID += 1
+            w.close()
+
+def makeFolder(location, foldername):
+    path = os.path.join(location, foldername)
+    os.mkdir(path)
+
 
 def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
     allCoords = []
@@ -836,50 +866,53 @@ def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
     return allCoords
 
 
-
 def getInterviewFiguresSorted(p_id):
     try:         
         int(p_id)    
     except:         
         raise InvalidUsage("Bad arg", status_code=400)
-
-    get_InterviewID_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
-    io_id = query_db(get_InterviewID_sql, (str(p_id),), True)
-
-    get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
-    query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
-    query_if_ids = query_if_ids[:-1]
-
-    if_ids = []
-    for if_id in query_if_ids:
-
-        if_ids.append(if_id[0])
-
-    get_figure_sql = ("SELECT * FROM InterviewFigures WHERE id=?")
-
-
-    dictAllInterviewFigureTypes = {}
-    for if_id in if_ids:
-        query_figure = query_db(get_figure_sql, (str(if_id),), True)
-        emotionalContext = findEmotionalContext(query_figure[2])
-
-        if query_figure[-1] not in dictAllInterviewFigureTypes:
-            dictByContext = {'Positive': [], 'Negative': [], 'Neutral': []}
-
-            objectInContext = dictByContext[emotionalContext]
-            objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
-            dictByContext[emotionalContext] = objectInContext
-
-            dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
-        else:
-            innerDict = dictAllInterviewFigureTypes[query_figure[-1]]
-                        
-            objectInContext = innerDict[emotionalContext]
-            objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
-            innerDict[emotionalContext] = objectInContext
-            dictAllInterviewFigureTypes[query_figure[-1]] = innerDict
+    get_InterviewIds_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
+    query_io_ids = query_db(get_InterviewIds_sql, (p_id,))
     
-    return json.dumps(dictAllInterviewFigureTypes)
+    # query_io_ids = query_db(get_InterviewID_sql, (str(p_id),), True)
+    query_io_ids = query_io_ids[:-1]
+
+    interviewObjectDict = []
+    for io_id in query_io_ids:
+
+        get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
+        query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
+        query_if_ids = query_if_ids[:-1]
+
+        if_ids = []
+        for if_id in query_if_ids:
+            if_ids.append(if_id[0])
+
+        get_figure_sql = ("SELECT * FROM InterviewFigures WHERE id=?")
+
+
+        dictAllInterviewFigureTypes = {}
+        for if_id in if_ids:
+            query_figure = query_db(get_figure_sql, (str(if_id),), True)
+            emotionalContext = findEmotionalContext(query_figure[2])
+
+            if query_figure[-1] not in dictAllInterviewFigureTypes:
+                dictByContext = {'Positive': [], 'Negative': [], 'Neutral': []}
+
+                objectInContext = dictByContext[emotionalContext]
+                objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
+                dictByContext[emotionalContext] = objectInContext
+
+                dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
+            else:
+                innerDict = dictAllInterviewFigureTypes[query_figure[-1]]
+                            
+                objectInContext = innerDict[emotionalContext]
+                objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
+                innerDict[emotionalContext] = objectInContext
+                dictAllInterviewFigureTypes[query_figure[-1]] = innerDict
+        interviewObjectDict.append(dictAllInterviewFigureTypes)
+    return json.dumps(interviewObjectDict)
 
 def findEmotionalContext(color):
     context = None
@@ -908,6 +941,7 @@ def addInterviewFigure():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
+"""
 def clearShapefiles():
     filesLocation = 'behaviourmapper/static/shapefiles/'
     for foldername in os.listdir(filesLocation):
@@ -921,10 +955,24 @@ def clearShapefiles():
             # w.point(0, 0)
             # w.record(0, 'Point')
             w.close()
+"""
 
-def doesFolderExist(folderName):
-    filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
-    if os.path.exists(filesLocation):
+def clearFolders(folder):
+    filesLocation = None
+    if folder == 'shapefiles':
+        filesLocation = Config.SHAPEFILES_FOLDER
+    if folder == 'geographicQuestioning':
+        filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    if filesLocation != None:
+        if type(filesLocation) == str:
+            for fileOrFolder in os.listdir(filesLocation):
+                locationFolder = os.path.join(filesLocation, fileOrFolder)
+                if os.path.isdir(locationFolder):
+                    shutil.rmtree(locationFolder)
+
+def doesFolderExist(location, folderName):
+    folder = os.path.join(location, folderName)
+    if os.path.exists(folder):
         return True
     return False
 
@@ -940,6 +988,7 @@ def sendFileToFrontend(file): #path, ziph):
     try:
         return send_file(placement)
     except FileNotFoundError:
+        print('File Not Found')
         abort(404)
 
 # zip only relevant files !!!
@@ -950,6 +999,8 @@ def zip_files(typeOfFiles):
                 filesLocation = Config.CSVFILES_FOLDER
             elif typeOfFiles == "shapefiles":
                 filesLocation = Config.SHAPEFILES_FOLDER
+            elif typeOfFiles == 'geographicQuestioning':
+                filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
             for filename in os.listdir(filesLocation):
                 f = os.path.join(filesLocation, filename)
                 arcname = f[len(filesLocation) + 1:]

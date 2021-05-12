@@ -79,6 +79,7 @@ function ManageProject() {
         })
         .then(response => response.blob())
       .then(blob => {
+        console.log('YYYYYY')
         var url = window.URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
