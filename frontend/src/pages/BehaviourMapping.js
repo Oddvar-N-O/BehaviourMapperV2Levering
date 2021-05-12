@@ -1107,6 +1107,10 @@ selectItemForContextMenu(e) {
     let image = this.myImage.current;
     this.drawCanvasMap(canvas, image);
   }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('scroll', this.handleScroll);
+  }
 
   drawCanvasMap(canvas, image) {
     let ctx = canvas.getContext("2d");
