@@ -1103,30 +1103,18 @@ selectItemForContextMenu(e) {
       //   setTimeout(() => this.loadFormerEvents(data), 500);
       // }
     // });
+    let canvas = this.canvas.current;
+    let image = this.myImage.current;
+    this.drawCanvasMap(canvas, image);
+  }
 
-    var firstTime = 0;
-    (function(canvas, image) {
-      window.addEventListener('resize', resizeCanvas, false);
-      
-      function resizeCanvas() {
-        canvas.width = window.innerWidth - 200;
-        canvas.height = window.innerHeight;
-        drawMap(); 
-      }
-      resizeCanvas();
-  
-      function drawMap() {
-        let ctx = canvas.getContext("2d");
-        if (firstTime === 0) {
-          image.onload = () => {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          }
-          firstTime++;
-        } else {
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        }
-      }
-    })(this.canvas.current, this.myImage.current);
+  drawCanvasMap(canvas, image) {
+    let ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth - 200;
+    canvas.height = window.innerHeight;
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
   }
 
   render() {
