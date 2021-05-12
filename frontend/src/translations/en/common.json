@@ -54,7 +54,10 @@
         "addPoint": "Add Point",
         "newInterviewee": "New Interviewee",
         "color": "Color",
-        "finishProject": "Finish Project"
+        "finishProject": "Finish Project",
+        "green": "Green",
+        "red": "Red",
+        "black": "Black"
     },
     "allIcons": {
         "man": "Man",
@@ -67,5 +70,9 @@
         "notes": "Notes",
         "update": "Update Comment",
         "save": "Save Comment"
+    },
+    "interview": {
+        "interview": "Interview",
+        "notes": "Notes"
     }
 }

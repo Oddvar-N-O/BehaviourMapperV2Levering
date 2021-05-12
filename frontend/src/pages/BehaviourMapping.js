@@ -1202,9 +1202,9 @@ selectItemForContextMenu(e) {
                 <li className="select">
                   <label>{t('mapping.color')}</label>
                   <select value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing}>
-                    <option value="#008000">Green</option>
-                    <option value="#ff0000">Red</option>
-                    <option value="#000000">Black</option>
+                    <option value="#008000">{t('mapping.green')}</option>
+                    <option value="#ff0000">{t('mapping.red')}</option>
+                    <option value="#000000">{t('mapping.black')}</option>
                   </select>
                 </li>
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>

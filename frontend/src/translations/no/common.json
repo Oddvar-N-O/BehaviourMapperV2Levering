@@ -54,7 +54,10 @@
         "addPoint": "Legg Til Punkt",
         "newInterviewee": "Nytt Intervjuobjekt",
         "color": "Farge",
-        "finishProject": "Avslutt"
+        "finishProject": "Avslutt",
+        "green": "Grønn",
+        "red": "Rød",
+        "black": "Svart"
     },
     "allIcons": {
         "man": "Mann",
@@ -67,6 +70,10 @@
         "notes": "Notater",
         "update": "Oppdater Kommentar",
         "save": "Lagre Kommentar"
+    },
+    "interview": {
+        "interview": "Intervju",
+        "notes": "Notater"
     }
 
 }
