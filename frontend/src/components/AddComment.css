@@ -2,8 +2,8 @@
     position: absolute;
     left: 27.5vw;
     top: 13.5vh;
-    width: 45vw;
-    height: 73vh;
+    width: 540px;
+    height: 520px;
     background-color: #222020;
     font-size: 27px;
     min-width: 500px;
@@ -20,8 +20,9 @@
     width: 80%;
 }
 .comment-box textarea {
-    height: 85%;
-    width: 100%;
+    height: 333px;
+    width: 432px;
+    margin: 5px 0;
 }
 .comment-box input {
     list-style: none;
@@ -49,9 +50,9 @@
 }
 .comment-box-heading .x {
     position: absolute;
-    right: 2vw;
-    top: 4vh;
-    font-size: 3.75vh;
+    right: 2px;
+    top: 4px;
+    font-size: 28px;
 }
 .comment-box .visible {
     display: "";

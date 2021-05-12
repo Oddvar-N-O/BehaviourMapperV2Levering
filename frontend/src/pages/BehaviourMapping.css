@@ -147,6 +147,8 @@
     flex-wrap: wrap;
     font-size: 48%;
     text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 
 /*ModImg*/
@@ -159,9 +161,8 @@
 }
 .map-image {
     height: 100vh;
-    width: calc(100vw - 200px);
+    width: auto;
     min-height: 300px;
-    min-width: 400px;
     order: 3;
 }
 .uploaded-map-image {

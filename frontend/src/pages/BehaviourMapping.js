@@ -760,13 +760,14 @@ class BehaviourMapping extends React.Component {
     let iconinfo;
     for (var i=0; i<this.state.newIconID; i++) {
       iconinfo = this.state.iconObjects[i];
-      icon = document.getElementById(iconinfo.id);
-      let coord = iconinfo.originalCoord;
-      if (icon != null) {
-        icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
-        icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      if (iconinfo !== undefined) {
+        icon = document.getElementById(iconinfo.id);
+        let coord = iconinfo.originalCoord;
+        if (icon != null) {
+          icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+          icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+        }
       }
-      
     }
   }
 
@@ -941,7 +942,7 @@ selectItemForContextMenu(e) {
 
   removeIcon() {
     this.stopPointing();
-    this.setState({actionID: 1}, function() {})
+    this.setState({actionID: 1})
     var icon = document.getElementById(this.state.selectedEventID);
     if (icon != null) {
       icon.remove();
@@ -961,7 +962,7 @@ selectItemForContextMenu(e) {
       })
 
       if (this.state.sendIconToBD === true) {
-        this.setState({sendIconToBD: false}, function() {});
+        this.setState({sendIconToBD: false});
       }  
     }
   }
@@ -1076,11 +1077,11 @@ selectItemForContextMenu(e) {
     this.initiateFormerScreenSize();
     if (!this.state.onlyObservation) {
       fetch(window.backend_url + `getquestionsfromproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
-    .then(res => res.json())
-    .then(data => {
-      this.setState({projectQuestions: data.questions});
-      this.sendInterviewObjectToDb(data.questions);
-    });
+      .then(res => res.json())
+      .then(data => {
+        this.setState({projectQuestions: data.questions});
+        this.sendInterviewObjectToDb(data.questions);
+      });
     }
     
     window.addEventListener('resize', this.handleResize);
@@ -1109,30 +1110,22 @@ selectItemForContextMenu(e) {
       //   setTimeout(() => this.loadFormerEvents(data), 500);
       // }
     // });
+    let canvas = this.canvas.current;
+    let image = this.myImage.current;
+    this.drawCanvasMap(canvas, image);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('scroll', this.handleScroll);
+  }
 
-    var firstTime = 0;
-    (function(canvas, image) {
-      window.addEventListener('resize', resizeCanvas, false);
-      
-      function resizeCanvas() {
-        canvas.width = window.innerWidth - 200;
-        canvas.height = window.innerHeight;
-        drawMap(); 
-      }
-      resizeCanvas();
-  
-      function drawMap() {
-        let ctx = canvas.getContext("2d");
-        if (firstTime === 0) {
-          image.onload = () => {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          }
-          firstTime++;
-        } else {
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        }
-      }
-    })(this.canvas.current, this.myImage.current);
+  drawCanvasMap(canvas, image) {
+    let ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth - 200;
+    canvas.height = window.innerHeight;
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
   }
 
   render() {
@@ -1215,9 +1208,9 @@ selectItemForContextMenu(e) {
                 <li className="select">
                   <label>{t('mapping.color')}</label>
                   <select value={this.state.chosenColorForDrawing} onChange={this.chooseColorForDrawing}>
-                    <option value="#008000">Green</option>
-                    <option value="#ff0000">Red</option>
-                    <option value="#000000">Black</option>
+                    <option value="#008000">{t('mapping.green')}</option>
+                    <option value="#ff0000">{t('mapping.red')}</option>
+                    <option value="#000000">{t('mapping.black')}</option>
                   </select>
                 </li>
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
