@@ -48,9 +48,9 @@
 }
 .interview-box-heading .x {
     position: absolute;
-    right: 2vw;
-    top: 4vh;
-    font-size: 3.75vh;
+    right: 2px;
+    top: 4px;
+    font-size: 30px;
 }
 .interview-box .visible {
     display: "";
