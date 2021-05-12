@@ -760,13 +760,14 @@ class BehaviourMapping extends React.Component {
     let iconinfo;
     for (var i=0; i<this.state.newIconID; i++) {
       iconinfo = this.state.iconObjects[i];
-      icon = document.getElementById(iconinfo.id);
-      let coord = iconinfo.originalCoord;
-      if (icon != null) {
-        icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
-        icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      if (iconinfo !== undefined) {
+        icon = document.getElementById(iconinfo.id);
+        let coord = iconinfo.originalCoord;
+        if (icon != null) {
+          icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+          icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+        }
       }
-      
     }
   }
 
@@ -941,7 +942,7 @@ selectItemForContextMenu(e) {
 
   removeIcon() {
     this.stopPointing();
-    this.setState({actionID: 1}, function() {})
+    this.setState({actionID: 1})
     var icon = document.getElementById(this.state.selectedEventID);
     if (icon != null) {
       icon.remove();
@@ -961,7 +962,7 @@ selectItemForContextMenu(e) {
       })
 
       if (this.state.sendIconToBD === true) {
-        this.setState({sendIconToBD: false}, function() {});
+        this.setState({sendIconToBD: false});
       }  
     }
   }
