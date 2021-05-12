@@ -159,9 +159,8 @@
 }
 .map-image {
     height: 100vh;
-    width: calc(100vw - 200px);
+    width: auto;
     min-height: 300px;
-    min-width: 400px;
     order: 3;
 }
 .uploaded-map-image {
