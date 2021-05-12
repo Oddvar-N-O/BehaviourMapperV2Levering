@@ -829,12 +829,12 @@ finishProject() {
     let time = String(new Date());
     this.takeScreenshot();
     fetch(window.backend_url + `updateiconsize?p_id=${this.state.p_id}&iconSize=${this.state.eventSize}`);
-    setTimeout(() => {
-    fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
-    setTimeout(() => {
-      this.props.history.push({pathname: "/startpage"})
-      }, 1500);
-    }, 200);
+      setTimeout(() => {
+        fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+          setTimeout(() => {
+            this.props.history.push({pathname: "/startpage"})
+            }, 1500);
+      }, 200);
   }
 }
 
@@ -1062,6 +1062,12 @@ selectItemForContextMenu(e) {
       })
     }
     
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('scroll', this.handleScroll);
+    document.removeEventListener('resize', this.handleResize);
+    // document.removeEventListener('scroll', this.handleScroll);
   }
 
   componentDidMount() {

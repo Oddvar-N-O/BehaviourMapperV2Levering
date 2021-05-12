@@ -753,7 +753,13 @@ def createARCGIS():
             for i in range(len(sortedInterviewObjects)):
                 interviewObjectDict = sortedInterviewObjects[i]
                 writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, i)
-                sleep(1)
+                """
+                if i == 0:
+                    zip_files('geographicQuestioning')
+                else:
+                    append_zip_folders('geographicQuestioning')
+                """
+            sleep(1)
             zip_files('geographicQuestioning')
             clearFolders('geographicQuestioning')
             return sendFileToFrontend('geographicQuestioning.zip')
@@ -781,12 +787,13 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
         for innerKey in dict.keys(innerDict):
             foldername = key + innerKey
             exists = doesFolderExist(path, foldername) # also check if changed
+            if exists == True: # for senere utvikling av vilkårlige ikoner
+                filename = findFileName(path, foldername)
+
             eventGroup = innerDict[innerKey]
             if len(eventGroup) != 0:
-                if exists == False: 
-                    makeFolder(path, foldername)
-
-                filename = foldername + 'SHP'
+                # if exists == False: 
+                #   makeFolder(path, foldername)
                 shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
                 w = shp.Writer(shapeFileName)
                 
@@ -810,44 +817,43 @@ def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rig
         for context in dict.keys(innerDict):
             foldername = objectType + context
             exists = doesFolderExist(path, foldername)
-            if exists == False: 
-                makeFolder(path, foldername)
+            # if exists == False: 
+            #     makeFolder(path, foldername)
+            if exists == True: # for senere utvikling av vilkårlige ikoner
+                filename = findFileName(path, foldername)
 
             dictObjectByContext = innerDict[context]
             point_ID = 0
-
-            shapeFileName = 'behaviourmapper/static/geographicQuestioningFolder/' + foldername + '/' + foldername + '_InterviewObjectNumber_' + str(interviewObjectNumber)
+            
+            shapeFileName = 'behaviourmapper/static/geographicQuestioningFolder/' + foldername + '/' + foldername + '_' + str(interviewObjectNumber)
             if dictObjectByContext != []:
+                # print(shapeFileName)
                 w = shp.Writer(shapeFileName)
                 w.field('Background', 'C', '40')
-            for i in range(len(dictObjectByContext)):
+                for i in range(len(dictObjectByContext)):
 
-                drawnObject = dictObjectByContext[i]
+                    drawnObject = dictObjectByContext[i]
 
-                coordinateList = drawnObject[1]
-                floatCoordinateList = getElementXandY(drawnObject[1])
-                pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
-                screenSizeWhenCreated = drawnObject[3]
-                for j in range(len(pairsOfCoordinates)):
-                    coordinates = pairsOfCoordinates[j]
-                    newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)
-                    pairsOfCoordinates[j] = newCoords
-                if objectType == 'Line':
-                    w.line([pairsOfCoordinates])
-                    w.record(str(point_ID), str(objectType))
-                elif objectType == 'Area':
-                    w.poly([pairsOfCoordinates])
-                    w.record(str(point_ID), str(objectType))
-                elif objectType == 'Point':
-                    coord = pairsOfCoordinates[0]
-                    w.point(coord[0], coord[1])
-                    w.record(str(point_ID), str(objectType))
-                point_ID += 1
-            w.close()
-
-def makeFolder(location, foldername):
-    path = os.path.join(location, foldername)
-    os.mkdir(path)
+                    coordinateList = drawnObject[1]
+                    floatCoordinateList = getElementXandY(drawnObject[1])
+                    pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
+                    screenSizeWhenCreated = drawnObject[3]
+                    for j in range(len(pairsOfCoordinates)):
+                        coordinates = pairsOfCoordinates[j]
+                        newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)
+                        pairsOfCoordinates[j] = newCoords
+                    if objectType == 'Line':
+                        w.line([pairsOfCoordinates])
+                        w.record(str(point_ID), str(objectType))
+                    elif objectType == 'Area':
+                        w.poly([pairsOfCoordinates])
+                        w.record(str(point_ID), str(objectType))
+                    elif objectType == 'Point':
+                        coord = pairsOfCoordinates[0]
+                        w.point(coord[0], coord[1])
+                        w.record(str(point_ID), str(objectType))
+                    point_ID += 1
+                w.close()
 
 
 def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
@@ -941,34 +947,41 @@ def addInterviewFigure():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-"""
-def clearShapefiles():
-    filesLocation = 'behaviourmapper/static/shapefiles/'
-    for foldername in os.listdir(filesLocation):
-        exists = doesFolderExist(foldername)
-        path = filesLocation + foldername 
-        if exists == True & os.path.isdir(path):
-            filename = findShapefileName(foldername)
-            shapeFileName = filesLocation + foldername + '/' + filename
-            w = shp.Writer(shapeFileName)
-            w.field('Background', 'C', '40')
-            # w.point(0, 0)
-            # w.record(0, 'Point')
-            w.close()
-"""
+
 
 def clearFolders(folder):
-    filesLocation = None
+    folderLocation = None
     if folder == 'shapefiles':
-        filesLocation = Config.SHAPEFILES_FOLDER
+        folderLocation = Config.SHAPEFILES_FOLDER
     if folder == 'geographicQuestioning':
-        filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+        folderLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    if folderLocation != None:
+        if type(folderLocation) == str:
+
+            for fileOrFolder in os.listdir(folderLocation):
+                shapefileFolder = os.path.join(folderLocation, fileOrFolder)
+                print('SHPFILE: ' + str(shapefileFolder))
+                if os.path.isdir(shapefileFolder):
+                    print(shapefileFolder)
+                    for shapefile in os.listdir(shapefileFolder):
+                        print('--: ' + str(shapefile))
+                        filePath = os.path.join(shapefileFolder, shapefile)
+                        # print(filePath)
+                        os.remove(filePath)
+    
+    """
     if filesLocation != None:
         if type(filesLocation) == str:
-            for fileOrFolder in os.listdir(filesLocation):
-                locationFolder = os.path.join(filesLocation, fileOrFolder)
-                if os.path.isdir(locationFolder):
-                    shutil.rmtree(locationFolder)
+            for foldername in os.listdir(filesLocation):
+                exists = doesFolderExist(filesLocation, foldername)
+                path = filesLocation + foldername 
+                if exists == True & os.path.isdir(path):
+                    filename = findFileName(path, foldername)
+                    shapeFileName = filesLocation + foldername + '/' + filename
+                    w = shp.Writer(shapeFileName)
+                    w.field('Background', 'C', '40')
+                    w.close()
+    """
 
 def doesFolderExist(location, folderName):
     folder = os.path.join(location, folderName)
@@ -976,11 +989,12 @@ def doesFolderExist(location, folderName):
         return True
     return False
 
-def findShapefileName(folderName):
-    filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
+def findFileName(path, foldername):
+    filesLocation = os.path.join(path, foldername)
     for filename in os.listdir(filesLocation):
         if filename.endswith((".shp", "_files")):
             return filename
+    return None
 
 
 def sendFileToFrontend(file): #path, ziph):
@@ -994,25 +1008,43 @@ def sendFileToFrontend(file): #path, ziph):
 # zip only relevant files !!!
 def zip_files(typeOfFiles):
     with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
-            absPath = os.path.abspath(typeOfFiles)
-            if typeOfFiles == "csvfiles":
-                filesLocation = Config.CSVFILES_FOLDER
-            elif typeOfFiles == "shapefiles":
-                filesLocation = Config.SHAPEFILES_FOLDER
-            elif typeOfFiles == 'geographicQuestioning':
-                filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
-            for filename in os.listdir(filesLocation):
-                f = os.path.join(filesLocation, filename)
-                arcname = f[len(filesLocation) + 1:]
-                if os.path.isfile(f):
-                    my_zip.write(f, arcname=arcname)
-                elif os.path.isdir(f):
-                    for root, dirs, files in os.walk(f):
-                        for fname in files:
-                            my_zip.write(os.path.join(root, fname),
-                            os.path.relpath(os.path.join(root, fname),
-                            os.path.join(f, '..')))
-                    
+        absPath = os.path.abspath(typeOfFiles)
+        if typeOfFiles == "csvfiles":
+            filesLocation = Config.CSVFILES_FOLDER
+        elif typeOfFiles == "shapefiles":
+            filesLocation = Config.SHAPEFILES_FOLDER
+        elif typeOfFiles == 'geographicQuestioning':
+            filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+        for filename in os.listdir(filesLocation):
+            f = os.path.join(filesLocation, filename)
+            arcname = f[len(filesLocation) + 1:]
+            if os.path.isfile(f):
+                my_zip.write(f, arcname=arcname)
+            elif os.path.isdir(f):
+                for root, dirs, files in os.walk(f):
+                    for fname in files:
+                        my_zip.write(os.path.join(root, fname),
+                        os.path.relpath(os.path.join(root, fname),
+                        os.path.join(f, '..')))
+
+def append_zip_folders(typeOfFiles):
+    with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'a', compression=zipfile.ZIP_DEFLATED) as my_zip:
+        absPath = os.path.abspath(typeOfFiles)
+        if typeOfFiles == "csvfiles":
+            filesLocation = Config.CSVFILES_FOLDER
+        elif typeOfFiles == "shapefiles":
+            filesLocation = Config.SHAPEFILES_FOLDER
+        elif typeOfFiles == 'geographicQuestioning':
+            filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+        for filename in os.listdir(filesLocation):
+            f = os.path.join(filesLocation, filename)
+            arcname = f[len(filesLocation) + 1:]
+            if os.path.isdir(f):
+                for root, dirs, files in os.walk(f):
+                    for fname in files:      
+                        my_zip.write(os.path.join(root, fname),
+                        os.path.relpath(os.path.join(root, fname),
+                        os.path.join(f, '..')))
 
 def addMapName(mapname, p_id, u_id):
     add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
