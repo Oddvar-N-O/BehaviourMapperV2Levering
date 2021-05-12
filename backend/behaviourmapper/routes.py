@@ -794,7 +794,7 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
             if len(eventGroup) != 0:
                 # if exists == False: 
                 #   makeFolder(path, foldername)
-                shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
+                shapeFileName = 'behaviourmapper/static/shapefiles/' + str(foldername) + '/' + str(filename)
                 w = shp.Writer(shapeFileName)
                 
                 w.field('Background', 'C', '40')
@@ -827,7 +827,6 @@ def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rig
             
             shapeFileName = 'behaviourmapper/static/geographicQuestioningFolder/' + foldername + '/' + foldername + '_' + str(interviewObjectNumber)
             if dictObjectByContext != []:
-                # print(shapeFileName)
                 w = shp.Writer(shapeFileName)
                 w.field('Background', 'C', '40')
                 for i in range(len(dictObjectByContext)):
@@ -970,7 +969,7 @@ def doesFolderExist(location, folderName):
     if os.path.exists(folder):
         return True
     return False
-
+ 
 def findFileName(path, foldername):
     filesLocation = os.path.join(path, foldername)
     for filename in os.listdir(filesLocation):
