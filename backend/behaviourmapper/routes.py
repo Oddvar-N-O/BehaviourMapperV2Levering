@@ -924,7 +924,7 @@ def findEmotionalContext(color):
         context = 'Neutral'
     return context
 
-@bp.route('addinterviewfigure', methods=['POST'])
+@bp.route('/addinterviewfigure', methods=['POST'])
 def addInterviewFigure():
     if authenticateUser(request.form.get('u_id')):
         add_int_figure = ('INSERT INTO InterviewFigures'
