@@ -960,28 +960,10 @@ def clearFolders(folder):
 
             for fileOrFolder in os.listdir(folderLocation):
                 shapefileFolder = os.path.join(folderLocation, fileOrFolder)
-                print('SHPFILE: ' + str(shapefileFolder))
                 if os.path.isdir(shapefileFolder):
-                    print(shapefileFolder)
                     for shapefile in os.listdir(shapefileFolder):
-                        print('--: ' + str(shapefile))
                         filePath = os.path.join(shapefileFolder, shapefile)
-                        # print(filePath)
                         os.remove(filePath)
-    
-    """
-    if filesLocation != None:
-        if type(filesLocation) == str:
-            for foldername in os.listdir(filesLocation):
-                exists = doesFolderExist(filesLocation, foldername)
-                path = filesLocation + foldername 
-                if exists == True & os.path.isdir(path):
-                    filename = findFileName(path, foldername)
-                    shapeFileName = filesLocation + foldername + '/' + filename
-                    w = shp.Writer(shapeFileName)
-                    w.field('Background', 'C', '40')
-                    w.close()
-    """
 
 def doesFolderExist(location, folderName):
     folder = os.path.join(location, folderName)
