@@ -1042,10 +1042,10 @@ selectItemForContextMenu(e) {
     }
   }
 
-  /* componentWillUnmount() {
+  componentWillUnmount() {
     document.removeEventListener('scroll', this.handleScroll);
     document.removeEventListener('resize', this.handleResize);
-  }*/
+  }
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
