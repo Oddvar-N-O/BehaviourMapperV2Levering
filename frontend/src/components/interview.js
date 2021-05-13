@@ -1,5 +1,5 @@
 import React from 'react'
-import './interview.css'
+import './Interview.css'
 import * as AiIcons from 'react-icons/ai';
 import { withTranslation } from 'react-i18next';
 
@@ -46,7 +46,6 @@ class Interview extends React.Component {
                         value={this.state.interview} 
                         onChange={this.handleChange}
                     />
-                    {/* <input type="submit" value="Save interview" onClick={this.props.save} className={this.state.alreadySaved ? "invisible" : "visible"}></input> */}
                 </form>
                 
             </div>
@@ -55,4 +54,4 @@ class Interview extends React.Component {
 }
 
 
-export default withTranslation('common')(Interview)
+export default withTranslation('common', {withRef: true})(Interview)
