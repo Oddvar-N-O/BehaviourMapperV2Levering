@@ -763,11 +763,11 @@ def createARCGIS():
         if geografiskSpørreundersøkelse == "0": # CHANGE THIS TO NONE LATER
             eventsJSON = get_events_func(pid)
             events = json.loads(eventsJSON)
-            # clearFolders('shapefiles')
+            emptyShapefiles('shapefiles')
             sortedEvents = generateDictOfEvents(events)
-            writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
-            zip_files('shapefiles')
-            # clearFolders('shapefiles')
+            sendTheseFoldersList = writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
+            zip_files('shapefiles', sendTheseFoldersList)
+            # clearFolders('shapefiles') # remove folders
             return sendFileToFrontend('shapefiles.zip')
 
         return "empty file"
@@ -775,8 +775,13 @@ def createARCGIS():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
+def makeFolder(location, foldername):
+    path = os.path.join(location, foldername)
+    os.mkdir(path)
+
 def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
     path = Config.SHAPEFILES_FOLDER
+    sendTheseFoldersList = []
     for key in dict.keys(sortedEvents):
         innerDict = sortedEvents[key]
         for innerKey in dict.keys(innerDict):
@@ -784,39 +789,39 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
             # print(foldername)
             exists = doesFolderExist(path, foldername) # also check if changed
             filename = foldername
+
+            if exists == False:
+                # print(foldername)
+                makeFolder(path, foldername)
+
             if exists == True: # for senere utvikling av vilkårlige ikoner
                 filename = findFileName(path, foldername)
-                # print(filename)
 
             eventGroup = innerDict[innerKey]
-            if len(eventGroup) != 0 :
-                # if exists == False:
-                # print('Fol + Fil: ' + foldername + ' ' + filename)
-                #   makeFolder(path, foldername)
-                shapeFileName = path + '/' + str(foldername) + '/' + str(filename)
-                # w = shp.Writer(shapeFileName) # det er her i w = shp.Writer
+            
+            # if len(eventGroup) != 0:
+            #     sendTheseFoldersList.append(foldername)
+            shapeFileName = path + '/' + str(foldername) + '/' + str(filename)
+            
+            w = shp.Writer(shapeFileName)
+            w.field('Background', 'C', '40')
+            # Copy over the existing dbf records
+            # w.records.extend(r.records())
 
-                r = shp.Reader(shapeFileName)
-                # Create a shapefile writer using the same shape type as our reader
-                # print(r.shapeType)
-                w = shp.Writer(str(r.shapeType))
-                # Copy over the existing dbf fields
-                # w.fields = list(r.fields)
-                w.field('Background', 'C', '40')
-                # Copy over the existing dbf records
-                # w.records.extend(r.records())
+            point_ID = 1
 
-                point_ID = 1
-                
-                for event in eventGroup:
-                    newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
-                    x = newCoords[0]
-                    y = newCoords[1]
-                    w.point(x, y)
-                    w.record(str(point_ID), 'Point')
-                    point_ID += 1
-                w.close()
-
+            if len(eventGroup) != 0:
+                sendTheseFoldersList.append(foldername)
+            
+            for event in eventGroup:
+                newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
+                x = newCoords[0]
+                y = newCoords[1]
+                w.point(x, y)
+                w.record(str(point_ID), 'Point')
+                point_ID += 1
+            w.close()
+    return sendTheseFoldersList
 
 def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, interviewObjectNumber):
     path = Config.GEOGRAPHIC_QUESTIONING_FOLDER
@@ -972,6 +977,25 @@ def clearFolders(folder):
                         filePath = os.path.join(shapefileFolder, shapefile)
                         os.remove(filePath)
 
+def emptyShapefiles(folder):
+    print('yeyeyeyeyyeye')
+    folderLocation = None
+    if folder == 'shapefiles':
+        folderLocation = Config.SHAPEFILES_FOLDER
+    if folder == 'geographicQuestioning':
+        folderLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    if folderLocation != None:
+        if type(folderLocation) == str:
+            for foldername in os.listdir(folderLocation):
+                exists = doesFolderExist(folderLocation, foldername)
+                path = folderLocation + foldername 
+                if exists == True & os.path.isdir(path):
+                    filename = findFileName(path, foldername)
+                    shapeFileName = folderLocation + foldername + '/' + filename
+                    w = shp.Writer(shapeFileName)
+                    w.field('Background', 'C', '40')
+                    w.close()
+
 def doesFolderExist(location, folderName):
     folder = os.path.join(location, folderName)
     if os.path.exists(folder):
@@ -995,7 +1019,8 @@ def sendFileToFrontend(file): #path, ziph):
         abort(404)
 
 # zip only relevant files !!!
-def zip_files(typeOfFiles):
+def zip_files(typeOfFiles, modifiedFoldersList):
+    print(modifiedFoldersList)
     with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
         absPath = os.path.abspath(typeOfFiles)
         if typeOfFiles == "csvfiles":
@@ -1010,11 +1035,12 @@ def zip_files(typeOfFiles):
             if os.path.isfile(f):
                 my_zip.write(f, arcname=arcname)
             elif os.path.isdir(f):
-                for root, dirs, files in os.walk(f):
-                    for fname in files:
-                        my_zip.write(os.path.join(root, fname),
-                        os.path.relpath(os.path.join(root, fname),
-                        os.path.join(f, '..')))
+                if filename in modifiedFoldersList:
+                    for root, dirs, files in os.walk(f):
+                        for fname in files:
+                            my_zip.write(os.path.join(root, fname),
+                            os.path.relpath(os.path.join(root, fname),
+                            os.path.join(f, '..')))
 
 def append_zip_folders(typeOfFiles):
     with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'a', compression=zipfile.ZIP_DEFLATED) as my_zip:
