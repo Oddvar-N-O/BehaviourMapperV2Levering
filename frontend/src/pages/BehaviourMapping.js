@@ -442,6 +442,8 @@ class BehaviourMapping extends React.Component {
     }
 
   newInterviewee() {
+    console.log('PROJETQUESTIONS: ' + this.state.projectQuestions)
+    console.log('PROJETQUESTIONS: ' + this.state.projectQuestions)
     if (window.confirm("This will clear and save all work for the current interviewee. \n\n Do you want to continue?")) {
       this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
       this.clearCanvas();
@@ -1065,13 +1067,14 @@ selectItemForContextMenu(e) {
     
   }
 
-  componentWillUnmount() {
+  /* componentWillUnmount() {
     document.removeEventListener('scroll', this.handleScroll);
     document.removeEventListener('resize', this.handleResize);
-  }
+  }*/
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
+
     this.findScreenSize();
     this.initiateFormerScreenSize();
     if (!this.state.onlyObservation) {
