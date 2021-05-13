@@ -235,7 +235,7 @@ class NewProject extends React.Component {
                 <div className="new-project">
                     {loadingGif}
                     <div className={ this.state.fromLoadMap ? 'new-project-box-upload' : 'new-project-box'}>
-                        <Link to="/startpage" className="close-icon">
+                        <Link to="/startpage" className={this.state.fromLoadMap ? "close-icon-upload" : "close-icon"}>
                             <AiIcons.AiOutlineClose />
                         </Link>
                         <div id="heading-and-form">

@@ -26,12 +26,12 @@
 }
 .comment-box input {
     list-style: none;
-    padding: 0.5vh 2vh;
-    margin: 1vh;
+    padding: 4px 16px;
+    margin: 7px;
     color: #222020;
     border-radius: 25px;
     opacity: 0.85; 
-    font-size: 3vh;
+    font-size: 22px;
     text-align: center; 
     cursor: pointer;
 }
@@ -44,8 +44,8 @@
 }
 .comment-box-heading h2 {
     text-align: center;
-    font-size: 7.5vh;
-    padding-bottom: 2vh;
+    font-size: 50px;
+    padding-bottom: 12px;
     color: #58A4B0;
 }
 .comment-box-heading .x {
