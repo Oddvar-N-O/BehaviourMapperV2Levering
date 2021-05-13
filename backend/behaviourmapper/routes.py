@@ -753,12 +753,6 @@ def createARCGIS():
             for i in range(len(sortedInterviewObjects)):
                 interviewObjectDict = sortedInterviewObjects[i]
                 writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, i)
-                """
-                if i == 0:
-                    zip_files('geographicQuestioning')
-                else:
-                    append_zip_folders('geographicQuestioning')
-                """
             sleep(1)
             zip_files('geographicQuestioning')
             clearFolders('geographicQuestioning')
@@ -772,7 +766,7 @@ def createARCGIS():
             sortedEvents = generateDictOfEvents(events)
             writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
             zip_files('shapefiles')
-            clearFolders('shapefiles')
+            # clearFolders('shapefiles')
             return sendFileToFrontend('shapefiles.zip')
 
         return "empty file"
@@ -791,11 +785,14 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
                 filename = findFileName(path, foldername)
 
             eventGroup = innerDict[innerKey]
-            if len(eventGroup) != 0 and filename != None:
+            if len(eventGroup) != 0 :
                 # if exists == False: 
                 #   makeFolder(path, foldername)
                 shapeFileName = 'behaviourmapper/static/shapefiles/' + str(foldername) + '/' + str(filename)
-                w = shp.Writer(shapeFileName)
+                # r = shp.Reader(shapeFileName)
+                w = shp.Writer(shapeFileName) # det er her i w = shp.Writer
+                # w.fields = list(r.fields)
+                # w = shp.Writer(shapeFileName)
                 
                 w.field('Background', 'C', '40')
                 point_ID = 1
