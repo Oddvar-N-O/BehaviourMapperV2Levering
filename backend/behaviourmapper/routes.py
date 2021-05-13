@@ -722,7 +722,7 @@ def generateDictOfEvents(events):
             allPersonTypeEvents.append(event)
             dictAllEventsOfGroup[personType] = allPersonTypeEvents
 
-    sortedDict['All'] = dictAllEventsOfGroup
+    sortedDict['all'] = dictAllEventsOfGroup
     return sortedDict
 
 @bp.route('/createarcgis', methods=['POST'])
@@ -755,7 +755,7 @@ def createARCGIS():
                 writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, i)
             sleep(1)
             zip_files('geographicQuestioning')
-            clearFolders('geographicQuestioning')
+            # clearFolders('geographicQuestioning')
             return sendFileToFrontend('geographicQuestioning.zip')
         
 
@@ -763,6 +763,7 @@ def createARCGIS():
         if geografiskSpørreundersøkelse == "0": # CHANGE THIS TO NONE LATER
             eventsJSON = get_events_func(pid)
             events = json.loads(eventsJSON)
+            # clearFolders('shapefiles')
             sortedEvents = generateDictOfEvents(events)
             writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
             zip_files('shapefiles')
@@ -780,21 +781,31 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
         innerDict = sortedEvents[key]
         for innerKey in dict.keys(innerDict):
             foldername = key + innerKey
+            # print(foldername)
             exists = doesFolderExist(path, foldername) # also check if changed
+            filename = foldername
             if exists == True: # for senere utvikling av vilkårlige ikoner
                 filename = findFileName(path, foldername)
+                # print(filename)
 
             eventGroup = innerDict[innerKey]
             if len(eventGroup) != 0 :
-                # if exists == False: 
+                # if exists == False:
+                # print('Fol + Fil: ' + foldername + ' ' + filename)
                 #   makeFolder(path, foldername)
-                shapeFileName = 'behaviourmapper/static/shapefiles/' + str(foldername) + '/' + str(filename)
-                # r = shp.Reader(shapeFileName)
-                w = shp.Writer(shapeFileName) # det er her i w = shp.Writer
+                shapeFileName = path + '/' + str(foldername) + '/' + str(filename)
+                # w = shp.Writer(shapeFileName) # det er her i w = shp.Writer
+
+                r = shp.Reader(shapeFileName)
+                # Create a shapefile writer using the same shape type as our reader
+                # print(r.shapeType)
+                w = shp.Writer(str(r.shapeType))
+                # Copy over the existing dbf fields
                 # w.fields = list(r.fields)
-                # w = shp.Writer(shapeFileName)
-                
                 w.field('Background', 'C', '40')
+                # Copy over the existing dbf records
+                # w.records.extend(r.records())
+
                 point_ID = 1
                 
                 for event in eventGroup:
@@ -972,7 +983,7 @@ def findFileName(path, foldername):
     for filename in os.listdir(filesLocation):
         if filename.endswith((".shp", "_files")):
             return filename
-    return None
+    return foldername
 
 
 def sendFileToFrontend(file): #path, ziph):
