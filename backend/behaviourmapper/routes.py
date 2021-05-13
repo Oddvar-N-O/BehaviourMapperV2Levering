@@ -761,7 +761,6 @@ def createARCGIS():
                     mode = 'a'
                 else:
                     zip_files('geographicQuestioning', str(mode), interviewFolderList)
-                print(interviewFolderList)
             return sendFileToFrontend('geographicQuestioning.zip')
 
         if geografiskSpørreundersøkelse == "0": # CHANGE THIS TO NONE LATER
@@ -829,23 +828,16 @@ def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rig
             if len(dictObjectByContext) > 0:
                 filename = objectType + context
                 foldername = objectType + context + '_INtObj_' + str(interviewObjectNumber+1)
-
                 incrementGeographicFolderNames(filename, foldername)
                 sendTheseFoldersList.append(foldername)
                 exists = doesFolderExist(path, foldername)
-
                 if exists == True: # for senere utvikling av vilkårlige ikoner
                     filename = findFileName(path, foldername)
                 
                 dictObjectByContext = innerDict[context]
                 point_ID = 0
-
-                if len(dictObjectByContext) > 0:
-                    sendTheseFoldersList.append(foldername)
-                
                 shapeFileName = path + '/' + foldername + '/' + filename
                 if dictObjectByContext != []:
-                    # print('Shapefilename: ' + shapeFileName)
                     w = shp.Writer(shapeFileName)
                     w.field('Background', 'C', '40')
                     for i in range(len(dictObjectByContext)):
@@ -874,7 +866,6 @@ def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rig
 
 def incrementGeographicFolderNames(oldfoldername, newname):
     path = Config.GEOGRAPHIC_QUESTIONING_FOLDER
-    # print(path) # dette er folderen
     for filename in os.listdir(path):
         foldername_path = os.path.join(path, filename)
         if os.path.isdir(foldername_path):
@@ -890,11 +881,8 @@ def resetGeographicFolderNames():
         if os.path.isdir(foldername_path):
             filename_split = filename.split('_')
             if len(filename_split) > 1:
-                print(filename_split)
                 newname = filename_split[0]
-                print(newname)
                 newname_path = os.path.join(path, newname)
-                print('--------------')
                 os.rename(foldername_path, str(newname_path))
 
 def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
