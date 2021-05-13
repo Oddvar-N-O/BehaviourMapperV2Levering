@@ -1,6 +1,6 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
-import Interview from '../components/interview';
+import Interview from '../components/Interview';
 import AddComment from '../components/AddComment';
 import ContextMenu from '../components/ContextMenu';
 import './BehaviourMapping.css';
@@ -442,8 +442,6 @@ class BehaviourMapping extends React.Component {
     }
 
   newInterviewee() {
-    console.log('PROJETQUESTIONS: ' + this.state.projectQuestions)
-    console.log('PROJETQUESTIONS: ' + this.state.projectQuestions)
     if (window.confirm("This will clear and save all work for the current interviewee. \n\n Do you want to continue?")) {
       this.updateInterviewObjectInDb(this.interviewElement.current.state.interview);
       this.clearCanvas();
@@ -1213,7 +1211,6 @@ selectItemForContextMenu(e) {
                 </li>
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
               </ul>
-              
           </div>
           <div className={screenshotDivClassList}>
             <canvas 
