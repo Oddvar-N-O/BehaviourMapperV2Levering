@@ -16,7 +16,6 @@ import surveyNorsk from './images/surveyNorsk.png'
 import surveyEnglish from './images/surveyEnglish.png'
 
 
-
 class BehaviourMapping extends React.Component {
   constructor(props) {
       super(props)
@@ -114,7 +113,6 @@ class BehaviourMapping extends React.Component {
   }
 
   sendEventToDatabase() {
-    // rettningen, xogykoordinat, tid, icon
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
@@ -147,7 +145,6 @@ class BehaviourMapping extends React.Component {
   }
 
   newIcon() {
-    // this.hideIcon();
     this.setState({ addIcon: !this.state.addIcon });
     this.setState({showContextMenu: false});
   }
@@ -176,8 +173,6 @@ class BehaviourMapping extends React.Component {
           break;
       }
       let innerHTML = descr[0] + ": " + descr[1];
-      // this.setState({ourEventName: descr[0]}, function() {});
-      // this.setState({ourEventGroup: descr[1]}, function() {});    
       return innerHTML; 
     }
   }
@@ -228,7 +223,6 @@ class BehaviourMapping extends React.Component {
       }
     }
   }
-
 
   placeIcon(event) {
     this.findScreenSize()
@@ -338,7 +332,6 @@ class BehaviourMapping extends React.Component {
   }
 
   showAll() {
-    // this.stopPointing()
     var icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
@@ -349,7 +342,6 @@ class BehaviourMapping extends React.Component {
   }
 
   hideAll() {
-    // this.stopPointing()
     let icon;
     for (var i=0; i<this.state.newIconID; i++) {
       icon = document.getElementById(i.toString());
@@ -377,7 +369,6 @@ class BehaviourMapping extends React.Component {
   }
 
   findScreenSize() {
-    // this.stopPointing()
     let mapImage = document.querySelector('.map-image');
     this.setState({
       currentScreenSize: {
@@ -458,7 +449,6 @@ class BehaviourMapping extends React.Component {
     ctx.drawImage(image, 0,0,canvas.width,canvas.height);
     this.interviewElement.current.clearInterview();
     this.clearDrawing();
-
   }
 
   sendInterviewObjectToDb(interviewData) {
@@ -617,7 +607,6 @@ class BehaviourMapping extends React.Component {
     let width = canvas.width;
     let height = canvas.height;
     return [width, height]
-
   }
 
   sendInterviewFigureToDb() {
@@ -651,7 +640,6 @@ class BehaviourMapping extends React.Component {
       }, function() {});
     }
   }
-
 
   loadFormerEvents(data) {
     let formerEvents = [];
@@ -770,7 +758,6 @@ class BehaviourMapping extends React.Component {
       }
     }
   }
-
   
   takeScreenshot() {
     if (this.state.onlyObservation) {
@@ -796,8 +783,7 @@ class BehaviourMapping extends React.Component {
         body: data,})
       }).catch(function (error) {
           console.error('oops, something went wrong!', error);
-      });
-    
+    });
   }
 
   // https://stackoverflow.com/questions/4998908/convert-data-uri-to-file-then-append-to-formdata
@@ -817,7 +803,6 @@ class BehaviourMapping extends React.Component {
   for (var i = 0; i < byteString.length; i++) {
       ia[i] = byteString.charCodeAt(i);
   }
-
   return new Blob([ia], {type:mimeString});
 }
 
@@ -838,7 +823,6 @@ finishProject() {
       }, 200);
   }
 }
-
 
 changeSizeOfIcons(event) {
   if (event.target.textContent === "+") {
@@ -879,7 +863,6 @@ changeShowContextMenu() {
   }
 }
 
-
 selectItemForContextMenu(e) {
   let list = document.getElementById('favorite-icon-list');
   let li = document.createElement('li');
@@ -893,7 +876,6 @@ selectItemForContextMenu(e) {
   }
   this.setState({addIcon: false});
 }
-
 
   setEventlistenerAndAppendLi(li, newText, newSrc, newF_id, list) {
     li.innerHTML = newText;
@@ -925,8 +907,6 @@ selectItemForContextMenu(e) {
     }
     return { newSrc, newText, newF_id};
   }
-
-  
 
   findIconObjectOfOurID() {
     let iconObject;
@@ -978,7 +958,6 @@ selectItemForContextMenu(e) {
       function() {});
   }
 
-
   showChosenIcon(thisEvent) {
     this.setState({selectedEventID: thisEvent});
     this.setState({actionID: null});
@@ -1023,9 +1002,8 @@ selectItemForContextMenu(e) {
       this.commentElement.current.setState({alreadySaved: false})
       this.setState({addComment: !this.state.addComment});
     }
-    
-
   }
+
   closeAddComment() {
     this.setState({addComment: false});
   }
@@ -1062,7 +1040,6 @@ selectItemForContextMenu(e) {
         showHelperImage: true
       })
     }
-    
   }
 
   /* componentWillUnmount() {
@@ -1083,7 +1060,6 @@ selectItemForContextMenu(e) {
         this.sendInterviewObjectToDb(data.questions);
       });
     }
-    
     window.addEventListener('resize', this.handleResize);
     fetch(window.backend_url + `getprojectmapping?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     .then(res => res.json())
@@ -1101,7 +1077,6 @@ selectItemForContextMenu(e) {
       .then(images => {
         let image = URL.createObjectURL(images);
         this.setState({mapblob: image});
-
     });
     // fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
     // .then(res => res.json())
@@ -1185,7 +1160,6 @@ selectItemForContextMenu(e) {
                     <p className="changeSize" onClick={this.changeSizeOfIcons}>-</p>
                   </div>
                 </li>
-
                 <li id="hide-or-show" className="buttonLi" onClick={this.hideOrShowFunction}> {t(this.state.hideOrShow)}</li>
                 <li className="buttonLi" onClick={this.removeIcon}>{t('mapping.remove')}</li>
                 <li className="buttonLi" onClick={this.addComment}>{t('mapping.addComment')}</li>
@@ -1193,8 +1167,8 @@ selectItemForContextMenu(e) {
                 <ul id="favorite-icon-list">
                 </ul>
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
-                
               </ul>
+
               <ul id="interview-sidebar-li" className={interviewLiClassList}>
                 <li className="buttonLi" onClick={this.newInterviewee}>{t('mapping.newInterviewee')}</li>
                 <li className="buttonLi" onClick={this.addInterview}>{t('mapping.addInterview')}</li>
@@ -1212,6 +1186,7 @@ selectItemForContextMenu(e) {
                 <li id="finishProjectLi" className="buttonLi" onClick={this.finishProject}><p>{t('mapping.finishMapping')}</p></li>
               </ul>
           </div>
+          
           <div className={screenshotDivClassList}>
             <canvas 
               onTouchStart={this.state.drawOnCanvas ? this.activateDrawingOnCanvas : null}
@@ -1254,7 +1229,6 @@ selectItemForContextMenu(e) {
               alt="HelperImage">
               </img>
             </div>
-
         </div>
       </Authenticated>
     );
