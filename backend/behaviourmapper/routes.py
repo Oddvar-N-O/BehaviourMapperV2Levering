@@ -763,7 +763,7 @@ def createARCGIS():
         if geografiskSpørreundersøkelse == "0": # CHANGE THIS TO NONE LATER
             eventsJSON = get_events_func(pid)
             events = json.loads(eventsJSON)
-            emptyShapefiles('shapefiles')
+            # emptyShapefiles('shapefiles')
             sortedEvents = generateDictOfEvents(events)
             sendTheseFoldersList = writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
             zip_files('shapefiles', sendTheseFoldersList)
@@ -786,12 +786,10 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
         innerDict = sortedEvents[key]
         for innerKey in dict.keys(innerDict):
             foldername = key + innerKey
-            # print(foldername)
             exists = doesFolderExist(path, foldername) # also check if changed
             filename = foldername
 
             if exists == False:
-                # print(foldername)
                 makeFolder(path, foldername)
 
             if exists == True: # for senere utvikling av vilkårlige ikoner
@@ -977,25 +975,6 @@ def clearFolders(folder):
                         filePath = os.path.join(shapefileFolder, shapefile)
                         os.remove(filePath)
 
-def emptyShapefiles(folder):
-    print('yeyeyeyeyyeye')
-    folderLocation = None
-    if folder == 'shapefiles':
-        folderLocation = Config.SHAPEFILES_FOLDER
-    if folder == 'geographicQuestioning':
-        folderLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
-    if folderLocation != None:
-        if type(folderLocation) == str:
-            for foldername in os.listdir(folderLocation):
-                exists = doesFolderExist(folderLocation, foldername)
-                path = folderLocation + foldername 
-                if exists == True & os.path.isdir(path):
-                    filename = findFileName(path, foldername)
-                    shapeFileName = folderLocation + foldername + '/' + filename
-                    w = shp.Writer(shapeFileName)
-                    w.field('Background', 'C', '40')
-                    w.close()
-
 def doesFolderExist(location, folderName):
     folder = os.path.join(location, folderName)
     if os.path.exists(folder):
@@ -1020,7 +999,6 @@ def sendFileToFrontend(file): #path, ziph):
 
 # zip only relevant files !!!
 def zip_files(typeOfFiles, modifiedFoldersList):
-    print(modifiedFoldersList)
     with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
         absPath = os.path.abspath(typeOfFiles)
         if typeOfFiles == "csvfiles":
