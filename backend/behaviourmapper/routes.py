@@ -297,8 +297,7 @@ def get_events_func(p_id):
 
     e_ids = []
     for e_id in query_e_ids:        
-        e_ids.append(e_id[0])    
-    # events = []
+        e_ids.append(e_id[0])
     events = []
 
     for e_id in e_ids:
@@ -400,13 +399,6 @@ def addSizeToProject():
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
-
-"""
-Use POST for destructive actions such as creation (I'm aware of the irony),
-editing, and deletion, because you can't hit a POST action in the address
-bar of your browser. Use GET when it's safe to allow a person to call an
-action. So a URL like:
-"""
 
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
@@ -728,9 +720,6 @@ def generateDictOfEvents(events):
 @bp.route('/createarcgis', methods=['POST'])
 def createARCGIS():
     if authenticateUser(request.form.get('u_id')):
-        # step 1 create field. Step 2 populate fields
-        # enter folder
-        # shapefile = outline of a building and 
         target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
         if not os.path.isdir(target):
             os.mkdir(target)
@@ -747,7 +736,7 @@ def createARCGIS():
         geografiskSpørreundersøkelse = project_values[15]
         path = ""
 
-        if geografiskSpørreundersøkelse != "0": # CHANGE THIS TO NONE LATER
+        if geografiskSpørreundersøkelse != "0":
             sortedInterviewObjectsJSON = getInterviewFiguresSorted(pid)
             sortedInterviewObjects = json.loads(sortedInterviewObjectsJSON)
             
@@ -763,10 +752,9 @@ def createARCGIS():
                     zip_files('geographicQuestioning', str(mode), interviewFolderList)
             return sendFileToFrontend('geographicQuestioning.zip')
 
-        if geografiskSpørreundersøkelse == "0": # CHANGE THIS TO NONE LATER
+        if geografiskSpørreundersøkelse == "0":
             eventsJSON = get_events_func(pid)
             events = json.loads(eventsJSON)
-            # emptyShapefiles('shapefiles')
             sortedEvents = generateDictOfEvents(events)
             sendTheseFoldersList = writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
             zip_files('shapefiles', 'w', sendTheseFoldersList)
@@ -788,7 +776,7 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
         innerDict = sortedEvents[key]
         for innerKey in dict.keys(innerDict):
             foldername = key + innerKey
-            exists = doesFolderExist(path, foldername) # also check if changed
+            exists = doesFolderExist(path, foldername)
             filename = foldername
 
             if exists == False:
@@ -831,7 +819,7 @@ def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rig
                 incrementGeographicFolderNames(filename, foldername)
                 sendTheseFoldersList.append(foldername)
                 exists = doesFolderExist(path, foldername)
-                if exists == True: # for senere utvikling av vilkårlige ikoner
+                if exists == True:
                     filename = findFileName(path, foldername)
                 
                 dictObjectByContext = innerDict[context]
@@ -906,11 +894,10 @@ def getInterviewFiguresSorted(p_id):
     get_InterviewIds_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
     query_io_ids = query_db(get_InterviewIds_sql, (p_id,))
     
-    # query_io_ids = query_db(get_InterviewID_sql, (str(p_id),), True)
     query_io_ids = query_io_ids[:-1]
 
     interviewObjectDict = []
-    for io_id in query_io_ids: # get all interviewobjects
+    for io_id in query_io_ids:
 
         get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
         query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
@@ -937,8 +924,7 @@ def getInterviewFiguresSorted(p_id):
 
                 dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
             else:
-                innerDict = dictAllInterviewFigureTypes[query_figure[-1]]
-                            
+                innerDict = dictAllInterviewFigureTypes[query_figure[-1]]  
                 objectInContext = innerDict[emotionalContext]
                 objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
                 innerDict[emotionalContext] = objectInContext
@@ -987,7 +973,7 @@ def findFileName(path, foldername):
     return foldername
 
 
-def sendFileToFrontend(file): #path, ziph):
+def sendFileToFrontend(file):
     placement = os.path.join(Config.ZIPFILES_FOLDER, file)
     try:
         return send_file(placement)
@@ -995,7 +981,6 @@ def sendFileToFrontend(file): #path, ziph):
         print('File Not Found')
         abort(404)
 
-# zip only relevant files !!!
 def zip_files(typeOfFiles, zipfileAction, modifiedFoldersList):
     with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), str(zipfileAction), compression=zipfile.ZIP_DEFLATED) as my_zip:
         absPath = os.path.abspath(typeOfFiles)
