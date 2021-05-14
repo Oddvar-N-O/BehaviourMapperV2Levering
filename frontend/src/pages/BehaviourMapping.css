@@ -161,7 +161,7 @@
 }
 .map-image {
     height: 100vh;
-    width: auto;
+    width: calc(100vw - 200px);
     min-height: 300px;
     order: 3;
 }
