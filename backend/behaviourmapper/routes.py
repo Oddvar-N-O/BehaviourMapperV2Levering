@@ -120,13 +120,39 @@ def deleteProject():
         deleteImage(p_id)
 
         delete_project = ("DELETE FROM Project WHERE id=?")
-
-        query_db(delete_project, (p_id,), True)
-
-        return "deleted"
+        deleteInterviewRelatedDatabaseObjects(p_id)
+        res = query_db(delete_project, (p_id,), True)
+        return res
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+def deleteInterviewRelatedDatabaseObjects(p_id):
+    try:         
+        int(p_id)    
+    except:         
+        raise InvalidUsage("Bad arg", status_code=400)
+    get_InterviewIds_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
+    query_io_ids = query_db(get_InterviewIds_sql, (p_id,))
+    query_io_ids = query_io_ids[:-1]
+
+    delete_Interview_object_sql = ("DELETE FROM InterviewObjects WHERE p_id=?")
+    query_db(delete_Interview_object_sql, (p_id,))
+
+    get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")
+    for io_id in query_io_ids:
+        print('IOID: ' + str(io_id[0]))
+        query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
+        query_if_ids = query_if_ids[:-1]
+    
+        for if_id in query_if_ids:
+            print('IOIF: ' + str(if_id[0]))
+            delete_IO_has_IF_sql = ("DELETE FROM InterviewObjects_has_InterviewFigures WHERE if_id=?")
+            delete_Interview_Figure_sql = ("DELETE FROM InterviewFigures WHERE id=?")
+            query_db(delete_IO_has_IF_sql, (if_id[0],))
+            query_db(delete_Interview_Figure_sql, (if_id[0],))
+
+    return 'Deleted all Interview related Information'
 
 def deleteAllEvents(p_id):
     delete_event = ("DELETE FROM Event WHERE id=?")
@@ -743,13 +769,14 @@ def createARCGIS():
             mode = 'w'
             for io in range(len(sortedInterviewObjects)):
                 interviewObjectDict = sortedInterviewObjects[io]
-                resetGeographicFolderNames()
+                
                 interviewFolderList = writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, io)
                 if mode  == 'w':
                     zip_files('geographicQuestioning', str(mode), interviewFolderList)
                     mode = 'a'
                 else:
                     zip_files('geographicQuestioning', str(mode), interviewFolderList)
+                resetGeographicFolderNames()
             return sendFileToFrontend('geographicQuestioning.zip')
 
         if geografiskSpørreundersøkelse == "0":
@@ -815,6 +842,7 @@ def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rig
             dictObjectByContext = innerDict[context]
             if len(dictObjectByContext) > 0:
                 filename = objectType + context
+                
                 foldername = objectType + context + '_INtObj_' + str(interviewObjectNumber+1)
                 incrementGeographicFolderNames(filename, foldername)
                 sendTheseFoldersList.append(foldername)
