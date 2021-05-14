@@ -160,8 +160,11 @@
     order: 3;
 }
 .map-image {
+    /* height: 700px;
+    width: 700px;*/
     height: 100vh;
     width: auto;
+    background-color: blue;
     min-height: 300px;
     order: 3;
 }

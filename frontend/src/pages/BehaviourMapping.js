@@ -14,6 +14,7 @@ import mappingNorsk from './images/mappingNorsk.png'
 import mappingEnglish from './images/mappingEnglish.png'
 import surveyNorsk from './images/surveyNorsk.png'
 import surveyEnglish from './images/surveyEnglish.png'
+import { closestOnCircle } from 'ol/coordinate';
 
 
 class BehaviourMapping extends React.Component {
@@ -113,9 +114,12 @@ class BehaviourMapping extends React.Component {
   }
 
   sendEventToDatabase() {
+    console.log('S to DB')
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
+    console.log('currentSize: ' + currentSize[0] + ' ' + currentSize[1])
+    
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
     }
@@ -246,8 +250,12 @@ class BehaviourMapping extends React.Component {
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
     let coordinates = [event.clientX - 200, event.clientY];
+    console.log('Icon Coordinates: ' + coordinates[0] + ' ' + coordinates[1])
+    console.log('MOUSECOORD: ' + this.state.ourMouseCoord.x + ' ' + this.state.ourMouseCoord.y)
+    console.log('im map size: ' + this.state.currentScreenSize.x + ' ' + this.state.currentScreenSize.y)
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
+    // console.log('sHor: ' + scrollHorizontal + ' sVer: ' + scrollVertical)
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
       coordinates[0] = coordinates[0] + scrollHorizontal;
     }
@@ -258,6 +266,7 @@ class BehaviourMapping extends React.Component {
     img.style.left = coordinates[0] + 200 - (this.state.eventSize / 2) +'px';
     img.style.top =  coordinates[1] - (this.state.eventSize / 2) +'px';
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
+    // console.log('imageSizeOnCreation: ' + imageSizeOnCreation[0] + ' ' + imageSizeOnCreation[1])
     this.createIconObject(coordinates, imageSizeOnCreation, img.getAttribute('id'));
     this.setState({
       ourIconCoord: {
@@ -375,7 +384,7 @@ class BehaviourMapping extends React.Component {
         x: mapImage.width,
         y: mapImage.height,
       }
-    }, function() {});
+    }, function() {}); //console.log('curscreensize: ' + this.state.currentScreenSize.x + ' ' + this.state.currentScreenSize.y)});
   }
 
   initiateFormerScreenSize() {
@@ -390,12 +399,15 @@ class BehaviourMapping extends React.Component {
   }
 
   handleResize() {
-    if (this.state.formerEvents !== []) {
-      if (this.state.currentScreenSize.x !== 0) {
-        this.findScreenSize();
-        if (this.state.currentScreenSize.x !== this.state.formerScreenSize.x || this.state.currentScreenSize.y !== this.state.formerScreenSize.y ) {
-          this.placeEventsAfterChange()
-        }
+    if (this.state.iconObjects !== []) { //  former events brukes ikke mer
+      console.log('im map size: ' + this.state.currentScreenSize.x + ' ' + this.state.currentScreenSize.y)
+      if (this.state.currentScreenSize.x !== 0 || this.state.currentScreenSize.y !== 0) {
+        // console.log('andre ledd')
+        // this.findScreenSize();
+        // if (this.state.currentScreenSize.y !== this.state.formerScreenSize.y || this.state.currentScreenSize.x !== this.state.formerScreenSize.x) {
+        // console.log('tredje ledd')
+        // this.placeEventsAfterChange()
+        // }
         this.setState({formerScreenSize: this.state.currentScreenSize});
       }
     }
@@ -416,15 +428,16 @@ class BehaviourMapping extends React.Component {
   }
 
   placeEventsAfterChange() {
+    console.log('placeelementafterchange')
     let icon;
+    let id;
     for (var i=0; i<this.state.newIconID; i++) {
-      icon = document.getElementById(i.toString());
-      if (icon != null) {
-        let iconInfo = this.state.iconObjects[i];
-        let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-        icon.style.left = (coords[0] + 200) +'px';
-        icon.style.top =  (coords[1]) +'px';
-      }
+      let iconInfo = this.state.iconObjects[i];
+      id = iconInfo.id;
+      icon = document.getElementById(id.toString());
+      let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
+      icon.style.left = (coords[0] + 200) +'px';
+      icon.style.top =  (coords[1]) +'px';
     }
   }
 

@@ -823,8 +823,21 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
             if len(eventGroup) != 0:
                 sendTheseFoldersList.append(foldername)
             
+           
+
+            w.record('ll c', 'Point')
+            w.point(leftX, lowerY)
+            w.record('ul c', 'Point')
+            w.point(leftX, upperY)
+            w.record('lr c', 'Point')
+            w.point(rightX, lowerY)
+            w.record('ulrc', 'Point')
+            w.point(rightX, upperY)
+            
             for event in eventGroup:
+                print('old coords: ' + str(event[2]))
                 newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
+                print('new coords: ' + str(newCoords))
                 x = newCoords[0]
                 y = newCoords[1]
                 w.point(x, y)
