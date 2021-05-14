@@ -1,5 +1,51 @@
-id,action,group_name,direction,center_coordinate,image_size_when_created,created,comment,f_id,description,color
-4,,,rotate(-193deg),"539,256","1107,966",Mon May 10 2021 13:49:51 GMT+0200 (sentraleuropeisk sommertid),,2,bike,blue
-5,,,rotate(-154deg),"463,420","1107,966",Mon May 10 2021 13:49:54 GMT+0200 (sentraleuropeisk sommertid),,3,feeding birds,blue
-6,,,rotate(81deg),"761,206","1107,966",Mon May 10 2021 13:49:59 GMT+0200 (sentraleuropeisk sommertid),,4,scooter,blue
-7,,,rotate(81deg),"761,206","1107,966",Mon May 10 2021 13:49:59 GMT+0200 (sentraleuropeisk sommertid),,4,scooter,blue
+id,direction,center_coordinate,image_size_when_created,created,comment,f_id,description,color
+15,rotate(0deg),"158,176","615,744",Thu May 13 2021 10:35:26 GMT+0200 (Central European Summer Time),,1,walk,blue
+16,rotate(0deg),"185,252","615,744",Thu May 13 2021 10:35:27 GMT+0200 (Central European Summer Time),,2,bike,blue
+17,rotate(0deg),"104,358","615,744",Thu May 13 2021 10:35:28 GMT+0200 (Central European Summer Time),,3,feeding birds,blue
+18,rotate(0deg),"172,408","615,744",Thu May 13 2021 10:35:29 GMT+0200 (Central European Summer Time),,4,scooter,blue
+19,rotate(0deg),"134,509","615,744",Thu May 13 2021 10:35:30 GMT+0200 (Central European Summer Time),,8,stop,blue
+20,rotate(0deg),"112,579","615,744",Thu May 13 2021 10:35:31 GMT+0200 (Central European Summer Time),,7,stand,blue
+21,rotate(0deg),"48,666","615,744",Thu May 13 2021 10:35:32 GMT+0200 (Central European Summer Time),,6,skateboard,blue
+22,rotate(0deg),"185,600","615,744",Thu May 13 2021 10:35:33 GMT+0200 (Central European Summer Time),,5,sit,blue
+23,undefined,"217,511","615,744",Thu May 13 2021 10:35:35 GMT+0200 (Central European Summer Time),,9,talk,blue
+24,undefined,"350,355","615,744",Thu May 13 2021 10:35:37 GMT+0200 (Central European Summer Time),,10,talking in phone,blue
+25,undefined,"215,217","615,744",Thu May 13 2021 10:35:39 GMT+0200 (Central European Summer Time),,11,vehicle,blue
+26,undefined,"163,182","615,744",Thu May 13 2021 10:35:41 GMT+0200 (Central European Summer Time),,12,walk with dog,blue
+27,undefined,"49,228","615,744",Thu May 13 2021 10:35:43 GMT+0200 (Central European Summer Time),,13,walk with pram,blue
+28,undefined,"223,319","615,744",Thu May 13 2021 10:35:45 GMT+0200 (Central European Summer Time),,14,wheelchair,blue
+29,undefined,"371,264","615,744",Thu May 13 2021 10:35:47 GMT+0200 (Central European Summer Time),,15,workers,blue
+30,undefined,"205,374","615,744",Thu May 13 2021 10:35:49 GMT+0200 (Central European Summer Time),,16,other,blue
+31,undefined,"141,98","615,744",Thu May 13 2021 10:35:52 GMT+0200 (Central European Summer Time),,17,walk,red
+32,undefined,"280,108","615,744",Thu May 13 2021 10:36:01 GMT+0200 (Central European Summer Time),,18,bike,red
+33,undefined,"181,124","615,744",Thu May 13 2021 10:36:02 GMT+0200 (Central European Summer Time),,19,feeding birds,red
+34,undefined,"440,157","615,744",Thu May 13 2021 10:36:05 GMT+0200 (Central European Summer Time),,20,scooter,red
+35,undefined,"274,132","615,744",Thu May 13 2021 10:36:06 GMT+0200 (Central European Summer Time),,21,sit,red
+36,undefined,"281,147","615,744",Thu May 13 2021 10:36:09 GMT+0200 (Central European Summer Time),,22,skateboard,red
+37,undefined,"24,110","615,744",Thu May 13 2021 10:36:10 GMT+0200 (Central European Summer Time),,23,stand,red
+38,undefined,"76,92","615,744",Thu May 13 2021 10:36:13 GMT+0200 (Central European Summer Time),,24,stop,red
+39,undefined,"393,260","615,744",Thu May 13 2021 10:36:16 GMT+0200 (Central European Summer Time),,25,talk,red
+40,undefined,"237,273","615,744",Thu May 13 2021 10:36:18 GMT+0200 (Central European Summer Time),,26,talking in phone,red
+41,undefined,"403,360","615,744",Thu May 13 2021 10:36:20 GMT+0200 (Central European Summer Time),,27,vehicle,red
+42,undefined,"461,384","615,744",Thu May 13 2021 10:36:22 GMT+0200 (Central European Summer Time),,28,walk with dog,red
+43,undefined,"240,416","615,744",Thu May 13 2021 10:36:24 GMT+0200 (Central European Summer Time),,29,walk with pram,red
+44,undefined,"262,424","615,744",Thu May 13 2021 10:36:27 GMT+0200 (Central European Summer Time),,30,wheelchair,red
+45,undefined,"358,377","615,744",Thu May 13 2021 10:36:29 GMT+0200 (Central European Summer Time),,31,workers,red
+46,undefined,"347,410","615,744",Thu May 13 2021 10:36:31 GMT+0200 (Central European Summer Time),,32,other,red
+47,undefined,"328,156","615,744",Thu May 13 2021 10:36:33 GMT+0200 (Central European Summer Time),,33,walk,green
+48,undefined,"347,179","615,744",Thu May 13 2021 10:36:35 GMT+0200 (Central European Summer Time),,34,bike,green
+49,undefined,"476,174","615,744",Thu May 13 2021 10:36:37 GMT+0200 (Central European Summer Time),,36,scooter,green
+50,undefined,"456,286","615,744",Thu May 13 2021 10:36:39 GMT+0200 (Central European Summer Time),,37,sit,green
+51,undefined,"485,336","615,744",Thu May 13 2021 10:36:42 GMT+0200 (Central European Summer Time),,38,skateboard,green
+52,undefined,"528,277","615,744",Thu May 13 2021 10:36:44 GMT+0200 (Central European Summer Time),,39,stand,green
+53,undefined,"376,366","615,744",Thu May 13 2021 10:36:46 GMT+0200 (Central European Summer Time),,40,stop,green
+54,undefined,"444,344","615,744",Thu May 13 2021 10:36:54 GMT+0200 (Central European Summer Time),,41,talk,green
+55,undefined,"576,362","615,744",Thu May 13 2021 10:36:55 GMT+0200 (Central European Summer Time),,39,stand,green
+56,undefined,"472,364","615,744",Thu May 13 2021 10:36:57 GMT+0200 (Central European Summer Time),,40,stop,green
+57,undefined,"494,343","615,744",Thu May 13 2021 10:37:00 GMT+0200 (Central European Summer Time),,41,talk,green
+58,undefined,"431,400","615,744",Thu May 13 2021 10:37:03 GMT+0200 (Central European Summer Time),,42,talking in phone,green
+59,undefined,"464,379","615,744",Thu May 13 2021 10:37:05 GMT+0200 (Central European Summer Time),,43,wheelchair,green
+60,undefined,"556,331","615,744",Thu May 13 2021 10:37:09 GMT+0200 (Central European Summer Time),,44,other,green
+61,undefined,"453,521","615,744",Thu May 13 2021 10:37:11 GMT+0200 (Central European Summer Time),,45,standing still,yellow
+62,undefined,"352,570","615,744",Thu May 13 2021 10:37:14 GMT+0200 (Central European Summer Time),,46,moving,yellow
+63,undefined,"540,476","615,744",Thu May 13 2021 10:37:16 GMT+0200 (Central European Summer Time),,47,other,yellow
+64,undefined,"540,476","615,744",Thu May 13 2021 10:37:16 GMT+0200 (Central European Summer Time),,47,other,yellow

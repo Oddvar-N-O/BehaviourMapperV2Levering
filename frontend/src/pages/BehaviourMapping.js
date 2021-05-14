@@ -1,6 +1,6 @@
 import React from 'react';
 import AllIcons from '../components/AllIcons';
-import Interview from '../components/interview';
+import Interview from '../components/Interview';
 import AddComment from '../components/AddComment';
 import ContextMenu from '../components/ContextMenu';
 import './BehaviourMapping.css';
@@ -748,11 +748,13 @@ class BehaviourMapping extends React.Component {
     let iconinfo;
     for (var i=0; i<this.state.newIconID; i++) {
       iconinfo = this.state.iconObjects[i];
-      icon = document.getElementById(iconinfo.id);
-      let coord = iconinfo.originalCoord;
-      if (icon != null) {
-        icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
-        icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+      if (iconinfo !== undefined) {
+        icon = document.getElementById(iconinfo.id);
+        let coord = iconinfo.originalCoord;
+        if (icon != null) {
+          icon.style.left = (coord[0] - (this.state.eventSize / 2) + change) + 'px'
+          icon.style.top = (coord[1] - (this.state.eventSize / 2)) + 'px'
+        }
       }
     }
   }
@@ -813,12 +815,12 @@ finishProject() {
     let time = String(new Date());
     this.takeScreenshot();
     fetch(window.backend_url + `updateiconsize?p_id=${this.state.p_id}&iconSize=${this.state.eventSize}`);
-    setTimeout(() => {
-    fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
-    setTimeout(() => {
-      this.props.history.push({pathname: "/startpage"})
-      }, 1500);
-    }, 200);
+      setTimeout(() => {
+        fetch(window.backend_url + `updateproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}&enddate=${time}`);
+          setTimeout(() => {
+            this.props.history.push({pathname: "/startpage"})
+            }, 1500);
+      }, 200);
   }
 }
 
@@ -1042,6 +1044,7 @@ selectItemForContextMenu(e) {
 
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
+
     this.findScreenSize();
     this.initiateFormerScreenSize();
     if (!this.state.onlyObservation) {
@@ -1080,6 +1083,11 @@ selectItemForContextMenu(e) {
     let canvas = this.canvas.current;
     let image = this.myImage.current;
     this.drawCanvasMap(canvas, image);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
+    window.removeEventListener('resize', this.handleResize);
   }
 
   drawCanvasMap(canvas, image) {

@@ -1,10 +1,11 @@
 import json
 import logging
 import os
+import shutil
 import zipfile
 import csv
 from datetime import date, datetime
-from time import time
+from time import time, sleep
 
 import shapefile as shp
 from flask import (Blueprint, Flask, abort, current_app, flash, g, redirect,
@@ -46,7 +47,7 @@ def login():
         if os.getenv('FLASK_ENV') == "development":
             return redirect('http://localhost:3000/behaviourmapper/startpage')   
         else:
-           return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
+            return redirect('https://www.ux.uis.no/behaviourmapper/startpage')
     else:
         raise InvalidUsage("Bad request", status_code=400)
 
@@ -119,13 +120,39 @@ def deleteProject():
         deleteImage(p_id)
 
         delete_project = ("DELETE FROM Project WHERE id=?")
-
-        query_db(delete_project, (p_id,), True)
-
-        return "deleted"
+        deleteInterviewRelatedDatabaseObjects(p_id)
+        res = query_db(delete_project, (p_id,), True)
+        return res
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
+
+def deleteInterviewRelatedDatabaseObjects(p_id):
+    try:         
+        int(p_id)    
+    except:         
+        raise InvalidUsage("Bad arg", status_code=400)
+    get_InterviewIds_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
+    query_io_ids = query_db(get_InterviewIds_sql, (p_id,))
+    query_io_ids = query_io_ids[:-1]
+
+    delete_Interview_object_sql = ("DELETE FROM InterviewObjects WHERE p_id=?")
+    query_db(delete_Interview_object_sql, (p_id,))
+
+    get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")
+    for io_id in query_io_ids:
+        print('IOID: ' + str(io_id[0]))
+        query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
+        query_if_ids = query_if_ids[:-1]
+    
+        for if_id in query_if_ids:
+            print('IOIF: ' + str(if_id[0]))
+            delete_IO_has_IF_sql = ("DELETE FROM InterviewObjects_has_InterviewFigures WHERE if_id=?")
+            delete_Interview_Figure_sql = ("DELETE FROM InterviewFigures WHERE id=?")
+            query_db(delete_IO_has_IF_sql, (if_id[0],))
+            query_db(delete_Interview_Figure_sql, (if_id[0],))
+
+    return 'Deleted all Interview related Information'
 
 def deleteAllEvents(p_id):
     delete_event = ("DELETE FROM Event WHERE id=?")
@@ -296,8 +323,7 @@ def get_events_func(p_id):
 
     e_ids = []
     for e_id in query_e_ids:        
-        e_ids.append(e_id[0])    
-    # events = []
+        e_ids.append(e_id[0])
     events = []
 
     for e_id in e_ids:
@@ -399,13 +425,6 @@ def addSizeToProject():
     else:
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
-
-"""
-Use POST for destructive actions such as creation (I'm aware of the irony),
-editing, and deletion, because you can't hit a POST action in the address
-bar of your browser. Use GET when it's safe to allow a person to call an
-action. So a URL like:
-"""
 
 @bp.route('/addevent', methods=['POST'])
 def addEvent():
@@ -532,7 +551,7 @@ def exportToCsv():
             writeEventsToCSV(all_events_fromdb)
             clearInterviewObjectsCSVs()
         writeProjectToCSV(project_fromdb)
-        zip_files('csvfiles')
+        zip_files('csvfiles', 'w', 'All')
         return sendFileToFrontend('csvfiles.zip')
     else:
         logger.info("Not logged in.")
@@ -721,15 +740,12 @@ def generateDictOfEvents(events):
             allPersonTypeEvents.append(event)
             dictAllEventsOfGroup[personType] = allPersonTypeEvents
 
-    sortedDict['All'] = dictAllEventsOfGroup
+    sortedDict['all'] = dictAllEventsOfGroup
     return sortedDict
 
 @bp.route('/createarcgis', methods=['POST'])
 def createARCGIS():
     if authenticateUser(request.form.get('u_id')):
-        # step 1 create field. Step 2 populate fields
-        # enter folder
-        # shapefile = outline of a building and 
         target=os.path.join(Config.STATIC_URL_PATH, "shapefiles")
         if not os.path.isdir(target):
             os.mkdir(target)
@@ -737,69 +753,119 @@ def createARCGIS():
         get_proj_sql = ("SELECT * FROM Project WHERE id=?")
         pid = (request.form.get('p_id'))
         project_values = query_db(get_proj_sql, (str(pid),), True)
+
         leftX = float(project_values[9])
         lowerY = float(project_values[10])
         rightX = float(project_values[11])
         upperY = float(project_values[12])
-        
-        eventsJSON = get_events_func(request.form.get('p_id'))
-        events = json.loads(eventsJSON)
 
-        sortedEvents = generateDictOfEvents(events)
+        geografiskSpørreundersøkelse = project_values[15]
+        path = ""
 
-        for key in dict.keys(sortedEvents):
-            innerDict = sortedEvents[key]
-            for innerKey in dict.keys(innerDict):
-                foldername = key + innerKey
-                exists = doesFolderExist(foldername) # also check if changed
-
-                if exists == True: # for senere utvikling av vilkårlige ikoner
-                    filename = findShapefileName(foldername)
-                    
-                    shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
-                    w = shp.Writer(shapeFileName)
-                    
-                    w.field('Background', 'C', '40')
-                    point_ID = 1
-                    eventGroup = innerDict[innerKey]
-                    for event in eventGroup:
-                        newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
-                        x = newCoords[0]
-                        y = newCoords[1]
-                        
-                        w.point(x, y)
-                        w.record(str(point_ID), 'Point')
-                        point_ID += 1
-                    w.close()
-        
-        sortedInterviewFiguresJSON = getInterviewFiguresSorted(pid)
-        sortedInterviewFigures = json.loads(sortedInterviewFiguresJSON)
-
-        for objectType in dict.keys(sortedInterviewFigures):
-            innerDict = sortedInterviewFigures[objectType]
+        if geografiskSpørreundersøkelse != "0":
+            sortedInterviewObjectsJSON = getInterviewFiguresSorted(pid)
+            sortedInterviewObjects = json.loads(sortedInterviewObjectsJSON)
             
-            for context in dict.keys(innerDict):
-                foldername = objectType + context
-                exists = doesFolderExist(foldername)
-                if exists == True: # for senere utvikling av vilkårlige ikoner
-                    filename = findShapefileName(foldername)
+            mode = 'w'
+            for io in range(len(sortedInterviewObjects)):
+                interviewObjectDict = sortedInterviewObjects[io]
+                
+                interviewFolderList = writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, io)
+                if mode  == 'w':
+                    zip_files('geographicQuestioning', str(mode), interviewFolderList)
+                    mode = 'a'
+                else:
+                    zip_files('geographicQuestioning', str(mode), interviewFolderList)
+                resetGeographicFolderNames()
+            return sendFileToFrontend('geographicQuestioning.zip')
 
-                    shapeFileName = 'behaviourmapper/static/shapefiles/' + foldername + '/' + filename
-                    dictObjectByContext = innerDict[context]
+        if geografiskSpørreundersøkelse == "0":
+            eventsJSON = get_events_func(pid)
+            events = json.loads(eventsJSON)
+            sortedEvents = generateDictOfEvents(events)
+            sendTheseFoldersList = writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY)
+            zip_files('shapefiles', 'w', sendTheseFoldersList)
+            return sendFileToFrontend('shapefiles.zip')
+
+        return "empty file"
+    else:
+        logger.info("Not logged in.")
+        raise InvalidUsage("Bad request", status_code=400)
+
+def makeFolder(location, foldername):
+    path = os.path.join(location, foldername)
+    os.mkdir(path)
+
+def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
+    path = Config.SHAPEFILES_FOLDER
+    sendTheseFoldersList = []
+    for key in dict.keys(sortedEvents):
+        innerDict = sortedEvents[key]
+        for innerKey in dict.keys(innerDict):
+            foldername = key + innerKey
+            exists = doesFolderExist(path, foldername)
+            filename = foldername
+
+            if exists == False:
+                makeFolder(path, foldername)
+
+            if exists == True: # for senere utvikling av vilkårlige ikoner
+                filename = findFileName(path, foldername)
+
+            eventGroup = innerDict[innerKey]
+
+            shapeFileName = path + '/' + str(foldername) + '/' + str(filename)
+            
+            w = shp.Writer(shapeFileName)
+            w.field('Background', 'C', '40')
+            point_ID = 1
+
+            if len(eventGroup) != 0:
+                sendTheseFoldersList.append(foldername)
+            
+            for event in eventGroup:
+                newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
+                x = newCoords[0]
+                y = newCoords[1]
+                w.point(x, y)
+                w.record(str(point_ID), 'Point')
+                point_ID += 1
+            w.close()
+    return sendTheseFoldersList
+
+def writeGeographicQuestioningShapefiles(interviewObjectDict, leftX, lowerY, rightX, upperY, interviewObjectNumber):
+    sendTheseFoldersList = []
+    path = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    for objectType in dict.keys(interviewObjectDict):
+        innerDict = interviewObjectDict[objectType]
+        for context in dict.keys(innerDict):
+            dictObjectByContext = innerDict[context]
+            if len(dictObjectByContext) > 0:
+                filename = objectType + context
+                
+                foldername = objectType + context + '_INtObj_' + str(interviewObjectNumber+1)
+                incrementGeographicFolderNames(filename, foldername)
+                sendTheseFoldersList.append(foldername)
+                exists = doesFolderExist(path, foldername)
+                if exists == True:
+                    filename = findFileName(path, foldername)
+                
+                dictObjectByContext = innerDict[context]
+                point_ID = 0
+                shapeFileName = path + '/' + foldername + '/' + filename
+                if dictObjectByContext != []:
                     w = shp.Writer(shapeFileName)
                     w.field('Background', 'C', '40')
-                    point_ID = 0
-
-                    for drawnObject in dictObjectByContext:
+                    for i in range(len(dictObjectByContext)):
+                        drawnObject = dictObjectByContext[i]
                         coordinateList = drawnObject[1]
                         floatCoordinateList = getElementXandY(drawnObject[1])
                         pairsOfCoordinates = getPairsOfCoordinatesFromFloatList(floatCoordinateList)
                         screenSizeWhenCreated = drawnObject[3]
-                        for i in range(len(pairsOfCoordinates)):
-                            # so far so good
-                            coordinates = pairsOfCoordinates[i]
-                            newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)                        
-                            pairsOfCoordinates[i] = newCoords
+                        for j in range(len(pairsOfCoordinates)):
+                            coordinates = pairsOfCoordinates[j]
+                            newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, coordinates, screenSizeWhenCreated)
+                            pairsOfCoordinates[j] = newCoords
                         if objectType == 'Line':
                             w.line([pairsOfCoordinates])
                             w.record(str(point_ID), str(objectType))
@@ -811,18 +877,32 @@ def createARCGIS():
                             w.point(coord[0], coord[1])
                             w.record(str(point_ID), str(objectType))
                         point_ID += 1
-                           
                     w.close()
-        zip_files('shapefiles')
-        clearShapefiles()
-        return sendFileToFrontend('shapefiles.zip')
-    else:
-        logger.info("Not logged in.")
-        raise InvalidUsage("Bad request", status_code=400)
+    return sendTheseFoldersList
+
+def incrementGeographicFolderNames(oldfoldername, newname):
+    path = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    for filename in os.listdir(path):
+        foldername_path = os.path.join(path, filename)
+        if os.path.isdir(foldername_path):
+            if filename == oldfoldername:
+                newname_path = os.path.join(path, newname)
+                os.rename(foldername_path, newname_path)
+   
+def resetGeographicFolderNames():
+    path = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+    files = os.listdir(path)
+    for filename in os.listdir(path):
+        foldername_path = os.path.join(path, filename)
+        if os.path.isdir(foldername_path):
+            filename_split = filename.split('_')
+            if len(filename_split) > 1:
+                newname = filename_split[0]
+                newname_path = os.path.join(path, newname)
+                os.rename(foldername_path, str(newname_path))
 
 def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
     allCoords = []
-    
     cordNum = 0
     pairXY = []
     for coord in listOfCoordinates:
@@ -831,55 +911,54 @@ def getPairsOfCoordinatesFromFloatList(listOfCoordinates):
         if cordNum == 2:
             allCoords.append(pairXY)
             pairXY = []
-            cordNum = 0
-        
+            cordNum = 0  
     return allCoords
-
-
 
 def getInterviewFiguresSorted(p_id):
     try:         
         int(p_id)    
     except:         
         raise InvalidUsage("Bad arg", status_code=400)
-
-    get_InterviewID_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
-    io_id = query_db(get_InterviewID_sql, (str(p_id),), True)
-
-    get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
-    query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
-    query_if_ids = query_if_ids[:-1]
-
-    if_ids = []
-    for if_id in query_if_ids:
-
-        if_ids.append(if_id[0])
-
-    get_figure_sql = ("SELECT * FROM InterviewFigures WHERE id=?")
-
-
-    dictAllInterviewFigureTypes = {}
-    for if_id in if_ids:
-        query_figure = query_db(get_figure_sql, (str(if_id),), True)
-        emotionalContext = findEmotionalContext(query_figure[2])
-
-        if query_figure[-1] not in dictAllInterviewFigureTypes:
-            dictByContext = {'Positive': [], 'Negative': [], 'Neutral': []}
-
-            objectInContext = dictByContext[emotionalContext]
-            objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
-            dictByContext[emotionalContext] = objectInContext
-
-            dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
-        else:
-            innerDict = dictAllInterviewFigureTypes[query_figure[-1]]
-                        
-            objectInContext = innerDict[emotionalContext]
-            objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
-            innerDict[emotionalContext] = objectInContext
-            dictAllInterviewFigureTypes[query_figure[-1]] = innerDict
+    get_InterviewIds_sql = ("SELECT id FROM InterviewObjects WHERE p_id=?")
+    query_io_ids = query_db(get_InterviewIds_sql, (p_id,))
     
-    return json.dumps(dictAllInterviewFigureTypes)
+    query_io_ids = query_io_ids[:-1]
+
+    interviewObjectDict = []
+    for io_id in query_io_ids:
+
+        get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")     
+        query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
+        query_if_ids = query_if_ids[:-1]
+
+        if_ids = []
+        for if_id in query_if_ids:
+            if_ids.append(if_id[0])
+
+        get_figure_sql = ("SELECT * FROM InterviewFigures WHERE id=?")
+
+
+        dictAllInterviewFigureTypes = {}
+        for if_id in if_ids:
+            query_figure = query_db(get_figure_sql, (str(if_id),), True)
+            emotionalContext = findEmotionalContext(query_figure[2])
+
+            if query_figure[-1] not in dictAllInterviewFigureTypes:
+                dictByContext = {'Positive': [], 'Negative': [], 'Neutral': []}
+
+                objectInContext = dictByContext[emotionalContext]
+                objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
+                dictByContext[emotionalContext] = objectInContext
+
+                dictAllInterviewFigureTypes[query_figure[-1]] = dictByContext
+            else:
+                innerDict = dictAllInterviewFigureTypes[query_figure[-1]]  
+                objectInContext = innerDict[emotionalContext]
+                objectInContext.append((query_figure[0],query_figure[1],query_figure[2],query_figure[3], query_figure[4]))
+                innerDict[emotionalContext] = objectInContext
+                dictAllInterviewFigureTypes[query_figure[-1]] = innerDict
+        interviewObjectDict.append(dictAllInterviewFigureTypes)
+    return json.dumps(interviewObjectDict)
 
 def findEmotionalContext(color):
     context = None
@@ -891,7 +970,7 @@ def findEmotionalContext(color):
         context = 'Neutral'
     return context
 
-@bp.route('addinterviewfigure', methods=['POST'])
+@bp.route('/addinterviewfigure', methods=['POST'])
 def addInterviewFigure():
     if authenticateUser(request.form.get('u_id')):
         add_int_figure = ('INSERT INTO InterviewFigures'
@@ -908,60 +987,57 @@ def addInterviewFigure():
         logger.info("Not logged in.")
         raise InvalidUsage("Bad request", status_code=400)
 
-def clearShapefiles():
-    filesLocation = 'behaviourmapper/static/shapefiles/'
-    for foldername in os.listdir(filesLocation):
-        exists = doesFolderExist(foldername)
-        path = filesLocation + foldername 
-        if exists == True & os.path.isdir(path):
-            filename = findShapefileName(foldername)
-            shapeFileName = filesLocation + foldername + '/' + filename
-            w = shp.Writer(shapeFileName)
-            w.field('Background', 'C', '40')
-            # w.point(0, 0)
-            # w.record(0, 'Point')
-            w.close()
-
-def doesFolderExist(folderName):
-    filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
-    if os.path.exists(filesLocation):
+def doesFolderExist(location, folderName):
+    folder = os.path.join(location, folderName)
+    if os.path.exists(folder):
         return True
     return False
-
-def findShapefileName(folderName):
-    filesLocation = 'behaviourmapper/static/shapefiles/' + folderName
+ 
+def findFileName(path, foldername):
+    filesLocation = os.path.join(path, foldername)
     for filename in os.listdir(filesLocation):
         if filename.endswith((".shp", "_files")):
             return filename
+    return foldername
 
 
-def sendFileToFrontend(file): #path, ziph):
+def sendFileToFrontend(file):
     placement = os.path.join(Config.ZIPFILES_FOLDER, file)
     try:
         return send_file(placement)
     except FileNotFoundError:
+        print('File Not Found')
         abort(404)
 
-# zip only relevant files !!!
-def zip_files(typeOfFiles):
-    with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), 'w', compression=zipfile.ZIP_DEFLATED) as my_zip:
-            absPath = os.path.abspath(typeOfFiles)
-            if typeOfFiles == "csvfiles":
-                filesLocation = Config.CSVFILES_FOLDER
-            elif typeOfFiles == "shapefiles":
-                filesLocation = Config.SHAPEFILES_FOLDER
-            for filename in os.listdir(filesLocation):
-                f = os.path.join(filesLocation, filename)
-                arcname = f[len(filesLocation) + 1:]
-                if os.path.isfile(f):
+def zip_files(typeOfFiles, zipfileAction, modifiedFoldersList):
+    with zipfile.ZipFile(os.path.join(Config.ZIPFILES_FOLDER, (typeOfFiles + '.zip')), str(zipfileAction), compression=zipfile.ZIP_DEFLATED) as my_zip:
+        absPath = os.path.abspath(typeOfFiles)
+        if typeOfFiles == "csvfiles":
+            filesLocation = Config.CSVFILES_FOLDER
+        elif typeOfFiles == "shapefiles":
+            filesLocation = Config.SHAPEFILES_FOLDER
+        elif typeOfFiles == 'geographicQuestioning':
+            filesLocation = Config.GEOGRAPHIC_QUESTIONING_FOLDER
+        for filename in os.listdir(filesLocation):
+            f = os.path.join(filesLocation, filename)
+            arcname = f[len(filesLocation) + 1:]
+            if os.path.isfile(f):
+                if str(zipfileAction) != 'a':
                     my_zip.write(f, arcname=arcname)
-                elif os.path.isdir(f):
+            elif os.path.isdir(f): #shapefiles / geoq
+                if modifiedFoldersList != 'All':
+                    if filename in modifiedFoldersList:
+                        for root, dirs, files in os.walk(f): #bikeall, areapositive
+                            for fname in files: # add files
+                                my_zip.write(os.path.join(root, fname),
+                                os.path.relpath(os.path.join(root, fname),
+                                os.path.join(f, '..')))
+                else:
                     for root, dirs, files in os.walk(f):
                         for fname in files:
                             my_zip.write(os.path.join(root, fname),
                             os.path.relpath(os.path.join(root, fname),
                             os.path.join(f, '..')))
-                    
 
 def addMapName(mapname, p_id, u_id):
     add_map_name_sql = ("UPDATE Project SET map=? WHERE id=? AND u_id=?")
