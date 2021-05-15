@@ -14,7 +14,6 @@ import mappingNorsk from './images/mappingNorsk.png'
 import mappingEnglish from './images/mappingEnglish.png'
 import surveyNorsk from './images/surveyNorsk.png'
 import surveyEnglish from './images/surveyEnglish.png'
-import { closestOnCircle } from 'ol/coordinate';
 
 
 class BehaviourMapping extends React.Component {
@@ -1115,7 +1114,8 @@ selectItemForContextMenu(e) {
       'invisible': !this.state.onlyObservation
     });
     let canvasClassList = classNames({
-      'map-image': true,
+      'map-image': !this.state.imageUploaded,
+      'uploaded-map-image': this.state.imageUploaded,
       'invisible': this.state.onlyObservation,
       'visible': !this.state.onlyObservation
     });

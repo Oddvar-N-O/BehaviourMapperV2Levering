@@ -170,8 +170,6 @@
 }
 
 #map-image {
-    /* height: 100vh;
-    width: auto;*/
     height: 100vh;
     width: calc(100vw - 200px);
     min-height: 300px;
@@ -180,7 +178,7 @@
 
 .uploaded-map-image {
     height: 100vh;
-    width: auto;
+    width: auto !important;
     order: 3;
 }
 .sidebar .select {
