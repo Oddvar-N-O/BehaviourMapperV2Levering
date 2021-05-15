@@ -422,6 +422,7 @@ class BehaviourMapping extends React.Component {
 
 
   placeEventsAfterChange() {
+    console.log('placeelementafterchange')
     let icon;
     let id;
     for (var i=0; i<this.state.newIconID; i++) {
@@ -1096,14 +1097,6 @@ selectItemForContextMenu(e) {
     window.removeEventListener('resize', this.handleResize);
   }
 
-  drawCanvasMap(canvas, image) {
-    let ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth - 200;
-    canvas.height = window.innerHeight;
-    image.onload = () => {
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    }
-  }
 
   render() {
     const { t } = this.props; // used for translation
