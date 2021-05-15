@@ -141,12 +141,10 @@ def deleteInterviewRelatedDatabaseObjects(p_id):
 
     get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")
     for io_id in query_io_ids:
-        print('IOID: ' + str(io_id[0]))
         query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
         query_if_ids = query_if_ids[:-1]
     
         for if_id in query_if_ids:
-            print('IOIF: ' + str(if_id[0]))
             delete_IO_has_IF_sql = ("DELETE FROM InterviewObjects_has_InterviewFigures WHERE if_id=?")
             delete_Interview_Figure_sql = ("DELETE FROM InterviewFigures WHERE id=?")
             query_db(delete_IO_has_IF_sql, (if_id[0],))
@@ -823,21 +821,8 @@ def writeBehaviorMapper(sortedEvents, leftX, lowerY, rightX, upperY):
             if len(eventGroup) != 0:
                 sendTheseFoldersList.append(foldername)
             
-           
-
-            w.record('ll c', 'Point')
-            w.point(leftX, lowerY)
-            w.record('ul c', 'Point')
-            w.point(leftX, upperY)
-            w.record('lr c', 'Point')
-            w.point(rightX, lowerY)
-            w.record('ulrc', 'Point')
-            w.point(rightX, upperY)
-            
             for event in eventGroup:
-                print('old coords: ' + str(event[2]))
                 newCoords = findNewCoordinates(leftX, lowerY, rightX, upperY, event[2], event[3])
-                print('new coords: ' + str(newCoords))
                 x = newCoords[0]
                 y = newCoords[1]
                 w.point(x, y)

@@ -114,11 +114,9 @@ class BehaviourMapping extends React.Component {
   }
 
   sendEventToDatabase() {
-    console.log('S to DB')
     const data = new FormData();
     const coordinates = [this.state.ourIconCoord.x, this.state.ourIconCoord.y];
     const currentSize = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
-    console.log('currentSize: ' + currentSize[0] + ' ' + currentSize[1])
     
     if (this.state.ourIconCoord.degree === undefined) {
       this.setState({ourIconCoord: { degree: "rotate(0deg)"}})
@@ -250,12 +248,8 @@ class BehaviourMapping extends React.Component {
     }, function() {} );
     document.getElementById('icon-container').appendChild(img);
     let coordinates = [event.clientX - 200, event.clientY];
-    console.log('Icon Coordinates: ' + coordinates[0] + ' ' + coordinates[1])
-    console.log('MOUSECOORD: ' + this.state.ourMouseCoord.x + ' ' + this.state.ourMouseCoord.y)
-    console.log('im map size: ' + this.state.currentScreenSize.x + ' ' + this.state.currentScreenSize.y)
     let scrollHorizontal = this.state.scrollHorizontal;
     let scrollVertical = this.state.scrollVertical;
-    // console.log('sHor: ' + scrollHorizontal + ' sVer: ' + scrollVertical)
     if (typeof scrollHorizontal === 'number' && scrollHorizontal !== 0) {
       coordinates[0] = coordinates[0] + scrollHorizontal;
     }
@@ -266,7 +260,6 @@ class BehaviourMapping extends React.Component {
     img.style.left = coordinates[0] + 200 - (this.state.eventSize / 2) +'px';
     img.style.top =  coordinates[1] - (this.state.eventSize / 2) +'px';
     let imageSizeOnCreation = [this.state.currentScreenSize.x, this.state.currentScreenSize.y];
-    // console.log('imageSizeOnCreation: ' + imageSizeOnCreation[0] + ' ' + imageSizeOnCreation[1])
     this.createIconObject(coordinates, imageSizeOnCreation, img.getAttribute('id'));
     this.setState({
       ourIconCoord: {
@@ -378,36 +371,36 @@ class BehaviourMapping extends React.Component {
   }
 
   findScreenSize() {
-    let mapImage = document.querySelector('.map-image');
-    this.setState({
-      currentScreenSize: {
-        x: mapImage.width,
-        y: mapImage.height,
-      }
-    }, function() {}); //console.log('curscreensize: ' + this.state.currentScreenSize.x + ' ' + this.state.currentScreenSize.y)});
+    let mapImage = document.getElementById('map-image');
+    if (mapImage != null) {
+      this.setState({
+        currentScreenSize: {
+          x: mapImage.offsetWidth,
+          y: mapImage.offsetHeight,
+        }
+      });
+    }
   }
 
   initiateFormerScreenSize() {
-    this.stopPointing();
     let mapImage = document.querySelector('.map-image');
-    this.setState({
-      formerScreenSize: {
-        x: mapImage.width,
-        y: mapImage.height,
-      }
-    }, function() {});
+    if (mapImage != null) {
+      this.setState({
+        formerScreenSize: {
+          x: mapImage.width,
+          y: mapImage.height,
+        }
+      });
+    }
   }
 
   handleResize() {
-    if (this.state.iconObjects !== []) { //  former events brukes ikke mer
-      console.log('im map size: ' + this.state.currentScreenSize.x + ' ' + this.state.currentScreenSize.y)
-      if (this.state.currentScreenSize.x !== 0 || this.state.currentScreenSize.y !== 0) {
-        // console.log('andre ledd')
-        // this.findScreenSize();
-        // if (this.state.currentScreenSize.y !== this.state.formerScreenSize.y || this.state.currentScreenSize.x !== this.state.formerScreenSize.x) {
-        // console.log('tredje ledd')
-        // this.placeEventsAfterChange()
-        // }
+    if (this.state.formerEvents !== []) {
+      if (this.state.currentScreenSize.x !== 0) {
+        this.findScreenSize();
+        if (this.state.currentScreenSize.x !== this.state.formerScreenSize.x || this.state.currentScreenSize.y !== this.state.formerScreenSize.y ) {
+          this.placeEventsAfterChange()
+        }
         this.setState({formerScreenSize: this.state.currentScreenSize});
       }
     }
@@ -416,9 +409,9 @@ class BehaviourMapping extends React.Component {
   findNewCoordinates(oldSize, coords) {
     let percentx = coords[0] / oldSize[0];
     let percenty = coords[1] / oldSize[1];
-    let mapImage = document.querySelector('.map-image');
-    let newXsize = mapImage.width;
-    let newYsize = mapImage.height;
+    let mapImage = document.getElementById('map-image');
+    let newXsize = mapImage.offsetWidth;
+    let newYsize = mapImage.offsetHeight;
     let newXcoord = newXsize * percentx;
     let newYcoord = newYsize * percenty;
     let newccords = [];
@@ -427,8 +420,8 @@ class BehaviourMapping extends React.Component {
     return newccords;
   }
 
+
   placeEventsAfterChange() {
-    console.log('placeelementafterchange')
     let icon;
     let id;
     for (var i=0; i<this.state.newIconID; i++) {
@@ -436,8 +429,8 @@ class BehaviourMapping extends React.Component {
       id = iconInfo.id;
       icon = document.getElementById(id.toString());
       let coords = this.findNewCoordinates(iconInfo.originalSize, iconInfo.originalCoord);
-      icon.style.left = (coords[0] + 200) +'px';
-      icon.style.top =  (coords[1]) +'px';
+      icon.style.left = (coords[0] + 200 - (this.state.eventSize / 2)) +'px';
+      icon.style.top =  (coords[1] - (this.state.eventSize / 2)) + 'px';
     }
   }
 
@@ -1058,8 +1051,6 @@ selectItemForContextMenu(e) {
   componentDidMount() {
     window.addEventListener('scroll', this.handleScroll);
 
-    this.findScreenSize();
-    this.initiateFormerScreenSize();
     if (!this.state.onlyObservation) {
       fetch(window.backend_url + `getquestionsfromproject?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
       .then(res => res.json())
@@ -1086,16 +1077,18 @@ selectItemForContextMenu(e) {
         let image = URL.createObjectURL(images);
         this.setState({mapblob: image});
     });
-    // fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
-    // .then(res => res.json())
-    // .then(data => {
-      // if (data.length > 0) {
-      //   setTimeout(() => this.loadFormerEvents(data), 500);
-      // }
-    // });
+    /*fetch(window.backend_url + `getevents?p_id=${this.state.p_id}&u_id=${this.state.u_id}`)
+     .then(res => res.json())
+     .then(data => {
+      if (data.length > 0) {
+         setTimeout(() => this.loadFormerEvents(data), 500);
+      }
+    });*/
     let canvas = this.canvas.current;
     let image = this.myImage.current;
     this.drawCanvasMap(canvas, image);
+    this.findScreenSize();
+    this.initiateFormerScreenSize();
   }
 
   componentWillUnmount() {
