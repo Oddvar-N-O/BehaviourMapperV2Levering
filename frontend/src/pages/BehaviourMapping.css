@@ -165,8 +165,19 @@
 .map-image {
     height: 100vh;
     width: calc(100vw - 200px);
+    min-height: 300px;
     order: 3;
 }
+
+#map-image {
+    /* height: 100vh;
+    width: auto;*/
+    height: 100vh;
+    width: calc(100vw - 200px);
+    min-height: 300px;
+    order: 3;
+}
+
 .uploaded-map-image {
     height: 100vh;
     width: auto;
