@@ -64,11 +64,13 @@
     bottom: 0;
     font-size: 1.4em;
     padding: 15px 0 15px 10px;
+    background-color: #ece8e8;
+    border-bottom: none;
 
 
 }
 #finishProjectLi p {
-    color: #befe9e;
+    color: #222020;
 
 }
 #addEventLi {
@@ -123,6 +125,7 @@
 }
 #favorite-icon-list li {
     height: 30px;
+    border-bottom: 2px #ece8e8 solid;
 }
 
 .map{   
@@ -162,7 +165,6 @@
 .map-image {
     height: 100vh;
     width: calc(100vw - 200px);
-    min-height: 300px;
     order: 3;
 }
 .uploaded-map-image {
