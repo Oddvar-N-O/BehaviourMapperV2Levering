@@ -1097,6 +1097,14 @@ selectItemForContextMenu(e) {
     window.removeEventListener('resize', this.handleResize);
   }
 
+  drawCanvasMap(canvas, image) {
+    let ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth - 200;
+    canvas.height = window.innerHeight;
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+  }
 
   render() {
     const { t } = this.props; // used for translation
