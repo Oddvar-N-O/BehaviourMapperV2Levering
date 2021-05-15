@@ -415,7 +415,7 @@ def favicon():
 
 @bp.route('/updateiconsize')
 def addSizeToProject():
-    if authenticateUser(request.form.get('u_id')):
+    if authenticateUser(request.args.get('u_id')):
         update_sql = ("UPDATE Project SET iconSize=? WHERE id=?")
         values = (request.args.get('iconSize'), request.args.get('p_id'))
         query_db(update_sql, values)
