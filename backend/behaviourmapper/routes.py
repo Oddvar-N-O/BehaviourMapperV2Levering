@@ -141,12 +141,10 @@ def deleteInterviewRelatedDatabaseObjects(p_id):
 
     get_figureIds_sql = ("SELECT if_id FROM InterviewObjects_has_InterviewFigures WHERE io_id=?")
     for io_id in query_io_ids:
-        print('IOID: ' + str(io_id[0]))
         query_if_ids = query_db(get_figureIds_sql, (io_id[0],))
         query_if_ids = query_if_ids[:-1]
     
         for if_id in query_if_ids:
-            print('IOIF: ' + str(if_id[0]))
             delete_IO_has_IF_sql = ("DELETE FROM InterviewObjects_has_InterviewFigures WHERE if_id=?")
             delete_Interview_Figure_sql = ("DELETE FROM InterviewFigures WHERE id=?")
             query_db(delete_IO_has_IF_sql, (if_id[0],))

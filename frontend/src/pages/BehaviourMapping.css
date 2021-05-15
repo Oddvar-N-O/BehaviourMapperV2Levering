@@ -160,11 +160,27 @@
     order: 3;
 }
 .map-image {
+    /* height: 100vh;
+    width: auto;*/
+    height: 100vh;
+<<<<<<< HEAD
+    width: calc(100vw - 200px);   
+=======
+    width: calc(100vw - 200px);
+>>>>>>> c61428e591614de1061956237d12b73ce4d25b91
+    min-height: 300px;
+    order: 3;
+}
+
+#map-image {
+    /* height: 100vh;
+    width: auto;*/
     height: 100vh;
     width: calc(100vw - 200px);
     min-height: 300px;
     order: 3;
 }
+
 .uploaded-map-image {
     height: 100vh;
     width: auto;
